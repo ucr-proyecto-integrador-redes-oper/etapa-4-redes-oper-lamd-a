@@ -1,12 +1,19 @@
 import socket
 import pickle
+import sys
+
+
+maxSizeHeader = 237
 
 class ProcessData:
-	process_id = 0
+	SN = 0
+	sourceNode = 0
+	destinationNode = 0
+	tipo = ""
+	requestNode=0
+	address = "" #IP:PORT
 	prio = 0
-	address = ""
-	port = 0
-	msg = ""
+
 
 
 
@@ -22,9 +29,22 @@ sock.bind(server)
 print("Listening on" + server_address + ":" + str(server_port))
 
 while True:
-	payload, client_address = sock.recvfrom(128)
-	print("Echoing data back to" + str(client_address))
-	data_variable = ProcessData()
-	data_variable = pickle.loads(payload)
-	print("Recv: %s" % (data_variable.msg))
+	recvPack = ProcessData()
+	payload, client_address = sock.recvfrom(maxSizeHeader)
+	recvPack = pickle.loads(payload)
+	print("Recv from: %s [Sn: %d] [sourceNode: %d] [destinationNode: %d] [type: %s] [requestNode: %d] [address: %s] [prio: %d]"  % (client_address,recvPack.SN,recvPack.sourceNode,recvPack.destinationNode,recvPack.tipo,recvPack.requestNode,recvPack.address,recvPack.prio))
+	
+	##Adds data to the package
+	recvPack.sourceNode=6
+	recvPack.requestNode = 599
+	
+	
+	print("Send [Sn: %d] [sourceNode: %d] [destinationNode: %d] [type: %s] [requestNode: %d] [address: %s] [prio: %d]"  % (recvPack.SN,recvPack.sourceNode,recvPack.destinationNode,recvPack.tipo,recvPack.requestNode,recvPack.address,recvPack.prio))
+	data_string = pickle.dumps(recvPack)
+	
+	
+	sock.sendto(data_string, client_address)
+	print("Tam %d" % (sys.getsizeof(data_string)))
+	
+	
 	#sent = sock.sendto(payload, client_address)
