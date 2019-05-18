@@ -36,6 +36,15 @@ class Header:
         self.address = orig.address
         self.priority = orig.priority
 
+    def setAll(self, sn, sourceNode, destinationNode, type_n, requestedNode, address, priority):
+        self.sn = sn
+        self.sourceNode = sourceNode
+        self.destinationNode = destinationNode
+        self.type = type_n
+        self.requestedNode = requestedNode
+        self.address = address
+        self.priority = priority
+
     def setSN(self, sn):
         self.sn = sn
 
