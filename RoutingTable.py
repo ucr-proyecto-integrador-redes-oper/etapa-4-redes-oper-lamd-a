@@ -58,7 +58,7 @@ class RoutingTable:
                 address = (item.getIp(), item.getPort())
                 return address
 
-def main():
+#def main():
 #     #Creando un routing table
 #     rt = RoutingTable()
 #     rt.printTable()
