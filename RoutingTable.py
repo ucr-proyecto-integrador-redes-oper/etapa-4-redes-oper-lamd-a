@@ -58,14 +58,15 @@ class RoutingTable:
                 address = (item.getIp(), item.getPort())
                 return address
 
-def main():
-    rt = RoutingTable()
-    rt.printTable()
+# def main():
+#     #Creando un routing table
+#     rt = RoutingTable()
+#     rt.printTable()
 
-    #La siguiente es la dupla
-    result = rt.retrieveAddress(3)
-    print(result[0], " - ", result[1])
+#     #La siguiente es la dupla
+#     result = rt.retrieveAddress(3)
+#     print(result[0], " - ", result[1])
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
