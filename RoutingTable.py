@@ -31,7 +31,7 @@ class RoutingTable:
 
     #Parsing the data.txt file to create the routing table
     def constructTable(self):
-        file = open("data.txt", "r")
+        file = open("routingTable.txt", "r")
         content = file.readlines()
         for index, line in enumerate(content):
             if index != 0:
@@ -58,15 +58,15 @@ class RoutingTable:
                 address = (item.getIp(), item.getPort())
                 return address
 
-# def main():
-#     #Creando un routing table
-#     rt = RoutingTable()
-#     rt.printTable()
+def main():
+    #Creando un routing table
+    rt = RoutingTable()
+    rt.printTable()
 
-#     #La siguiente es la dupla
-#     result = rt.retrieveAddress(3)
-#     print(result[0], " - ", result[1])
+    #La siguiente es la dupla
+    result = rt.retrieveAddress(3)
+    print(result[0], " - ", result[1])
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
