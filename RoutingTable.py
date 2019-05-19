@@ -33,8 +33,9 @@ class RoutingTable:
     def constructTable(self):
         file = open("data.txt", "r")
         content = file.readlines()
-        for line in content:
-            self.parseLine(line) #Ahora se parsea la linea
+        for index, line in enumerate(content):
+            if index != 0:
+                self.parseLine(line) #Ahora se parsea la linea
         file.close()
 
     #Parseo de cada una de las lineas que representa un nodo y guardado en la tabla
@@ -51,23 +52,19 @@ class RoutingTable:
             x.print_data();
 
     #Devuelve una dupla del address y el puerto del node que se manda como argumento
-    def retrieve_address(self, node):
-        address = ()
+    def retrieveAddress(self, node):
         for item in self.table:
             if item.getNodo() is node:
                 address = (item.getIp(), item.getPort())
                 return address
-
-    #def -forward packet based on routing table si no soy yo se forwardea sino soy yo y se consume
 
 def main():
     rt = RoutingTable()
     rt.printTable()
 
     #La siguiente es la dupla
-    result = rt.retrieve_address(3)
+    result = rt.retrieveAddress(3)
     print(result[0], " - ", result[1])
-
 
 
 if __name__ == "__main__":
