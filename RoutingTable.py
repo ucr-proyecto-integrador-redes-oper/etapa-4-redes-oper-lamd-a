@@ -1,17 +1,17 @@
-#Estructura que es referencia de cada uno de los nodos
+#Struct that represents each of the nodes
 class Small_struct:
-    def __init__(self, nodo, ip, port):
-        self.nodo = nodo
+    def __init__(self, node, ip, port):
+        self.node = node
         self.ip = ip
         self.port = port
 
     #Metodo que imprime los datos relacionados al nodo mencionado
     def print_data(self):
-        print("Nodo(", self.nodo ,") - ip(", self.ip, ") - port(", self.port ,")")
+        print("Node(", self.node ,") - ip(", self.ip, ") - port(", self.port ,")")
 
     #Getter del nodo
-    def getNodo(self):
-        return self.nodo
+    def getNode(self):
+        return self.node
 
     #Getter de la ip
     def getIp(self):
@@ -29,7 +29,7 @@ class RoutingTable:
         self.table = [] #[smallStruct_0, smallStruct_1]
         self.constructTable()
 
-    #Metodo que se encarga del parseo del file para crear la tabla de enrutamiento
+    #Parsing the data.txt file to create the routing table
     def constructTable(self):
         file = open("data.txt", "r")
         content = file.readlines()
@@ -38,23 +38,23 @@ class RoutingTable:
                 self.parseLine(line) #Ahora se parsea la linea
         file.close()
 
-    #Parseo de cada una de las lineas que representa un nodo y guardado en la tabla
+    #Parsing each of the lines of the file
     def parseLine(self, line):
-        nodo = int(line[0:1]) #nodo
+        node = int(line[0:1]) #nodo
         ip = str(line[2:line.index(":")]) #ip
         port = int(line[line.index(":")+1: len(line)]) #port
-        ss = Small_struct(nodo, ip, port)
+        ss = Small_struct(node, ip, port)
         self.table.append(ss)
 
-    #Metodo de impresion del estado de la tabla
+    #Printing the state of the table
     def printTable(self):
         for x in self.table:
             x.print_data();
 
-    #Devuelve una dupla del address y el puerto del node que se manda como argumento
+    #Returns the tuple of address and port regarding to the argument(node)
     def retrieveAddress(self, node):
         for item in self.table:
-            if item.getNodo() is node:
+            if item.getNode() is node:
                 address = (item.getIp(), item.getPort())
                 return address
 
