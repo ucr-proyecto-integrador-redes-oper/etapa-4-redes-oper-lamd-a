@@ -3,15 +3,15 @@ import pickle
 import sys
 import queue
 import threading
-from Header import Header
+from ooPackage import ooPackage
 
 ##Thread that handles the input messages from the udp socket
 def inputThread(inputQueue,sock):
-	maxSizeHeader = 237 
+	maxSizeooPackage = 237 
 	while True:
 		#Receive a package
-		recvPack = Header()
-		payload, client_address = sock.recvfrom(maxSizeHeader)
+		recvPack = ooPackage()
+		payload, client_address = sock.recvfrom(maxSizeooPackage)
 		
 		#Reconstructs the data
 		recvPack = pickle.loads(payload)
@@ -25,7 +25,7 @@ def inputThread(inputQueue,sock):
 def outputThread(outputQueue,sock):
 	while True:
 		##Takes a package from the queue. If the queue is empty it waits until a package arrives
-		pack = Header()
+		pack = ooPackage()
 		pack = outputQueue.get()
 		
 		#print("Recv")
@@ -43,7 +43,7 @@ def outputThread(outputQueue,sock):
 def logicalThread(inputQueue,outputQueue,sock):
 	while True:
 		##Takes a package from the inputQueue. If the queue is empty it waits until a package arrives
-		pack = Header()
+		pack = ooPackage()
 		pack = inputQueue.get()
 		
 		##-------------Logic--------##

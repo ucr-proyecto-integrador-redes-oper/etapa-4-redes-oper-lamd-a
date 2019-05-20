@@ -1,6 +1,6 @@
 import copy
 
-class Header:
+class ooPackage:
 
     """
         SN - int 
@@ -100,11 +100,11 @@ class Header:
 
 
 def main():
-    header = Header()
-    header.print_data()
+    ooPackage = ooPackage()
+    ooPackage.print_data()
 
-    header2 = Header(header)
-    header2.print_data()
+    ooPackage2 = ooPackage(ooPackage)
+    ooPackage2.print_data()
 
 
 if __name__ == "__main__":
