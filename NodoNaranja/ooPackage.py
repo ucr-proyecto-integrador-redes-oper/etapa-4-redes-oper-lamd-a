@@ -39,7 +39,7 @@ class ooPackage:
 
 
 def main():
-    ooPackagex = ooPackage(0,1,0,5,'r',566,'10.1.127.37',8888,1000)
+    ooPackagex = ooPackage(2,1,3,9,'r',566,'0.0.0.0',8888,1000)
     ooPackagex.print_data()
 
     serializedObject = ooPackagex.serialize()
@@ -47,7 +47,6 @@ def main():
     ooPackage2 = ooPackage()
     ooPackage2.unserialize(serializedObject)
     ooPackage2.print_data()
-
 
 if __name__ == "__main__":
     main()

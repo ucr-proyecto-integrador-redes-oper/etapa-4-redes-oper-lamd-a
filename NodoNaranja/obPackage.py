@@ -20,7 +20,6 @@ class obPackage:
 
         bytePacket += pickle.dumps(self.neighborList)
         return bytePacket
-    print(struct.calcsize('bIch15ph'))
     def unserialize(self, bytePacket):
         processedPacket = struct.unpack('bIch15ph',bytePacket[:30])
 
