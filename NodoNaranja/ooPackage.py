@@ -1,109 +1,51 @@
-import copy
+import copy, struct
 
 class ooPackage:
 
-    """
-        SN - int 
-        sourceNode - int
-        destNode - int
-        type - char
-        rNode - int
-        address - something
-        priority - int
-    """
-    def __init__(self, orig=None):
-        if(orig is None):
-            self.non_copy_constructor()
-        else:
-            self.copy_constructor(orig)
-            
-
-    def non_copy_constructor(self):
-        self.packetCategory = -1
-        self.sn = -1
-        self.sourceNode = -1
-        self.destinationNode = -1
-        self.type = b'*'
-        self.requestedNode = -1
-        self.address = b"*"
-        self.priority = -1
-
-    def copy_constructor(self, orig):
-        self.packetCategory = -1
-        self.sn = orig.sn
-        self.sourceNode = orig.sourceNode
-        self.destinationNode = orig.destinationNode
-        self.type = orig.type
-        self.requestedNode = orig.requestedNode
-        self.address = orig.address
-        self.priority = orig.priority
-
-
-
-    def setAll(self, packetCategory, sn, sourceNode, destinationNode, type_n, requestedNode, address, priority):
+    def __init__(self, packetCategory = -1, sn = 0, orangeSource = -1, orangeTarget = -1, communicationType = '*', requestedGraphPosition = -1, blueAddressIP = '999.999.999.999', blueAddressPort = 0000, priority = 0):
         self.packetCategory = packetCategory
         self.sn = sn
-        self.sourceNode = sourceNode
-        self.destinationNode = destinationNode
-        self.type = type_n
-        self.requestedNode = requestedNode
-        self.address = address
+        self.orangeSource = orangeSource
+        self.orangeTarget = orangeTarget
+        self.communicationType = communicationType
+        self.requestedGraphPosition = requestedGraphPosition
+        self.blueAddressIP = blueAddressIP
+        self.blueAddressPort = blueAddressPort
         self.priority = priority
-        
-    def setSN(self, sn):
-        self.sn = sn
-
-    def getSN(self):
-        return self.sn
-
-    def getSourceNode(self):
-        return self.sourceNode
-
-    def setSourceNode(self, sourceNode):
-        self.sourceNode = sourceNode
-
-    def getDestinationNode(self):
-        return self.destinationNode
-
-    def setDestinationNode(self, destinationNode):
-        self.destinationNode = destinationNode
-
-    def getType(self):
-        return self.type
-
-    def setType(self, type):
-        self.type = type
-
-    def getRequestedNode(self):
-        return self.requestedNode
-
-    def setRequestedNode(self, requestedNode):
-        self.requestedNode = requestedNode
-
-    def setAddress(self, addr):
-        self.address = addr
-
-    def getAddress(self):
-        return self.address
-
-    def setPriority(self, prty):
-        self.priority = prty
-
-    def getPriority(self):
-        return self.priority
 
     def print_data(self):
-        print(" packetCategory:",self.packetCategory, " sn: ", self.sn, " sourceNode: ", self.sourceNode, " destinationNode: ", self.destinationNode, " type: ", self.type, " requestedNode: ", self.requestedNode, " address: ", self.address, " priority: ", self.priority)
+        print(" packetCategory:",self.packetCategory, " sn: ", self.sn, " orangeSource: ", self.orangeSource, " orangeTarget: ", self.orangeTarget, " communicationType: ", self.communicationType, " requestedGraphPosition: ", self.requestedGraphPosition, " blueAddressIP: ", self.blueAddressIP, "blueAddressPort:", self.blueAddressPort, " priority: ", self.priority)
 
+    #returns a bytes object
+    def serialize(self):
+        bytePacket = struct.pack('bIbbch15phI',self.packetCategory,self.sn,self.orangeSource,self.orangeTarget,self.communicationType.encode(),self.requestedGraphPosition,self.blueAddressIP.encode(),self.blueAddressPort,self.priority)
+        return bytePacket
+
+    def unserialize(self, bytePacket):
+        processedPacket = struct.unpack('BIBBcH15pHI',bytePacket)
+
+        self.packetCategory = processedPacket[0]
+        self.sn = processedPacket[1]
+        self.orangeSource = processedPacket[2]
+        self.orangeTarget = processedPacket[3]
+        self.communicationType = processedPacket[4].decode("utf-8")
+        self.requestedGraphPosition = processedPacket[5]
+        self.blueAddressIP = processedPacket[6].decode("utf-8")
+        self.blueAddressPort = processedPacket[7]
+        self.priority = processedPacket[8]
+        return self
 
 #----------------------------------------------------------
 
 
 def main():
-    ooPackage = ooPackage()
-    ooPackage.print_data()
+    ooPackagex = ooPackage(0,1,0,5,'r',566,'10.1.127.37',8888,1000)
+    ooPackagex.print_data()
 
-    ooPackage2 = ooPackage(ooPackage)
+    serializedObject = ooPackagex.serialize()
+
+    ooPackage2 = ooPackage()
+    ooPackage2.unserialize(serializedObject)
     ooPackage2.print_data()
 
 
