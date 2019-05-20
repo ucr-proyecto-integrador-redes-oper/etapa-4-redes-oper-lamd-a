@@ -19,15 +19,17 @@ class Header:
             
 
     def non_copy_constructor(self):
+        self.packetCategory = -1
         self.sn = -1
         self.sourceNode = -1
         self.destinationNode = -1
-        self.type = '*'
+        self.type = b'*'
         self.requestedNode = -1
-        self.address = "*"
+        self.address = b"*"
         self.priority = -1
 
     def copy_constructor(self, orig):
+        self.packetCategory = -1
         self.sn = orig.sn
         self.sourceNode = orig.sourceNode
         self.destinationNode = orig.destinationNode
@@ -38,7 +40,8 @@ class Header:
 
 
 
-    def setAll(self, sn, sourceNode, destinationNode, type_n, requestedNode, address, priority):
+    def setAll(self, packetCategory, sn, sourceNode, destinationNode, type_n, requestedNode, address, priority):
+        self.packetCategory = packetCategory
         self.sn = sn
         self.sourceNode = sourceNode
         self.destinationNode = destinationNode
@@ -90,7 +93,7 @@ class Header:
         return self.priority
 
     def print_data(self):
-        print("sn: ", self.sn, " sourceNode: ", self.sourceNode, " destinationNode: ", self.destinationNode, " type: ", self.type, " requestedNode: ", self.requestedNode, " address: ", self.address, " priority: ", self.priority)
+        print(" packetCategory:",self.packetCategory, " sn: ", self.sn, " sourceNode: ", self.sourceNode, " destinationNode: ", self.destinationNode, " type: ", self.type, " requestedNode: ", self.requestedNode, " address: ", self.address, " priority: ", self.priority)
 
 
 #----------------------------------------------------------
