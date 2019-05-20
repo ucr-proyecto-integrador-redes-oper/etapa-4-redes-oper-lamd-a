@@ -25,18 +25,22 @@ class Small_struct:
 
 class RoutingTable:
     #Constructor
-    def __init__(self):
+    def __init__(self,routingTableDir):
         self.table = [] #[smallStruct_0, smallStruct_1]
-        self.constructTable()
+        self.constructTable(routingTableDir)
 
     #Parsing the data.txt file to create the routing table
-    def constructTable(self):
-        file = open("routingTable.txt", "r")
-        content = file.readlines()
-        for index, line in enumerate(content):
-            if index != 0:
-                self.parseLine(line) #Ahora se parsea la linea
-        file.close()
+    def constructTable(self,routingTableDir):
+        
+        try:
+             file = open(routingTableDir, "r")
+             content = file.readlines()
+             for index, line in enumerate(content):
+                 if index != 0:
+                   self.parseLine(line) #Ahora se parsea la linea
+             file.close()
+        except IOError:
+             print("Error: cant find the file")
 
     #Parsing each of the lines of the file
     def parseLine(self, line):

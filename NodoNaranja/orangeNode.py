@@ -3,74 +3,99 @@ import pickle
 import sys
 import queue
 import threading
-from ooPackage import ooPackage
+from blueNodeTable import blueNodeTable
+from RoutingTable import RoutingTable
+import struct
+import random
 
-##Thread that handles the input messages from the udp socket
+
+
+class orangeNode:
+	
+
+    def __init__(self, ip = '0.0.0.0', port = 8888, nodeID = 0 ,  routingTableDir = "routingTable.txt", blueGraphDir = "Grafo_Referencia.csv"):
+        self.ip = ip
+        self.port = port
+        self.nodeID = nodeID
+        self.routingTableDir = routingTableDir
+        self.blueGraphDir = blueGraphDir
+
+    def run(self):
+        server = (self.ip, self.port)
+        inputQueue = queue.Queue()
+        outputQueue = queue.Queue()
+
+        ##Creates the routingtable
+        routingTable =  RoutingTable(self.routingTableDir)
+
+        #Starts the UDP server
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind(server)
+        print("Listening on " + self.ip + ":" + str(self.port))
+        
+        ##Creates the Threads
+        t = threading.Thread(target=inputThread, args=(inputQueue,sock, ))
+        t.start()
+        t2 = threading.Thread(target=outputThread, args=(outputQueue,sock,routingTable ))
+        t2.start()
+        t3 = threading.Thread(target=logicalThread, args=(inputQueue,outputQueue,sock,self.blueGraphDir,  ))
+        t3.start()
+        
+        
 def inputThread(inputQueue,sock):
-	maxSizeooPackage = 237 
-	while True:
-		#Receive a package
-		recvPack = ooPackage()
-		payload, client_address = sock.recvfrom(maxSizeooPackage)
-		
-		#Reconstructs the data
-		recvPack = pickle.loads(payload)
-		
-		#recvPack.print_data()
-		
-		#Puts the data to the queue
-		inputQueue.put(recvPack)
+    while True:
+      #Receive a package
+      payload, client_address = sock.recvfrom(5000)
 
-##Thread that handles the out messages to the udp socket
-def outputThread(outputQueue,sock):
-	while True:
-		##Takes a package from the queue. If the queue is empty it waits until a package arrives
-		pack = ooPackage()
-		pack = outputQueue.get()
-		
-		#print("Recv")
-		#pack.print_data()
-		
-		#Creates a representation of thr object as a bytes stream
-		data_string = pickle.dumps(pack)
-		
-		#Routing_table returns the address
-		#address = routing_table.retrieveAddress(pack.destinationNode)
-		
-		sock.sendto(data_string,address)
+      #this determines what type of packet it is (Orange&Orange = 0 or Orange&Blue = 1 )
+      if int.from_bytes(bytePacket[:1],byteorder='little') == 0: 
+         #Orange & Orange
+          ##BYTE 9 has the orangetarget
+          targetNode = int.from_bytes(bytePacket[:10],byteorder='little')
+   
+      #Puts the data to the queue
+      inputQueue.put(recvPack)
+   
+   
+
+def outputThread(outputQueue,sock,routingTable):
+    while True:
+      ##Takes a package from the queue. If the queue is empty it waits until a package arrives
+      bytePacket = outputQueue.get()
+  
+      #this determines what type of packet it is (Orange&Orange = 0 or Orange&Blue = 1 )
+      if int.from_bytes(bytePacket[:1],byteorder='little') == 0: 
+       #Orange & Orange
+       ##BYTE 9 has the orangetarget
+          targetNode = int.from_bytes(bytePacket[:10],byteorder='little')
+  
+          #Routing_table returns the address
+          address = routingTable.retrieveAddress(targetNode)
+          sock.sendto(bytePacket,address)
+      else:
+        print("This is a blue to orange pack, still needs the implementation")
+ 
+
+def logicalThread(inputQueue,outputQueue,sock,blueGraphDir):
+    while True:
+
+     ##Creates the orange graph and the blueNodeTable
+     table = blueNodeTable(blueGraphDir)
 
 
-def logicalThread(inputQueue,outputQueue,sock):
-	while True:
-		##Takes a package from the inputQueue. If the queue is empty it waits until a package arrives
-		pack = ooPackage()
-		pack = inputQueue.get()
-		
-		##-------------Logic--------##
-		
-		#Puts the data to the outputQueue
-		outputQueue.put(recvPack)
+     ##Takes a package from the inputQueue. If the queue is empty it waits until a package arrives
+     pack = inputQueue.get()
 
-def main():
-	
+     ##-------------Logic--------##
 
-	server_address = '0.0.0.0'
-	server_port = 8888
-	server = (server_address, server_port)
-	inputQueue = queue.Queue()
-	outputQueue = queue.Queue()
+     #Puts the data to the outputQueue
+     outputQueue.put(recvPack)
 
-	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock.bind(server)
-	print("Listening on " + server_address + ":" + str(server_port))
-	##Creates the Threads
-	t = threading.Thread(target=inputThread, args=(inputQueue,sock, ))
-	t.start()
-	t2 = threading.Thread(target=outputThread, args=(outputQueue,sock, ))
-	t2.start()
-	t3 = threading.Thread(target=logicalThread, args=(inputQueue,outputQueue,sock, ))
-	t3.start()
-	
-	
-if __name__== "__main__":
-  main()
+
+
+
+
+
+
+
+

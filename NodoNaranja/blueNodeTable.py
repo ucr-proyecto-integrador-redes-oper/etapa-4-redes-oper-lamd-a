@@ -1,84 +1,80 @@
-import csv
-import socket
- 
-# Store the nodes
-Graph = []
-# Diccionary for nodes (key=id content = ip:addr)
-nodeMap ={} 
 
-class blueNodeTable():
+import csv, socket, random, sys
 
-#-----------------------Could be in the __init__-------------------------
-    #Generates the graph
-    def genGraph(self):
-        with open('Grafo_Referencia.csv', newline='') as File:  
-            reader = csv.reader(File)
-            for row in reader:
-                Graph.append(row)
-        return Graph
+
+# REQUESTED_ADDRESS = ('0.0.0.0',-2)
+class blueNodeTable:
+
+  def __init__(self,blueGraphDir):
+    self.graphOfBlueNodes = {}  #[key = node] = NeighborsAdress
+    self.addressesOfBlueNodes = {}
+    self.availableBlueNodes = []
+    self.EMPTY_ADDRESS = ('0.0.0.0',-1)
+    try:
+      with open(blueGraphDir, newline='') as File:  
+        reader = csv.reader(File)
+        for row in reader:
+          self.graphOfBlueNodes[int(row[0])] = list(map(int,row[1:]))
+          self.availableBlueNodes.append(int(row[0]))
+    except IOError:
+          print("ErrorOrangeGraph: cant fint the file %s" % (blueGraphDir))
+          exit()
+        
+        
+  def printgraphOfBlueNodes(self):         
+   for x in self.graphOfBlueNodes:
+    print("Im node %d my Neighbors are %s" % (x,self.graphOfBlueNodes[x]) )
     
-    #Generates the nodemap
-    # x for default 
-    # -1 for requested
-    def genNodeMap(self, MAX_NODES): # To be changed
-        for i in range(0, MAX_NODES):
-            nodeMap[i] = "x"
-        return nodeMap
-#-----------------------Could be in the __init__-------------------------
- 
-    # Write, after the accept and confirm the addr(string)
-    def write(self, node, addr):
-        nodeMap[node] = addr
+   for x in self.graphOfBlueNodes[2]:
+    print(type(x))
+       
+            
+  def markNodeAsRequested(self, requestedNode):
+   # self.addressesOfBlueNodes[requestedNode] = REQUESTED_ADDRESS
+   self.availableBlueNodes.remove(requestedNode)
+  
+  def obtainAvailableNode(self):
+      availableNode = random.choice(self.availableBlueNodes)
+      return availableNode
 
-    #Return a list with the neig...
-    def retrieveNeighbors(self, node):
-        return Graph[node]
+  def write(self, nodeToWrite, tupleAddress):
+    self.availableBlueNodes.remove(nodeToWrite) #Probably unnecesary, since there will always be a request packet before a write packet
+    self.addressesOfBlueNodes[nodeToWrite] = tupleAddress
+    
+  def nodeHasAddress(self, nodeToCheck):
+    return nodeToCheck in self.addressesOfBlueNodes
 
-    #Returns neighbors with their address
-    #def retrieveNeighbors(self, node):
+  def obtainNodeAddress(self, nodeToCheck):
+    if self.nodeHasAddress(nodeToCheck):
+      resultingAddress = self.addressesOfBlueNodes[nodeToCheck]
+    else:
+      resultingAddress = self.EMPTY_ADDRESS
+    return resultingAddress
 
-    #Check if the node is avilable
-    def availableNode(self, node):
-        if nodeMap[node] == "x" or nodeMap[node] == "-1": #Default
-            return False
-        else:
-            return True
+  def obtainNodesNeighborsAdressList(self, mainNode):
+    listOfNeighbors = self.graphOfBlueNodes[mainNode]
+    neighborsAddressList =  []
+    
+    for neighborNode in listOfNeighbors:
+      if self.nodeHasAddress(neighborNode):
+        neighborTuple = (neighborNode,) + self.obtainNodeAddress(neighborNode)
+        neighborsAddressList.append(neighborTuple)  # (Node IP PORT)
+    return neighborsAddressList
 
-    #Returns node addr
-    def retrieveAddr(self, node):
-        if self.availableNode(node): #It's free!!
-            return nodeMap[node]
-        else:
-            return -1
 
-    def markAsRequested(self, node):
-        nodeMap[node] = "-1"
+
+
 
 
 if __name__== "__main__":
 
-    tables = blueNodeTable()
-    tables.genGraph()
-    tables.genNodeMap(15)
-
-    tables.write(1, "nodo 1")
-    tables.write(2, "nodo 2")
-    tables.write(3, "nodo 3")
-    tables.write(4, "nodo 4")
-    tables.write(5, "nodo 5")
-    tables.write(6, "nodo 6")
-    tables.write(7, "nodo 7")
-
-    print(tables.retrieveNeighbors(0))
-
-    print(tables.availableNode(1))
-    print(tables.availableNode(9))
-
-    tables.markAsRequested(2)
-    tables.markAsRequested(10)
-
-    print(tables.retrieveAddr(1))
-    print(tables.retrieveAddr(2))
-    print(tables.retrieveAddr(3))
-    print(tables.retrieveAddr(9))
-    print(tables.retrieveAddr(10))
+    myBlueNodeTable = blueNodeTable("Grafo_Referencia.csv")
+    myBlueNodeTable.write(5,('125.1.25.134',88885))
+    myBlueNodeTable.write(4,('125.1.25.134',88884))
+    #myBlueNodeTable.write(9,('125.1.25.134',88889))
+    myBlueNodeTable.write(8,('125.1.25.134',88888))
+    myBlueNodeTable.markNodeAsRequested(2)
+    print(myBlueNodeTable.availableBlueNodes)
+    print(myBlueNodeTable.obtainNodesNeighborsAdressList(5))
+    print(myBlueNodeTable.obtainAvailableNode())
+ 

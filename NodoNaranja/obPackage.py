@@ -56,6 +56,13 @@ def main():
     obPackage2.unserialize(serializedObject)
     obPackage2.print_data()
 
+    #the code below can be used to extract only the ip and port from a serializedPacket to send it (by the output thread of the orange node)
+
+    print(struct.calcsize('bIch15ph'))
+
+    result = struct.unpack('15ph',serializedObject[12:30])
+
+    print(result)
 
 if __name__ == "__main__":
     main()
