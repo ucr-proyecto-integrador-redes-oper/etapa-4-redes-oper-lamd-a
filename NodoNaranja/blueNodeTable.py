@@ -9,7 +9,7 @@ class blueNodeTable:
     self.graphOfBlueNodes = {}  #[key = node] = NeighborsAdress
     self.addressesOfBlueNodes = {}
     self.availableBlueNodes = []
-    self.EMPTY_ADDRESS = ('0.0.0.0',-1)
+    self.EMPTY_ADDRESS = ('0.0.0.0',-1) #Default Address
     try:
       with open(blueGraphDir, newline='') as File:  
         reader = csv.reader(File)
@@ -21,6 +21,7 @@ class blueNodeTable:
           exit()
         
         
+  #Print the blue graph
   def printgraphOfBlueNodes(self):         
    for x in self.graphOfBlueNodes:
     print("Im node %d my Neighbors are %s" % (x,self.graphOfBlueNodes[x]) )
@@ -28,29 +29,34 @@ class blueNodeTable:
    for x in self.graphOfBlueNodes[2]:
     print(type(x))
        
-            
+  #Prevent the problem of two orange requsting the blue
   def markNodeAsRequested(self, requestedNode):
    # self.addressesOfBlueNodes[requestedNode] = REQUESTED_ADDRESS
    self.availableBlueNodes.remove(requestedNode)
   
+  #Return an available random blue node
   def obtainAvailableNode(self):
       availableNode = random.choice(self.availableBlueNodes)
       return availableNode
 
+  #Write on the table when the ack arrives
   def write(self, nodeToWrite, tupleAddress):
     self.availableBlueNodes.remove(nodeToWrite) #Probably unnecesary, since there will always be a request packet before a write packet
     self.addressesOfBlueNodes[nodeToWrite] = tupleAddress
-    
+  
+  #Check if the node has an address asigned
   def nodeHasAddress(self, nodeToCheck):
     return nodeToCheck in self.addressesOfBlueNodes
 
+  #Return the address node
   def obtainNodeAddress(self, nodeToCheck):
     if self.nodeHasAddress(nodeToCheck):
       resultingAddress = self.addressesOfBlueNodes[nodeToCheck]
     else:
-      resultingAddress = self.EMPTY_ADDRESS
+      resultingAddress = self.EMPTY_ADDRESS #The default
     return resultingAddress
 
+  #Return a list with all the inicializated neighbors blue nodes
   def obtainNodesNeighborsAdressList(self, mainNode):
     listOfNeighbors = self.graphOfBlueNodes[mainNode]
     neighborsAddressList =  []
