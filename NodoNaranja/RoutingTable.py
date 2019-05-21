@@ -58,7 +58,7 @@ class RoutingTable:
     #Returns the tuple of address and port regarding to the argument(node)
     def retrieveAddress(self, node):
         for item in self.table:
-            if item.getNode() is node:
+            if item.getNode() == node: ##This was a item.getNode() is node
                 address = (item.getIp(), item.getPort())
                 return address
 
