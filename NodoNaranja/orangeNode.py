@@ -5,6 +5,8 @@ import queue
 import threading
 from blueNodeTable import blueNodeTable
 from RoutingTable import RoutingTable
+from ooPackage import ooPackage
+from obPackage import obPackage
 import struct
 import random
 
@@ -48,10 +50,15 @@ def inputThread(inputQueue,sock):
       payload, client_address = sock.recvfrom(5000)
 
       #this determines what type of packet it is (Orange&Orange = 0 or Orange&Blue = 1 )
-      if int.from_bytes(bytePacket[:1],byteorder='little') == 0: 
+      if int.from_bytes(payload[:1],byteorder='little') == 0: 
          #Orange & Orange
+         
+         pack = ooPackage()
+         pack.unserialize(payload)
+         pack.print_data()
+         
           ##BYTE 9 has the orangetarget
-          targetNode = int.from_bytes(bytePacket[:10],byteorder='little')
+         # targetNode = int.from_bytes(payload[:10],byteorder='little')
    
       #Puts the data to the queue
       inputQueue.put(recvPack)
@@ -80,16 +87,20 @@ def logicalThread(inputQueue,outputQueue,sock,blueGraphDir):
     while True:
 
      ##Creates the orange graph and the blueNodeTable
-     table = blueNodeTable(blueGraphDir)
+     #table = blueNodeTable(blueGraphDir)
 
 
      ##Takes a package from the inputQueue. If the queue is empty it waits until a package arrives
-     pack = inputQueue.get()
+     #pack = inputQueue.get()
 
      ##-------------Logic--------##
 
+     pack = ooPackage(0,10,1,0,'r',300,'192.168.1.1',8888,8263)
+     pack.print_data()
+     serializedObject = pack.serialize()
+     
      #Puts the data to the outputQueue
-     outputQueue.put(recvPack)
+     outputQueue.put(serializedObject)
 
 
 
