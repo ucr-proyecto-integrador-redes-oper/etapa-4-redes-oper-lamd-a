@@ -38,7 +38,7 @@ class blueNodeTable:
       return availableNode
 
   def write(self, nodeToWrite, tupleAddress):
-    self.availableBlueNodes.remove(nodeToWrite) #Probably unnecesary, since there will always be a request packet before a write packet
+    #self.availableBlueNodes.remove(nodeToWrite) #Probably unnecesary, since there will always be a request packet before a write packet
     self.addressesOfBlueNodes[nodeToWrite] = tupleAddress
     
   def nodeHasAddress(self, nodeToCheck):

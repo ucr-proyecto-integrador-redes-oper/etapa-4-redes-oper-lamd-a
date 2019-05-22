@@ -297,7 +297,19 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          
      #Once the acks list is done. Send the write package
      if acksDone == True:
-         if debug == True: print("Received all the acks for the requestNode: %d" % (requestNode))   
+         if debug == True: print("Received all the acks for the requestNode: %d" % (requestNode)) 
+         requestNode = -1
+         blueNodeIP = "0.0.0.0"
+         blueNodePort = 8888
+         MAXORANGENODES = maxOrangeNodes
+         acks = []
+         acksWrite = []
+         acksDone = False #True when all the acks have been received, False otherwise
+         acksWriteDone = False #True when all the acksWrite have been received, False otherwise
+         priority = -1
+         sn= nodeID
+         
+           
          #Creates the writePackages
          for node in range(0,MAXORANGENODES):
             if not node == nodeID: 
@@ -310,6 +322,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
      #Once the acksWrite list is done. Send the commit package
      if acksWriteDone == True:
          if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
+         
          #Creates the commitPackage
          neighborList = table.obtainNodesNeighborsAdressList(requestNode)
          commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
