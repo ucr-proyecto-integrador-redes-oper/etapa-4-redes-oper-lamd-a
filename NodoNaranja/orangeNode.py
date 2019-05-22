@@ -61,6 +61,11 @@ class orangeNode:
         
        
 def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
+
+
+    file = open("input.out","w+")
+    file.truncate(0)
+    
     while True:
       #Receive a package
       payload, client_address = sock.recvfrom(5000)
@@ -72,20 +77,25 @@ def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
          if debug == True: 
                  pack = ooPackage()  
                  pack.unserialize(payload)
-                 print("I received a Orange & Orange Package category %d sn %d  source %d  target %d type %s request %d " % (pack.packetCategory,pack.sn,pack.orangeSource,pack.orangeTarget,pack.communicationType,pack.requestedGraphPosition)) 
+                 file.write("I received a Orange & Orange packetCategory: %d  sn: %d  orangeSource: %d orangeTarget: %d communicationType: %s requestedGraphPosition: %d blueAddressIP: %s blueAddressPort: %d priority: %d \n" % (pack.packetCategory,pack.sn,pack.orangeSource, pack.orangeTarget,pack.communicationType, pack.requestedGraphPosition, pack.blueAddressIP, pack.blueAddressPort,pack.priority))
                  payload = pack.serialize()          
          targetNode = int.from_bytes(payload[9:10],byteorder='little')
          #If this is a package for me then send it to the inputQueue
          if nodeID == targetNode:
            inputQueue.put(payload)
+           if debug == True: file.write("\tthe package is for me\n")
          #If not then just put it to the outputQueue
          else:
             outputQueue.put(payload)
+            if debug == True: file.write("\tthe package is not for me\n")
          
       ##Orange & Blue     
       else:
          obPack = obPackage()
-         if debug == True: print("I received a Orange & Orange Package")         
+
+                
+                
+                       
          #Unserealize the payload to a obPack, in order to access the data inside
          obPack.unserialize(payload)
           
@@ -93,16 +103,22 @@ def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
          obPack.blueAddressIP = client_address[0]
          obPack.blueAddressPort = client_address[1]  
          
+         if debug == True:
+                 file.write("I received a Orange & Blue packetCategory: %d  sn: %d  communicationType: %s obtainedGraphPosition: %d blueAddressIP: %s blueAddressPort: %d neighborList: %s \n" % (obPack.packetCategory,obPack.sn,obPack.communicationType, obPack.obtainedGraphPosition, obPack.blueAddressIP, obPack.blueAddressPort,obPack.neighborList))
+         
          #Serialize the package
          byteobPack = obPack.serialize()       
          
          #Puts the package into the inputQueue so the logicalThread can proccess it
          inputQueue.put(byteobPack)
-         
+      if debug == True: file.flush()   
    
 
 def outputThread(outputQueue,sock,routingTable,debug):
-    temp = 0
+
+    file = open("output.out","w+")
+    file.truncate(0)
+    
     while True:
       ##Takes a package from the queue. If the queue is empty it waits until a package arrives
       bytePacket = outputQueue.get()
@@ -115,20 +131,21 @@ def outputThread(outputQueue,sock,routingTable,debug):
                 
                  pack = ooPackage()  
                  pack.unserialize(bytePacket)
-                 print("Im going to send a Orange & Orange Package type %s %d" % (pack.communicationType,temp)) 
+                 file.write("I send a Orange & Orange packetCategory: %d  sn: %d  orangeSource: %d orangeTarget: %d communicationType: %s requestedGraphPosition: %d blueAddressIP: %s blueAddressPort: %d priority: %d \n" % (pack.packetCategory,pack.sn,pack.orangeSource, pack.orangeTarget,pack.communicationType, pack.requestedGraphPosition, pack.blueAddressIP, pack.blueAddressPort,pack.priority))
                  bytePacket = pack.serialize()     
           targetNode = int.from_bytes(bytePacket[9:10],byteorder='little')
           #Routing_table returns the address
           address = routingTable.retrieveAddress(targetNode)
-          
+
           #Sends the pack to the other Orange node
           sock.sendto(bytePacket,address)
-          temp += 1
-          #if debug == True: print("Im going to send ooPack to the server %s:%d " % (address[0],address[1]))            
+          if debug == True: file.write("\t Sended to %s:%d\n"%(address[0],address[1]))       
           
       else:
         print("This is a blue to orange pack, still needs the implementation")
-        if debug == True: print("Im going to send obPack to the server %s:%d " % (address[0],address[1]))       
+        if debug == True: print("Im going to send obPack to the server %s:%d " % (address[0],address[1]))    
+        
+      if debug == True: file.flush()         
 
 def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug):
 
@@ -298,6 +315,17 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
      #Once the acks list is done. Send the write package
      if acksDone == True:
          if debug == True: print("Received all the acks for the requestNode: %d" % (requestNode)) 
+
+         
+           
+         #Creates the writePackages
+         for node in range(0,MAXORANGENODES):
+            if not node == nodeID: 
+                writePack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
+                #writePack.print_data()
+                byteWritePack = writePack.serialize()
+                outputQueue.put(byteWritePack)
+                
          requestNode = -1
          blueNodeIP = "0.0.0.0"
          blueNodePort = 8888
@@ -307,16 +335,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          acksDone = False #True when all the acks have been received, False otherwise
          acksWriteDone = False #True when all the acksWrite have been received, False otherwise
          priority = -1
-         sn= nodeID
-         
-           
-         #Creates the writePackages
-         for node in range(0,MAXORANGENODES):
-            if not node == nodeID: 
-                writePack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
-                #writePack.print_data()
-                byteWritePack = writePack.serialize()
-                outputQueue.put(byteWritePack) 
+         sn= nodeID         
                 
                 
      #Once the acksWrite list is done. Send the commit package
@@ -324,12 +343,12 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
          
          #Creates the commitPackage
-         neighborList = table.obtainNodesNeighborsAdressList(requestNode)
-         commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
-         commitPack.print_data()
-         byteCommitPack = writePack.serialize()
+        # neighborList = table.obtainNodesNeighborsAdressList(requestNode)
+        # commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
+        # commitPack.print_data()
+         #byteCommitPack = writePack.serialize()
          #outputQueue.put(byteCommitPack)   
-         exit()                 
+        # exit()                 
 
 
 
