@@ -69,8 +69,11 @@ def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
       if int.from_bytes(payload[:1],byteorder='little') == 0: 
          #Orange & Orange
          ##BYTE 9 has the orangetarget
-         if debug == True: print("I received a Orange & Orange Package")
-         
+         if debug == True: 
+                 pack = ooPackage()  
+                 pack.unserialize(payload)
+                 print("I received a Orange & Orange Package category %d sn %d  source %d  target %d type %s request %d " % (pack.packetCategory,pack.sn,pack.orangeSource,pack.orangeTarget,pack.communicationType,pack.requestedGraphPosition)) 
+                 payload = pack.serialize()          
          targetNode = int.from_bytes(payload[9:10],byteorder='little')
          #If this is a package for me then send it to the inputQueue
          if nodeID == targetNode:
@@ -99,6 +102,7 @@ def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
    
 
 def outputThread(outputQueue,sock,routingTable,debug):
+    temp = 0
     while True:
       ##Takes a package from the queue. If the queue is empty it waits until a package arrives
       bytePacket = outputQueue.get()
@@ -107,19 +111,23 @@ def outputThread(outputQueue,sock,routingTable,debug):
       if int.from_bytes(bytePacket[:1],byteorder='little') == 0: 
        #Orange & Orange
        ##BYTE 9 has the orangetarget    
-          if debug == True: print("Im going to send a Orange & Orange Package: ")       
+          if debug == True: 
+                
+                 pack = ooPackage()  
+                 pack.unserialize(bytePacket)
+                 print("Im going to send a Orange & Orange Package type %s %d" % (pack.communicationType,temp)) 
+                 bytePacket = pack.serialize()     
           targetNode = int.from_bytes(bytePacket[9:10],byteorder='little')
           #Routing_table returns the address
           address = routingTable.retrieveAddress(targetNode)
           
           #Sends the pack to the other Orange node
           sock.sendto(bytePacket,address)
-          if debug == True: print("Im going to send ooPack to the server %s:%d " % (address[0],address[1]))            
+          temp += 1
+          #if debug == True: print("Im going to send ooPack to the server %s:%d " % (address[0],address[1]))            
           
       else:
         print("This is a blue to orange pack, still needs the implementation")
-        address = routingTable.retrieveAddress(0)
-        sock.sendto(bytePacket,address)
         if debug == True: print("Im going to send obPack to the server %s:%d " % (address[0],address[1]))       
 
 def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug):
@@ -130,8 +138,8 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
     blueNodePort = 8888
     MAXORANGENODES = maxOrangeNodes
     acks = []
-    acksDone = False #True when all the acks have been received, False otherwise
     acksWrite = []
+    acksDone = False #True when all the acks have been received, False otherwise
     acksWriteDone = False #True when all the acksWrite have been received, False otherwise
     priority = -1
     sn= nodeID
@@ -232,7 +240,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
              #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
              if len(acks) == MAXORANGENODES - 1:
                    acksDone = True        
-                   print("Received all the acks for the requestNode: %d" % (requestNode))                      
+                  
                    
         elif pack.communicationType == 'a': #This is a accept package     
              print("Received ack type accept from  orangeNode: %d about the request of the blueNode: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))
@@ -242,7 +250,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
              #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
              if len(acks) == MAXORANGENODES - 1:
                    acksDone = True          
-                   print("Received all the acks for the requestNode: %d" % (requestNode))             
+          
         elif pack.communicationType == 'w': #This is a write package  
              print("Received write package from  orangeNode: %d about the request of the blueNode: %d" % (pack.orangeSource,pack.requestedGraphPosition))             
              #Writes the node IP and Port into the blueTable   
@@ -262,6 +270,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
               if len(acksWrite) == MAXORANGENODES-1:
                   ##Stop the timer
                   print("All the nodes wrote the blueNode %d with the ip %s port %d" % (requestNode,blueNodeIP,blueNodePort))
+                  acksWriteDone = True
                   
      else: #Orange & Blue  Tiene que mandar uno a la vez. Hay que ver como implementar eso
          
@@ -281,31 +290,33 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             for node in range(0,MAXORANGENODES):
                if not node == nodeID: 
                    requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
-                   if debug == True: requestPack.print_data()
+                   #if debug == True: requestPack.print_data()
                    byteRequestPack = requestPack.serialize()
                    outputQueue.put(byteRequestPack)
                 
          
      #Once the acks list is done. Send the write package
      if acksDone == True:
+         if debug == True: print("Received all the acks for the requestNode: %d" % (requestNode))   
          #Creates the writePackages
          for node in range(0,MAXORANGENODES):
             if not node == nodeID: 
                 writePack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
-                writePack.print_data()
+                #writePack.print_data()
                 byteWritePack = writePack.serialize()
                 outputQueue.put(byteWritePack) 
                 
                 
      #Once the acksWrite list is done. Send the commit package
-     if acksDone == True:
+     if acksWriteDone == True:
          if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
          #Creates the commitPackage
          neighborList = table.obtainNodesNeighborsAdressList(requestNode)
-         commitPack = obPackage(1,sn,nodeID,node,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
+         commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
          commitPack.print_data()
          byteCommitPack = writePack.serialize()
-         outputQueue.put(byteCommitPack)                    
+         #outputQueue.put(byteCommitPack)   
+         exit()                 
 
 
 
