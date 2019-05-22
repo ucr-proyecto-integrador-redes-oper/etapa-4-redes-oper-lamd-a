@@ -34,8 +34,12 @@ class blueNodeTable:
    self.availableBlueNodes.remove(requestedNode)
   
   def obtainAvailableNode(self):
-      availableNode = random.choice(self.availableBlueNodes)
-      return availableNode
+      try:
+         availableNode = random.choice(self.availableBlueNodes)
+         return availableNode
+      except IndexError:
+         return -1
+      
 
   def write(self, nodeToWrite, tupleAddress):
     #self.availableBlueNodes.remove(nodeToWrite) #Probably unnecesary, since there will always be a request packet before a write packet

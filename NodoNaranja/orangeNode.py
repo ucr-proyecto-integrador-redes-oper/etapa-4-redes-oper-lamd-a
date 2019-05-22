@@ -299,19 +299,28 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             
             if debug == True: print("I just receive a enroll package from the blueNode IP: %s Port: %d" % (pack.blueAddressIP,pack.blueAddressPort))
             
+
+            
             #Creates the request packages
             blueNodeIP = pack.blueAddressIP
             blueNodePort = pack.blueAddressPort
-            requestNode = 6 #table.obtainAvailableNode()
-            priority = 5#random.randrange(4294967294)
-
-            for node in range(0,MAXORANGENODES):
-               if not node == nodeID: 
-                   requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
-                   #if debug == True: requestPack.print_data()
-                   byteRequestPack = requestPack.serialize()
-                   outputQueue.put(byteRequestPack)
-                
+            requestNode = table.obtainAvailableNode()
+            if not requestNode == -1: ##Checks if there is more requestNodes
+ 
+                priority = random.randrange(4294967294)
+    
+                #Marks the node as requested                       
+                table.markNodeAsRequested(requestNode) 
+    
+                for node in range(0,MAXORANGENODES):
+                   if not node == nodeID: 
+                       requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
+                       #if debug == True: requestPack.print_data()
+                       byteRequestPack = requestPack.serialize()
+                       outputQueue.put(byteRequestPack)
+            else:
+               print("No more requestNumers available")            
+                    
          
      #Once the acks list is done. Send the write package (if u won the request)
      if acksDone == True:
@@ -319,25 +328,32 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
 
          
          if requestNodeWon == True:
+            #Writes the address
+            address = (blueNodeIP,blueNodePort)
+            table.write(requestNode,address)
+            
             #Creates the writePackages
             for node in range(0,MAXORANGENODES):
                if not node == nodeID: 
                    writePack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
                    byteWritePack = writePack.serialize()
                    outputQueue.put(byteWritePack)
+
+                   
+                   
          else:     
             requestNode = -1
             requestNodeWon = True
             blueNodeIP = "0.0.0.0"
             blueNodePort = 8888
-            MAXORANGENODES = maxOrangeNodes
-            acks = []
             acksWrite = []
-            acksDone = False #True when all the acks have been received, False otherwise
             acksWriteDone = False #True when all the acksWrite have been received, False otherwise
             priority = -1
-            sn= nodeID         
-                
+            sn= nodeID  
+                   
+         #Resets the variables
+         acks = []
+         acksDone = False             
                 
      #Once the acksWrite list is done. Send the commit package
      if requestNodeWon == True and acksWriteDone == True:
@@ -345,20 +361,17 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
          
          #Creates the commitPackage
-        # neighborList = table.obtainNodesNeighborsAdressList(requestNode)
-        # commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
-        # commitPack.print_data()
-         #byteCommitPack = writePack.serialize()
-         #outputQueue.put(byteCommitPack)   
-        # exit()     
+         neighborList = table.obtainNodesNeighborsAdressList(requestNode)
+         commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
+         byteCommitPack = commitPack.serialize()
+         outputQueue.put(byteCommitPack)   
+          
          requestNode = -1
          requestNodeWon = True
          blueNodeIP = "0.0.0.0"
          blueNodePort = 8888
          MAXORANGENODES = maxOrangeNodes
-         acks = []
          acksWrite = []
-         acksDone = False #True when all the acks have been received, False otherwise
          acksWriteDone = False #True when all the acksWrite have been received, False otherwise
          priority = -1
          sn= nodeID 
