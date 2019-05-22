@@ -1,0 +1,8 @@
+I send a Orange & Orange packetCategory: 0  sn: 1  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 6 blueAddressIP: 0.0.0.1 blueAddressPort: 2 priority: 5 
+	 Sended to 192.168.1.19:9999
+I send a Orange & Orange packetCategory: 0  sn: 1  orangeSource: 1 orangeTarget: 0 communicationType: d requestedGraphPosition: 6 blueAddressIP: 0.0.0.1 blueAddressPort: 2 priority: 5 
+	 Sended to 192.168.1.19:9999
+I send a Orange & Orange packetCategory: 0  sn: 1  orangeSource: 1 orangeTarget: 0 communicationType: w requestedGraphPosition: 6 blueAddressIP: 0.0.0.1 blueAddressPort: 2 priority: 5 
+	 Sended to 192.168.1.19:9999
+I send a Orange & Orange packetCategory: 0  sn: 1  orangeSource: 1 orangeTarget: 0 communicationType: w requestedGraphPosition: 6 blueAddressIP: 0.0.0.1 blueAddressPort: 2 priority: 5 
+	 Sended to 192.168.1.19:9999

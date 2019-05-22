@@ -152,7 +152,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
 
 
     requestNode = -1
-    requestNodeWon = False
+    requestNodeWon = True
     blueNodeIP = "0.0.0.0"
     blueNodePort = 8888
     MAXORANGENODES = maxOrangeNodes
@@ -204,13 +204,12 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                   outputQueue.put(bytePacket)
                                     
               else: #When both priorities are equal 
-                  print("Hello")
                   if debug == True: print("\tWe draw the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))                  
                   
                   #Checks the nodeID and the bigger wins
                   if nodeID > pack.orangeSource: #I win
                         
-                       if debug == True: print("\tI won the request of the blueNode:%d SecondRound (myID:%d) (otherNodeID:%d)" % (requestNode,nodeID,pack.orangeSource))                       
+                       if debug == True: print("\t\tI won the request of the blueNode:%d SecondRound (myID:%d) (otherNodeID:%d)" % (requestNode,nodeID,pack.orangeSource))                       
                        
                        #Creates a decline package
                        declinedPack = ooPackage(0,sn,nodeID,pack.orangeSource,'d',requestNode,blueNodeIP,blueNodePort,priority)
@@ -223,7 +222,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                                          
                   else: ## The other node wins
                          
-                       if debug == True: print("\tI lost the request of the blueNode:%d SecondRound (myID:%d) (otherNodeID:%d)" % (requestNode,nodeID,pack.orangeSource))       
+                       if debug == True: print("\t\tI lost the request of the blueNode:%d SecondRound (myID:%d) (otherNodeID:%d)" % (requestNode,nodeID,pack.orangeSource))       
                                             
                        #Creates a accept
                        acceptPack = ooPackage(0,sn,nodeID,pack.orangeSource,'a',pack.requestedGraphPosition,pack.blueAddressIP,pack.blueAddressPort,pack.priority)
@@ -252,18 +251,18 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                 
         elif pack.communicationType == 'd': #This is a declined package   
                        
-             if debug == True: print("Received ack type declined from  orangeNode: %d about the request of the blueNode: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))             
+             if debug == True: print("(Declined) from  orangeNode: %d about the request of: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))             
 
              #Append the ack to the acks list
              acks.append('d')
-
+             requestNodeWon = False
              #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
              if len(acks) == MAXORANGENODES - 1:
                    acksDone = True        
                   
                    
         elif pack.communicationType == 'a': #This is a accept package     
-             print("Received ack type accept from  orangeNode: %d about the request of the blueNode: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))
+             print("(Accept) from  orangeNode: %d about the request of: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))
              #Append the ack to the acks list
              acks.append('a')
              
@@ -272,7 +271,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                    acksDone = True          
           
         elif pack.communicationType == 'w': #This is a write package  
-             print("Received write package from  orangeNode: %d about the request of the blueNode: %d" % (pack.orangeSource,pack.requestedGraphPosition))             
+             print("(Write) the blueNode: %d" % (pack.requestedGraphPosition))             
              #Writes the node IP and Port into the blueTable   
              address = (pack.blueAddressIP,pack.blueAddressPort)
              table.write(pack.requestedGraphPosition,address)
@@ -282,14 +281,13 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
              byteSavedPack = savedPack.serialize()
              outputQueue.put(byteSavedPack)            
         else: ##This is a saved package      
-              print("Received saved ack from  orangeNode:%d about the request of the blueNode: %d my request is: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))                
+              print("(Saved) from  orangeNode:%d about the request of: %d my request is: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))                
               #Apeend the ack to the acksWrite list
               acksWrite.append('s')
               
               #Checks if the list is done. The list is done when the size is MAXORANGENODES-1              
               if len(acksWrite) == MAXORANGENODES-1:
                   ##Stop the timer
-                  print("All the nodes wrote the blueNode %d with the ip %s port %d" % (requestNode,blueNodeIP,blueNodePort))
                   acksWriteDone = True
                   
      else: #Orange & Blue  Tiene que mandar uno a la vez. Hay que ver como implementar eso
@@ -317,7 +315,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          
      #Once the acks list is done. Send the write package (if u won the request)
      if acksDone == True:
-         if debug == True: print("Received all the acks for the requestNode: %d" % (requestNode)) 
+         if debug == True: print("\tReceived all the acks for the requestNode: %d" % (requestNode)) 
 
          
          if requestNodeWon == True:
@@ -327,22 +325,23 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                    writePack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
                    byteWritePack = writePack.serialize()
                    outputQueue.put(byteWritePack)
-                
-         requestNode = -1
-         requestNodeWon = False
-         blueNodeIP = "0.0.0.0"
-         blueNodePort = 8888
-         MAXORANGENODES = maxOrangeNodes
-         acks = []
-         acksWrite = []
-         acksDone = False #True when all the acks have been received, False otherwise
-         acksWriteDone = False #True when all the acksWrite have been received, False otherwise
-         priority = -1
-         sn= nodeID         
+         else:     
+            requestNode = -1
+            requestNodeWon = True
+            blueNodeIP = "0.0.0.0"
+            blueNodePort = 8888
+            MAXORANGENODES = maxOrangeNodes
+            acks = []
+            acksWrite = []
+            acksDone = False #True when all the acks have been received, False otherwise
+            acksWriteDone = False #True when all the acksWrite have been received, False otherwise
+            priority = -1
+            sn= nodeID         
                 
                 
      #Once the acksWrite list is done. Send the commit package
      if requestNodeWon == True and acksWriteDone == True:
+         if debug == True: print("\tReceived all the acksWrite for the requestNode: %d" % (requestNode)) 
          if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
          
          #Creates the commitPackage
@@ -351,7 +350,19 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
         # commitPack.print_data()
          #byteCommitPack = writePack.serialize()
          #outputQueue.put(byteCommitPack)   
-        # exit()                 
+        # exit()     
+         requestNode = -1
+         requestNodeWon = True
+         blueNodeIP = "0.0.0.0"
+         blueNodePort = 8888
+         MAXORANGENODES = maxOrangeNodes
+         acks = []
+         acksWrite = []
+         acksDone = False #True when all the acks have been received, False otherwise
+         acksWriteDone = False #True when all the acksWrite have been received, False otherwise
+         priority = -1
+         sn= nodeID 
+                    
 
 
 
