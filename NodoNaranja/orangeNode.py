@@ -54,7 +54,7 @@ class orangeNode:
          test = int(input())
          if test == 1:
           neighborList = []
-          testPack = obPackage(1,2,'e',0,"0.0.0.1",2,neighborList)
+          testPack = obPackage(1,2,'e',0,"0.0.0.0",2,neighborList)
           ByteTestPack = testPack.serialize()
           print("\n")
           inputQueue.put(ByteTestPack)
@@ -93,10 +93,7 @@ def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
       ##Orange & Blue     
       else:
          obPack = obPackage()
-
-                
-                
-                       
+       
          #Unserealize the payload to a obPack, in order to access the data inside
          obPack.unserialize(payload)
           
@@ -142,9 +139,27 @@ def outputThread(outputQueue,sock,routingTable,debug):
           sock.sendto(bytePacket,address)
           if debug == True: file.write("\t Sended to %s:%d\n"%(address[0],address[1]))       
           
-      else:
-        print("This is a blue to orange pack, still needs the implementation")
-        if debug == True: print("Im going to send obPack to the server %s:%d " % (address[0],address[1]))    
+      else:    
+         obPack = obPackage()
+       
+         #Unserealize the payload to a obPack, in order to access the data inside
+         obPack.unserialize(bytePacket)
+          
+         #Takes the ip and port
+         ip = obPack.blueAddressIP 
+         port = obPack.blueAddressPort
+         client = (ip,port)
+         
+         if debug == True:
+                 file.write("Sending a Orange & Blue packetCategory: %d  sn: %d  communicationType: %s obtainedGraphPosition: %d blueAddressIP: %s blueAddressPort: %d neighborList: %s \n" % (obPack.packetCategory,obPack.sn,obPack.communicationType, obPack.obtainedGraphPosition, obPack.blueAddressIP, obPack.blueAddressPort,obPack.neighborList))
+         
+         #Serialize the package
+         byteobPack = obPack.serialize()       
+         try:
+          sock.sendto(byteobPack,client)      
+         except:
+          file.write("ERROR: clientAddress is wrong %s:%d"%(ip,port))
+         
         
       if debug == True: file.flush()         
 
@@ -320,7 +335,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                        outputQueue.put(byteRequestPack)
             else:
                print("No more requestNumers available")            
-                    
+        
          
      #Once the acks list is done. Send the write package (if u won the request)
      if acksDone == True:
@@ -358,11 +373,12 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
      #Once the acksWrite list is done. Send the commit package
      if requestNodeWon == True and acksWriteDone == True:
          if debug == True: print("\tReceived all the acksWrite for the requestNode: %d" % (requestNode)) 
-         if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
+         #if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
          
          #Creates the commitPackage
          neighborList = table.obtainNodesNeighborsAdressList(requestNode)
          commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
+         #commitPack.print_data()
          byteCommitPack = commitPack.serialize()
          outputQueue.put(byteCommitPack)   
           
