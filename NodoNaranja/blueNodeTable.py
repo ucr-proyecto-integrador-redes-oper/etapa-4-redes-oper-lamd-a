@@ -31,7 +31,10 @@ class blueNodeTable:
             
   def markNodeAsRequested(self, requestedNode):
    # self.addressesOfBlueNodes[requestedNode] = REQUESTED_ADDRESS
-   self.availableBlueNodes.remove(requestedNode)
+   try: 
+     self.availableBlueNodes.remove(requestedNode)
+   except ValueError:
+      print("node %d already removed" % (requestedNode))
   
   def obtainAvailableNode(self):
       try:

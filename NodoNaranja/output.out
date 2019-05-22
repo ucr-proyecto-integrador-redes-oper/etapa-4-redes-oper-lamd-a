@@ -1,13 +1,5 @@
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 7 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 1674370094 
-	 Sended to 192.168.1.8:8888
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 7 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 1674370094 
-	 Sended to 192.168.1.8:8888
-Sending a Orange & Blue packetCategory: 1  sn: 0  communicationType: c obtainedGraphPosition: 7 blueAddressIP: 0.0.0.0 blueAddressPort: 2 neighborList: [] 
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 8 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 496619640 
-	 Sended to 192.168.1.8:8888
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 8 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 496619640 
-	 Sended to 192.168.1.8:8888
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 8 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 496619640 
-	 Sended to 192.168.1.8:8888
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 8 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 496619640 
-	 Sended to 192.168.1.8:8888
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 2726929703 
+	 Sended to 0.0.0.0:8765
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 2726929703 
+	 Sended to 0.0.0.0:8765
+Sending a Orange & Blue packetCategory: 1  sn: 0  communicationType: c obtainedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 2 neighborList: [] 

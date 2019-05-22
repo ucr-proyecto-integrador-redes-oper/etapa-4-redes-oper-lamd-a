@@ -52,14 +52,18 @@ class orangeNode:
         
         #Testing
         while True:
-         test = int(input())
-         if test == 1:
-          neighborList = []
-          testPack = obPackage(1,2,'e',0,"0.0.0.0",2,neighborList)
-          ByteTestPack = testPack.serialize()
-          print("\n")
-          inputQueue.put(ByteTestPack)
-        
+          try:
+           test = int(input())
+           if test == 1:
+            neighborList = []
+            testPack = obPackage(1,2,'e',0,"0.0.0.0",2,neighborList)
+            ByteTestPack = testPack.serialize()
+            print("\n")
+            inputQueue.put(ByteTestPack)
+           if test == 2:
+             print("Total threads %d" % (threading.active_count()))
+          except:
+             print("",end='')
         
        
 def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
@@ -137,9 +141,12 @@ def outputThread(outputQueue,sock,routingTable,debug):
           address = routingTable.retrieveAddress(targetNode)
 
           #Sends the pack to the other Orange node
-          sock.sendto(bytePacket,address)
-          if debug == True: file.write("\t Sended to %s:%d\n"%(address[0],address[1]))       
-          
+          try:
+            sock.sendto(bytePacket,address)
+            if debug == True: file.write("\t Sended to %s:%d\n"%(address[0],address[1]))     
+          except OSError:
+            if debug == True: file.write("Network is unreachable\n")
+
       else:    
          obPack = obPackage()
        
@@ -168,7 +175,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
 
 
     requestNode = -1
-    requestNodeWon = True
+    requestNodeWon = False
     blueNodeIP = "0.0.0.0"
     blueNodePort = 8888
     MAXORANGENODES = maxOrangeNodes
@@ -183,6 +190,8 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
     flagTimesUp = False #True when the timer thread finished before receiving all the acks
     stop_eventWrite = Event() # Event object used to send signals from one thread to another
     flagWriteTimesUp = False #True when the timer thread finished before receiving all the acks
+    
+    
     
     while True:
      #If the queue is not empty
@@ -272,27 +281,36 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             elif pack.communicationType == 'd': #This is a declined package   
                            
                  if debug == True: print("(Declined) from  orangeNode: %d about the request of: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))                  
-                 # We send a signal that the other thread should stop.
-                 stop_event.set()  
-                 #Append the ack to the acks list
-                 acks.append('d')
-                 requestNodeWon = False
-                 #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
-                 if len(acks) == MAXORANGENODES - 1:
-                       acksDone = True        
-                      
+                 
+                 #If this is a declined for my request
+                 if requestNode == pack.requestedGraphPosition:
+                   # We send a signal that the other thread should stop.
+                   stop_event.set()  
+                   #Append the ack to the acks list
+                   acks.append('d')
+                   requestNodeWon = False
+                   #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
+                   if len(acks) == MAXORANGENODES - 1:
+                         acksDone = True        
+                 else:
+                    if debug == True: print("This is a old ack")     
                        
             elif pack.communicationType == 'a': #This is a accept package     
                  print("(Accept) from  orangeNode: %d about the request of: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))
-                 #Append the ack to the acks list
-                 acks.append('a')
                  
-                 #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
-                 if len(acks) == MAXORANGENODES - 1:
-                       acksDone = True
-                       # We send a signal that the other thread should stop.
-                       stop_event.set()
-                       
+                 
+                 #If this is a declined for my request
+                 if requestNode == pack.requestedGraphPosition:
+                    #Append the ack to the acks list
+                    acks.append('a')
+                    
+                    #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
+                    if len(acks) == MAXORANGENODES - 1:
+                          acksDone = True
+                          # We send a signal that the other thread should stop.
+                          stop_event.set()
+                 else:
+                     if debug == True: print("This is a old ack")           
                                  
               
             elif pack.communicationType == 'w': #This is a write package  
@@ -322,18 +340,24 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          
            if pack.communicationType == 'e': #Enroll package
               
-              if debug == True: print("I just receive a enroll package from the blueNode IP: %s Port: %d" % (pack.blueAddressIP,pack.blueAddressPort))
+              
                 
 
               #Creates the request packages
               blueNodeIP = pack.blueAddressIP
               blueNodePort = pack.blueAddressPort
               requestNode = table.obtainAvailableNode()
+              if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
+              
               if not requestNode == -1: ##Checks if there is more requestNodes 
                   priority = random.randrange(4294967294)  
                   #Marks the node as requested                       
                   table.markNodeAsRequested(requestNode) 
                   flagTimesUp == False  
+                  
+                  
+                  print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
+                  
                   for node in range(0,MAXORANGENODES):
                      if not node == nodeID: 
                          requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
@@ -355,10 +379,13 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          #Once the acks list is done. Send the write package (if u won the request)
          if acksDone == True:
              if debug == True: print("\tReceived all the acks for the requestNode: %d" % (requestNode)) 
+             
              stop_event.clear()
+             requestNodeWon = True
              
              if requestNodeWon == True:
                 #Writes the address
+
                 address = (blueNodeIP,blueNodePort)
                 table.write(requestNode,address)
                 flagTimesUp = True
@@ -380,7 +407,9 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                 acksWriteDone = False #True when all the acksWrite have been received, False otherwise
                 priority = -1
                 sn= nodeID  
-                       
+                    
+                    
+               
              #Resets the variables
              acks = []
              acksDone = False       
@@ -393,7 +422,9 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                print("Times Up")
                stop_event.clear()
                flagTimesUp == False
-               ##Needs to resend the package           
+               ##Needs to resend the package   
+               print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
+        
                for node in range(0,MAXORANGENODES):
                   if not node == nodeID: 
                      requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
@@ -414,12 +445,12 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             #Creates the commitPackage
             neighborList = table.obtainNodesNeighborsAdressList(requestNode)
             commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
-            #commitPack.print_data()
+           # commitPack.print_data()
             byteCommitPack = commitPack.serialize()
             outputQueue.put(byteCommitPack)   
              
             requestNode = -1
-            requestNodeWon = True
+            requestNodeWon = False
             blueNodeIP = "0.0.0.0"
             blueNodePort = 8888
             MAXORANGENODES = maxOrangeNodes
@@ -444,4 +475,5 @@ def timer(timeout,stop_event):
       
     # We send a signal that the other thread should stop.
     stop_event.set()
+    exit()
 
