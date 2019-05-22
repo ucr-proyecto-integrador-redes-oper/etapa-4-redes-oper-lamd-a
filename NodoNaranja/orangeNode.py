@@ -332,7 +332,8 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
               if not requestNode == -1: ##Checks if there is more requestNodes 
                   priority = random.randrange(4294967294)  
                   #Marks the node as requested                       
-                  table.markNodeAsRequested(requestNode)   
+                  table.markNodeAsRequested(requestNode) 
+                  flagTimesUp == False  
                   for node in range(0,MAXORANGENODES):
                      if not node == nodeID: 
                          requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
@@ -350,81 +351,84 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
         
 
        
-         
-     #Once the acks list is done. Send the write package (if u won the request)
-     if acksDone == True:
-         if debug == True: print("\tReceived all the acks for the requestNode: %d" % (requestNode)) 
-
-         
-         if requestNodeWon == True:
-            #Writes the address
-            address = (blueNodeIP,blueNodePort)
-            table.write(requestNode,address)
+     if not requestNode == -1:  
+         #Once the acks list is done. Send the write package (if u won the request)
+         if acksDone == True:
+             if debug == True: print("\tReceived all the acks for the requestNode: %d" % (requestNode)) 
+             stop_event.clear()
+             
+             if requestNodeWon == True:
+                #Writes the address
+                address = (blueNodeIP,blueNodePort)
+                table.write(requestNode,address)
+                flagTimesUp = True
+                #Creates the writePackages
+                for node in range(0,MAXORANGENODES):
+                   if not node == nodeID: 
+                       writePack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
+                       byteWritePack = writePack.serialize()
+                       outputQueue.put(byteWritePack)
+     
+                       
+                       
+             else:     
+                requestNode = -1
+                requestNodeWon = True
+                blueNodeIP = "0.0.0.0"
+                blueNodePort = 8888
+                acksWrite = []
+                acksWriteDone = False #True when all the acksWrite have been received, False otherwise
+                priority = -1
+                sn= nodeID  
+                       
+             #Resets the variables
+             acks = []
+             acksDone = False       
+             flagTimesUp == True      
+                    
+                    
+         #Checks if the acks Timer is done
+         else:
+            if stop_event.is_set() and flagTimesUp == False: 
+               print("Times Up")
+               stop_event.clear()
+               flagTimesUp == False
+               ##Needs to resend the package           
+               for node in range(0,MAXORANGENODES):
+                  if not node == nodeID: 
+                     requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
+                     if debug == True: requestPack.print_data()
+                     byteRequestPack = requestPack.serialize()
+                     outputQueue.put(byteRequestPack)
+               ##Creates the Timer Thread
+               timeout = 5 #Waits 5 seconds
+               t = threading.Thread(target=timer, args=(timeout,stop_event, ))
+               t.start()
+                 
+                    
+         #Once the acksWrite list is done. Send the commit package
+         if requestNodeWon == True and acksWriteDone == True:
+            if debug == True: print("\tReceived all the acksWrite for the requestNode: %d" % (requestNode)) 
+            #if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
             
-            #Creates the writePackages
-            for node in range(0,MAXORANGENODES):
-               if not node == nodeID: 
-                   writePack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
-                   byteWritePack = writePack.serialize()
-                   outputQueue.put(byteWritePack)
-
-                   
-                   
-         else:     
+            #Creates the commitPackage
+            neighborList = table.obtainNodesNeighborsAdressList(requestNode)
+            commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
+            #commitPack.print_data()
+            byteCommitPack = commitPack.serialize()
+            outputQueue.put(byteCommitPack)   
+             
             requestNode = -1
             requestNodeWon = True
             blueNodeIP = "0.0.0.0"
             blueNodePort = 8888
+            MAXORANGENODES = maxOrangeNodes
             acksWrite = []
             acksWriteDone = False #True when all the acksWrite have been received, False otherwise
             priority = -1
-            sn= nodeID  
-                   
-         #Resets the variables
-         acks = []
-         acksDone = False             
-                
-                
-     #Checks if the acks Timer is done
-     else:
-        if stop_event.is_set(): 
-           print("Times Up")
-           stop_event.clear()
-           ##Needs to resend the package           
-           for node in range(0,MAXORANGENODES):
-              if not node == nodeID: 
-                 requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
-                 #if debug == True: requestPack.print_data()
-                 byteRequestPack = requestPack.serialize()
-                 outputQueue.put(byteRequestPack)
-           ##Creates the Timer Thread
-           timeout = 5 #Waits 5 seconds
-           t = threading.Thread(target=timer, args=(timeout,stop_event, ))
-           t.start()
-                     
-                
-     #Once the acksWrite list is done. Send the commit package
-     if requestNodeWon == True and acksWriteDone == True:
-         if debug == True: print("\tReceived all the acksWrite for the requestNode: %d" % (requestNode)) 
-         #if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
-         
-         #Creates the commitPackage
-         neighborList = table.obtainNodesNeighborsAdressList(requestNode)
-         commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
-         #commitPack.print_data()
-         byteCommitPack = commitPack.serialize()
-         outputQueue.put(byteCommitPack)   
-          
-         requestNode = -1
-         requestNodeWon = True
-         blueNodeIP = "0.0.0.0"
-         blueNodePort = 8888
-         MAXORANGENODES = maxOrangeNodes
-         acksWrite = []
-         acksWriteDone = False #True when all the acksWrite have been received, False otherwise
-         priority = -1
-         sn= nodeID 
-                    
+            sn= nodeID 
+            flagTimesUp = False  
+            stop_event.clear()       
 
 
 
