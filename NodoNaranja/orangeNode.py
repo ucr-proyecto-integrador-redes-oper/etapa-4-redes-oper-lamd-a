@@ -13,6 +13,8 @@ from threading import Event
 import time
 
 
+
+
 class orangeNode:
 	
 
@@ -42,6 +44,7 @@ class orangeNode:
         sock.bind(server)
         print("Listening on ip: %s port %d Im orange: %d"  % (self.ip,self.port,self.nodeID))
         
+        
         ##Creates the Threads
         t = threading.Thread(target=inputThread, args=(inputQueue,outputQueue,sock,self.nodeID,self.debug ))
         t.start()
@@ -49,18 +52,19 @@ class orangeNode:
         t2.start()
         t3 = threading.Thread(target=logicalThread, args=(inputQueue,outputQueue,sock,table,self.nodeID,maxOrangeNodes,self.debug  ))
         t3.start()
-        
-        #Testing
-        while True:
+         
+        #Testing. Every 5s a new blueNode is created 
+        blueNodes = 0
+        port = 0
+        while blueNodes < 17:
 
-          test = int(input())
-          if test == 1:
            neighborList = []
-           testPack = obPackage(1,2,'e',0,"0.0.0.0",2,neighborList)
+           testPack = obPackage(1,2,'e',0,"0.0.0.0",port,neighborList)
            ByteTestPack = testPack.serialize()
-           print("\n")
            inputQueue.put(ByteTestPack)
-
+           time.sleep(5)
+           blueNodes += 1   
+           port += 1     
         
        
 def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
@@ -169,8 +173,11 @@ def outputThread(outputQueue,sock,routingTable,debug):
       if debug == True: file.flush()         
 
 def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug):
-
-
+     
+    file2 = open("logicThread.out","w+")
+    file2.truncate(0) 
+     
+    processingBlueNode = False
     requestNode = -1
     requestNodeWon = False
     blueNodeIP = "0.0.0.0"
@@ -189,12 +196,16 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
     stop_eventWrite = Event() # Event object used to send signals from one thread to another
     flagWriteTimesUp = False #True when the timer thread finished before receiving all the acks
     
+    
+    blueNodeEnrolls = queue.Queue()
+    
     cheackingDebug = 0
+
     
     while True:
      #If the queue is not empty
      if not inputQueue.empty():
-         ##Takes a package from the inputQueue. If the queue is empty it waits until a package arrives
+         ##Takes a package from the inputQueue. 
          bytePacket = inputQueue.get()    
          #this determines what type of packet it is (Orange&Orange = 0 or Orange&Blue = 1 )
          if int.from_bytes(bytePacket[:1],byteorder='little') == 0:  #Orage & Orange
@@ -302,9 +313,9 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                     
                     flagNoAck = False 
                     for keyNode in acks:
-                        print(acks[keyNode])
+                        #print(acks[keyNode])
                         if acks[keyNode] == 'x':
-                          print("found one")
+                          #print("found one")
                           flagNoAck = True
                           
                           break
@@ -323,7 +334,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                  #Writes the node IP and Port into the blueTable   
                  address = (pack.blueAddressIP,pack.blueAddressPort)
                  table.write(pack.requestedGraphPosition,address)
-                 
+                 file2.write("Wrote the request %d\n"%(pack.requestedGraphPosition))  
                  #Creates the saved package
                  savedPack = ooPackage(0,sn,nodeID,pack.orangeSource,'s',pack.requestedGraphPosition,blueNodeIP,blueNodePort,pack.priority)
                  byteSavedPack = savedPack.serialize()
@@ -331,82 +342,42 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             else: ##This is a saved package      
                   print("(Saved) from  orangeNode:%d about the request of: %d my request is: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))                
                   
-                  if pack.requestedGraphPosition = requestNode
+                  if pack.requestedGraphPosition == requestNode:
                     #Adds the ack to the map
-                    acks[pack.orangeSource] = 's'
+                    acksWrite[pack.orangeSource] = 's'
                     
                     flagNoAckSaved = False 
                     for keyNode in acksWrite:
-                        print(acksWrite[keyNode])
+                       # print(acksWrite[keyNode])
                         if acksWrite[keyNode] == 'x':
-                          print("found one")
+                          #print("found one")
                           flagNoAckSaved = True
                           
                           break
                           
                     if flagNoAckSaved == False:  ##I got all the acks
-                       acksDoneWrite = True
+                       #print("Got all writeAcks")
+                       #print("Local variables requestWon: %s  mainThread %s  timerThread %s" %(requestNodeWon,stop_eventMainThread.is_set(),stop_eventTimerThread.is_set()))     
+                       acksWriteDone = True
 
-                 else:
+                  else:
                      if debug == True: print("This is a old ack")  
                       
          else: #Orange & Blue  Tiene que mandar uno a la vez. Hay que ver como implementar eso
          
            pack = obPackage()
            pack.unserialize(bytePacket)
-         
+            
            if pack.communicationType == 'e': #Enroll package
-              
-              
-                
-
-              #Creates the request packages
-              blueNodeIP = pack.blueAddressIP
-              blueNodePort = pack.blueAddressPort
-              requestNode = table.obtainAvailableNode()
-              sn=0
-              #stop_event.clear()  
-              if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
-              
-              if not requestNode == -1: ##Checks if there is more requestNodes 
-                  priority = random.randrange(4294967294)  
-                  #Marks the node as requested                       
-                  table.markNodeAsRequested(requestNode) 
-                  flagTimesUp == False  
-                  
-                  stop_eventMainThread.clear()
-                  stop_eventTimerThread.clear()
-                  
-                  print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
-                  
-                  for node in range(0,MAXORANGENODES):
-                     
-                     if node == nodeID: 
-                        acks[node] = 'a'
-                        acksWrite[node] = 's'
-                     elif not node == nodeID:    
-                        acks[node] = "x" #Fills with an x (not ack recived)-------------------------------------------------
-                        acksWrite[node] = 'x'
-                        requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
-                        #if debug == True: requestPack.print_data()
-                        byteRequestPack = requestPack.serialize()
-                        outputQueue.put(byteRequestPack)
-                         
-                  ##Creates the Timer Thread
-                  timeout = 5 #Waits 5 seconds
-                  t = threading.Thread(target=timer, args=(cheackingDebug,stop_eventMainThread,stop_eventTimerThread, ))
-                  t.start()
-                         
-              else:
-                 print("No more requestNumers available")            
-        
+              blueNodeEnrolls.put(pack)
+                            
 
        
      if not requestNode == -1:  
          #Once the acks list is done. Send the write package (if u won the request)
          if acksDone == True:
              if debug == True: print("\tReceived all the acks for the requestNode: %d" % (requestNode)) 
-             
+             file2.write("I won my request %d\n"%(requestNode))
              stop_eventMainThread.set()
              
              #stop_event.clear()
@@ -430,28 +401,32 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
              acksDone = False       
              flagTimesUp == True  
              cheackingDebug += 1    
+             stop_eventMainThread.clear()
+             stop_eventTimerThread.clear()
                     
+                    
+             #print("Local variables requestWon: %s  mainThread %s  timerThread %s" %(requestNodeWon,stop_eventMainThread.is_set(),stop_eventTimerThread.is_set()))        
                     
          #Checks if the acks Timer is done
          else:
-            if stop_eventMainThread.is_set() == False and stop_eventTimerThread.is_set() == True: 
-               print("Times Up")
+            if requestNodeWon == False and stop_eventMainThread.is_set() == False and stop_eventTimerThread.is_set() == True: 
+               print("\tTimes Up Acks from the request %d"%(requestNode))
                stop_eventMainThread.clear()
                stop_eventTimerThread.clear()
                flagTimesUp == False
                ##Needs to resend the package 
                sn +=  1 
-               print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
+               #print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
 
                for node in range(0,MAXORANGENODES):
                   if acks[node] == 'x': 
                      requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
-                     if debug == True: requestPack.print_data()
+                     if debug == True: print("\t\tResending the  request pack to the orangeNode %d"%(node))
                      byteRequestPack = requestPack.serialize()
                      outputQueue.put(byteRequestPack)
                ##Creates the Timer Thread
                timeout = 5 * sn #Waits 5 seconds
-               t = threading.Thread(target=timer, args=(cheackingDebug,stop_eventMainThread,stop_eventTimerThread, ))
+               t = threading.Thread(target=timer, args=(timeout,stop_eventMainThread,stop_eventTimerThread, ))
                t.start()
                  
                     
@@ -463,10 +438,14 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             #Creates the commitPackage
             neighborList = table.obtainNodesNeighborsAdressList(requestNode)
             commitPack = obPackage(1,sn,'c',requestNode,blueNodeIP,blueNodePort,neighborList)
-           # commitPack.print_data()
+            if debug == True: 
+                print("Creating a (commit) package")
+                #commitPack.print_data()
             byteCommitPack = commitPack.serialize()
             outputQueue.put(byteCommitPack)   
-             
+            
+            print("(Done) with the blueNode %d"%(requestNode))
+            processingBlueNode = False 
             requestNode = -1
             requestNodeWon = False
             blueNodeIP = "0.0.0.0"
@@ -481,26 +460,77 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          #Checks if the acksWrite Timer is done
          elif requestNodeWon == True:
             if stop_eventMainThread.is_set() == False and stop_eventTimerThread.is_set() == True: 
-               print("Times Up WriteAcks")
+               print("\tTimes Up WriteAcks from the requesr %d"%(requestNode))
                stop_eventMainThread.clear()
                stop_eventTimerThread.clear()
                
                ##Needs to resend the package 
                sn +=  1 
-               print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
+               #print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
 
                for node in range(0,MAXORANGENODES):
                   if acksWrite[node] == 'x': 
-                     requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
-                     if debug == True: requestPack.print_data()
+                     requestPack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
+                     if debug == True: print("\t\tResending the  write pack to the orangeNode %d"%(node))
                      byteRequestPack = requestPack.serialize()
                      outputQueue.put(byteRequestPack)
                ##Creates the Timer Thread
                timeout = 5 * sn #Waits 5 seconds
-               t = threading.Thread(target=timer, args=(cheackingDebug,stop_eventMainThread,stop_eventTimerThread, ))
+               t = threading.Thread(target=timer, args=(timeout,stop_eventMainThread,stop_eventTimerThread, ))
                t.start()
          
-
+     if processingBlueNode == False:
+           
+            
+            #If the queue is not empty takes out a new request
+            if not blueNodeEnrolls.empty(): 
+               #Takes a new request
+               pack = obPackage()
+               pack = blueNodeEnrolls.get()
+               #Creates the request packages
+               blueNodeIP = pack.blueAddressIP
+               blueNodePort = pack.blueAddressPort
+               requestNode = table.obtainAvailableNode()
+               sn=0 
+               #if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
+               
+               
+               if not requestNode == -1: ##Checks if there is more requestNodes 
+                   if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
+                   priority = random.randrange(4294967294)  
+                   #Marks the node as requested                       
+                   table.markNodeAsRequested(requestNode) 
+                   flagTimesUp == False  
+                   processingBlueNode = True
+                   stop_eventMainThread.clear()
+                   stop_eventTimerThread.clear()
+                   
+                   #print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
+                   
+                   for node in range(0,MAXORANGENODES):
+                      
+                      if node == nodeID: 
+                         acks[node] = 'a'
+                         acksWrite[node] = 's'
+                      elif not node == nodeID:    
+                         acks[node] = "x" #Fills with an x (not ack recived)-------------------------------------------------
+                         acksWrite[node] = 'x'
+                         requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
+                         #if debug == True: requestPack.print_data()
+                         byteRequestPack = requestPack.serialize()
+                         outputQueue.put(byteRequestPack)
+                          
+                   ##Creates the Timer Thread
+                   timeout = 5 #Waits 5 seconds
+                   t = threading.Thread(target=timer, args=(timeout,stop_eventMainThread,stop_eventTimerThread, ))
+                   t.start()
+                          
+               else:
+                  print("No more requestNumers available")  
+     
+     
+     file2.flush()          
+             
 
 def timer(timeout,stop_eventMainThread,stop_eventTimerThread):
 
