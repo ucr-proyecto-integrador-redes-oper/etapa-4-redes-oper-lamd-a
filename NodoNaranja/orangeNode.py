@@ -52,18 +52,15 @@ class orangeNode:
         
         #Testing
         while True:
-          try:
-           test = int(input())
-           if test == 1:
-            neighborList = []
-            testPack = obPackage(1,2,'e',0,"0.0.0.0",2,neighborList)
-            ByteTestPack = testPack.serialize()
-            print("\n")
-            inputQueue.put(ByteTestPack)
-           if test == 2:
-             print("Total threads %d" % (threading.active_count()))
-          except:
-             print("",end='')
+
+          test = int(input())
+          if test == 1:
+           neighborList = []
+           testPack = obPackage(1,2,'e',0,"0.0.0.0",2,neighborList)
+           ByteTestPack = testPack.serialize()
+           print("\n")
+           inputQueue.put(ByteTestPack)
+
         
        
 def inputThread(inputQueue,outputQueue,sock,nodeID,debug):
@@ -179,19 +176,20 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
     blueNodeIP = "0.0.0.0"
     blueNodePort = 8888
     MAXORANGENODES = maxOrangeNodes
-    acks = []
+    acks = {} #Map de ACK {key:node id, value:"a"}
     acksWrite = []
     acksDone = False #True when all the acks have been received, False otherwise
     acksWriteDone = False #True when all the acksWrite have been received, False otherwise
     priority = -1
-    sn= nodeID
+    sn= 0
        
-    stop_event = Event() # Event object used to send signals from one thread to another
+    stop_eventMainThread = Event() # If this is true then I received all the acks
+    stop_eventTimerThread = Event() # If this is true then the times up
     flagTimesUp = False #True when the timer thread finished before receiving all the acks
     stop_eventWrite = Event() # Event object used to send signals from one thread to another
     flagWriteTimesUp = False #True when the timer thread finished before receiving all the acks
     
-    
+    cheackingDebug = 0
     
     while True:
      #If the queue is not empty
@@ -285,13 +283,10 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                  #If this is a declined for my request
                  if requestNode == pack.requestedGraphPosition:
                    # We send a signal that the other thread should stop.
-                   stop_event.set()  
-                   #Append the ack to the acks list
-                   acks.append('d')
+                   stop_eventMainThread.set() 
                    requestNodeWon = False
-                   #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
-                   if len(acks) == MAXORANGENODES - 1:
-                         acksDone = True        
+                   requestNode = -1
+                         
                  else:
                     if debug == True: print("This is a old ack")     
                        
@@ -301,14 +296,24 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                  
                  #If this is a declined for my request
                  if requestNode == pack.requestedGraphPosition:
-                    #Append the ack to the acks list
-                    acks.append('a')
                     
-                    #Checks if the acks list is done. The list is done when the size is MAXORANGENODES - 1
-                    if len(acks) == MAXORANGENODES - 1:
-                          acksDone = True
-                          # We send a signal that the other thread should stop.
-                          stop_event.set()
+                    #Adds the ack to the map
+                    acks[pack.orangeSource] = 'a'
+                    
+                    flagNoAck = False 
+                    for keyNode in acks:
+                        print(acks[keyNode])
+                        if acks[keyNode] == 'x':
+                          print("found one")
+                          flagNoAck = True
+                          
+                          break
+                          
+                    if flagNoAck == False:  ##I got all the acks
+                       acksDone = True
+
+                       
+
                  else:
                      if debug == True: print("This is a old ack")           
                                  
@@ -347,6 +352,8 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
               blueNodeIP = pack.blueAddressIP
               blueNodePort = pack.blueAddressPort
               requestNode = table.obtainAvailableNode()
+              sn=0
+              #stop_event.clear()  
               if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
               
               if not requestNode == -1: ##Checks if there is more requestNodes 
@@ -355,19 +362,25 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                   table.markNodeAsRequested(requestNode) 
                   flagTimesUp == False  
                   
+                  stop_eventMainThread.clear()
+                  stop_eventTimerThread.clear()
                   
                   print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
                   
                   for node in range(0,MAXORANGENODES):
-                     if not node == nodeID: 
-                         requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
-                         #if debug == True: requestPack.print_data()
-                         byteRequestPack = requestPack.serialize()
-                         outputQueue.put(byteRequestPack)
+                     
+                     if node == nodeID: 
+                        acks[node] = 'a'
+                     elif not node == nodeID:    
+                        acks[node] = "x" #Fills with an x (not ack recived)-------------------------------------------------
+                        requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
+                        #if debug == True: requestPack.print_data()
+                        byteRequestPack = requestPack.serialize()
+                        outputQueue.put(byteRequestPack)
                          
                   ##Creates the Timer Thread
                   timeout = 5 #Waits 5 seconds
-                  t = threading.Thread(target=timer, args=(timeout,stop_event, ))
+                  t = threading.Thread(target=timer, args=(cheackingDebug,stop_eventMainThread,stop_eventTimerThread, ))
                   t.start()
                          
               else:
@@ -380,7 +393,9 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
          if acksDone == True:
              if debug == True: print("\tReceived all the acks for the requestNode: %d" % (requestNode)) 
              
-             stop_event.clear()
+             stop_eventMainThread.set()
+             
+             #stop_event.clear()
              requestNodeWon = True
              
              if requestNodeWon == True:
@@ -395,45 +410,34 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                        writePack = ooPackage(0,sn,nodeID,node,'w',requestNode,blueNodeIP,blueNodePort,priority)
                        byteWritePack = writePack.serialize()
                        outputQueue.put(byteWritePack)
-     
-                       
-                       
-             else:     
-                requestNode = -1
-                requestNodeWon = True
-                blueNodeIP = "0.0.0.0"
-                blueNodePort = 8888
-                acksWrite = []
-                acksWriteDone = False #True when all the acksWrite have been received, False otherwise
-                priority = -1
-                sn= nodeID  
-                    
-                    
-               
+                                         
              #Resets the variables
-             acks = []
+             acks.clear()
              acksDone = False       
-             flagTimesUp == True      
+             flagTimesUp == True  
+             cheackingDebug += 1    
                     
                     
          #Checks if the acks Timer is done
          else:
-            if stop_event.is_set() and flagTimesUp == False: 
+            if stop_eventMainThread.is_set() == False and stop_eventTimerThread.is_set() == True: 
                print("Times Up")
-               stop_event.clear()
+               stop_eventMainThread.clear()
+               stop_eventTimerThread.clear()
                flagTimesUp == False
-               ##Needs to resend the package   
+               ##Needs to resend the package 
+               sn +=  1 
                print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
-        
+
                for node in range(0,MAXORANGENODES):
-                  if not node == nodeID: 
+                  if acks[node] == 'x': 
                      requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
                      if debug == True: requestPack.print_data()
                      byteRequestPack = requestPack.serialize()
                      outputQueue.put(byteRequestPack)
                ##Creates the Timer Thread
-               timeout = 5 #Waits 5 seconds
-               t = threading.Thread(target=timer, args=(timeout,stop_event, ))
+               timeout = 5 * sn #Waits 5 seconds
+               t = threading.Thread(target=timer, args=(cheackingDebug,stop_eventMainThread,stop_eventTimerThread, ))
                t.start()
                  
                     
@@ -459,21 +463,50 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             priority = -1
             sn= nodeID 
             flagTimesUp = False  
-            stop_event.clear()       
+                  
+         #Checks if the acksWrite Timer is done
+         else:
+            if stop_eventMainThread.is_set() == False and stop_eventTimerThread.is_set() == True: 
+               print("Times Up")
+               stop_eventMainThread.clear()
+               stop_eventTimerThread.clear()
+               flagTimesUp == False
+               ##Needs to resend the package 
+               sn +=  1 
+               print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
+
+               for node in range(0,MAXORANGENODES):
+                  if acks[node] == 'x': 
+                     requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
+                     if debug == True: requestPack.print_data()
+                     byteRequestPack = requestPack.serialize()
+                     outputQueue.put(byteRequestPack)
+               ##Creates the Timer Thread
+               timeout = 5 * sn #Waits 5 seconds
+               t = threading.Thread(target=timer, args=(cheackingDebug,stop_eventMainThread,stop_eventTimerThread, ))
+               t.start()
+         
 
 
+def timer(timeout,stop_eventMainThread,stop_eventTimerThread):
 
-def timer(timeout,stop_event):
     i = 0
-    while timeout > i:
+    #Loops every 0.1s
+    while (timeout * 10) > i:
         i += 1
-        #print(i)
-        time.sleep(1)
-        # Here we make the check if the other thread sent a signal to stop execution.
-        if stop_event.is_set():
+        #Checks if the other thread recieved all the acks
+        if stop_eventMainThread.is_set():
+
             break
+            
+        #print(i)
+        
+        time.sleep(0.1)
+
       
-    # We send a signal that the other thread should stop.
-    stop_event.set()
+    # We send a signal that the times up
+    stop_eventTimerThread.set()
+    
+
     exit()
 
