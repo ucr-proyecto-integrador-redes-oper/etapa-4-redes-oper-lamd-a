@@ -251,6 +251,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                       requestNode = -1
                       stop_eventMainThread.clear()
                       stop_eventTimerThread.clear()
+                      processingBlueNode = False 
                                         
                   else: #When both priorities are equal 
                       if debug == True: print("\tWe draw the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))                  
@@ -288,6 +289,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                            requestNode = -1
                            stop_eventMainThread.clear()
                            stop_eventTimerThread.clear()
+                           processingBlueNode = False 
                                              
                else: #I did not request that node   
                         
