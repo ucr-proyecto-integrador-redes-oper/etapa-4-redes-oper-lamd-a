@@ -512,14 +512,17 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                #Creates the request packages
                blueNodeIP = pack.blueAddressIP
                blueNodePort = pack.blueAddressPort
-               requestNode = table.obtainAvailableNode(testingConfli)
-               testingConfli += 1
+               print("Testing %d" %(testingConfli))
+               requestNode = table.obtainAvailableNode(0)
+               
                sn=0 
                #if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
                
                
                if not requestNode == -1: ##Checks if there is more requestNodes 
                    if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
+
+                   testingConfli += 1
                    priority = random.randrange(4294967294)  
                    #Marks the node as requested                       
                    table.markNodeAsRequested(requestNode) 
