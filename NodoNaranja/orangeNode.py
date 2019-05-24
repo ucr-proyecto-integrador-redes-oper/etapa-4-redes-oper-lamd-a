@@ -249,8 +249,10 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                       
                       #If i was requesting the same number put my requestNode to -1 and clear the timer signals
                       requestNode = -1
-                      stop_eventMainThread.clear()
-                      stop_eventTimerThread.clear()
+                      
+                      # We send a signal that the other thread should stop.
+                      stop_eventMainThread.set()
+                      
                       processingBlueNode = False 
                                         
                   else: #When both priorities are equal 
@@ -287,8 +289,9 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                            
                            #If i was requesting the same number put my requestNode to -1 and clear the timer signals
                            requestNode = -1
-                           stop_eventMainThread.clear()
-                           stop_eventTimerThread.clear()
+                           # We send a signal that the other thread should stop.
+                           stop_eventMainThread.set()
+
                            processingBlueNode = False 
                                              
                else: #I did not request that node   
@@ -315,6 +318,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                    stop_eventMainThread.set() 
                    requestNodeWon = False
                    requestNode = -1
+                   processingBlueNode = False 
                          
                  else:
                     if debug == True: print("This is a old ack")     
