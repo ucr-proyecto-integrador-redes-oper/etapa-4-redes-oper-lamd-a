@@ -213,6 +213,9 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             pack = ooPackage()
             pack.unserialize(bytePacket)
             if pack.communicationType == 'r':   ##This a request package
+               
+               #Marks the node as requested                       
+               table.markNodeAsRequested(pack.requestedGraphPosition)    
                 
                if debug == True: print("(Request) from: %s requesting the number: %d with the priority: %d " % (pack.orangeSource,pack.requestedGraphPosition,pack.priority))
                
@@ -230,8 +233,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                       #Puts the package to the outputQueue
                       outputQueue.put(bytePacket)
                       
-                      #Marks the node as requested                       
-                      table.markNodeAsRequested(pack.requestedGraphPosition)    
+  
                       
                   elif pack.priority > priority: ##If my priority is smaller then the other node wins    
                       if debug == True: print("\tI lost the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))    
@@ -245,8 +247,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                       #Puts the package to the outputQueue
                       outputQueue.put(bytePacket)
                       
-                      #Marks the node as requested                       
-                      table.markNodeAsRequested(pack.requestedGraphPosition)    
+
                                         
                   else: #When both priorities are equal 
                       if debug == True: print("\tWe draw the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))                  
@@ -265,8 +266,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                            #Puts the package to the outputQueue
                            outputQueue.put(bytePacket)
                            
-                           #Marks the node as requested                       
-                           table.markNodeAsRequested(pack.requestedGraphPosition)    
+
                                              
                       else: ## The other node wins
                              
@@ -281,8 +281,6 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                            #Puts the package to the outputQueue
                            outputQueue.put(bytePacket)  
                            
-                           #Marks the node as requested                       
-                           table.markNodeAsRequested(pack.requestedGraphPosition)           
                                              
                else: #I did not request that node   
                         
@@ -296,9 +294,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                   
                   #Puts the package to the outputQueue
                   outputQueue.put(bytePacket)  
-                  
-                  #Marks the node as requested                       
-                  table.markNodeAsRequested(pack.requestedGraphPosition) 
+
                     
             elif pack.communicationType == 'd': #This is a declined package   
                            
