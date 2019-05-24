@@ -39,7 +39,7 @@ class blueNodeTable:
   def obtainAvailableNode(self,temp):
       try:
          #availableNode = random.choice(self.availableBlueNodes)
-         return availableNode[temp]
+         return availableBlueNodes[temp]
       except IndexError:
          return -1
       
