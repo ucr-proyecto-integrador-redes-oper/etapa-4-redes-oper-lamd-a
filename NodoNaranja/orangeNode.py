@@ -247,7 +247,10 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                       #Puts the package to the outputQueue
                       outputQueue.put(bytePacket)
                       
-
+                      #If i was requesting the same number put my requestNode to -1 and clear the timer signals
+                      requestNode = -1
+                      stop_eventMainThread.clear()
+                      stop_eventTimerThread.clear()
                                         
                   else: #When both priorities are equal 
                       if debug == True: print("\tWe draw the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))                  
@@ -281,6 +284,10 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                            #Puts the package to the outputQueue
                            outputQueue.put(bytePacket)  
                            
+                           #If i was requesting the same number put my requestNode to -1 and clear the timer signals
+                           requestNode = -1
+                           stop_eventMainThread.clear()
+                           stop_eventTimerThread.clear()
                                              
                else: #I did not request that node   
                         
