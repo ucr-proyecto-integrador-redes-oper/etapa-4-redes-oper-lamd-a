@@ -196,7 +196,8 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
     stop_eventWrite = Event() # Event object used to send signals from one thread to another
     flagWriteTimesUp = False #True when the timer thread finished before receiving all the acks
     
-    
+    testingConfli = 0    
+
     blueNodeEnrolls = queue.Queue()
     
     cheackingDebug = 0
@@ -490,7 +491,8 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                #Creates the request packages
                blueNodeIP = pack.blueAddressIP
                blueNodePort = pack.blueAddressPort
-               requestNode = table.obtainAvailableNode()
+               requestNode = table.obtainAvailableNode(testingConfli)
+               testingConfli += 1
                sn=0 
                #if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
                

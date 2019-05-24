@@ -36,10 +36,10 @@ class blueNodeTable:
    except ValueError:
       print("node %d already removed" % (requestedNode))
   
-  def obtainAvailableNode(self):
+  def obtainAvailableNode(self,temp):
       try:
-         availableNode = random.choice(self.availableBlueNodes)
-         return availableNode
+         #availableNode = random.choice(self.availableBlueNodes)
+         return availableNode[temp]
       except IndexError:
          return -1
       
