@@ -541,4 +541,27 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                print("No more requestNumers available")  
      
      
-   file2.flush()  
+   file2.flush() 
+
+def timer(timeout,stop_eventMainThread,stop_eventTimerThread):
+
+   i = 0
+   #Loops every 0.1s
+   while (timeout * 10) > i:
+      i += 1
+      #Checks if the other thread recieved all the acks
+      if stop_eventMainThread.is_set():
+
+         break
+            
+      #print(i)
+        
+      time.sleep(0.1)
+
+      
+   # We send a signal that the times up
+   stop_eventTimerThread.set()
+    
+
+   exit() 
+   
