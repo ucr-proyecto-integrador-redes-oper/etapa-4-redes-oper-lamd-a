@@ -1,36 +1,41 @@
 #Struct that represents each of the nodes
 class Small_struct:
+    """
+        Efe: Creates an instance of the class with 3 attributes (node, ip and port)
+        Req: All the three attributes and having node and port as integers and ip as a string
+        Mod: ---
+    """
     def __init__(self, node, ip, port):
         self.node = node
         self.ip = ip
         self.port = port
 
-    #Metodo que imprime los datos relacionados al nodo mencionado
+    """
+        Efe: Print the values of the attributes
+        Req: ---
+        Mod: ---
+    """
     def print_data(self):
-        print("Node(", self.node ,") - ip(", self.ip, ") - port(", self.port ,")")
-
-    #Getter del nodo
-    def getNode(self):
-        return self.node
-
-    #Getter de la ip
-    def getIp(self):
-        return self.ip
-
-    #Getter del port
-    def getPort(self):
-        return self.port
+        print("Node(", str(self.node) ,") - ip(", self.ip, ") - port(", str(self.port) ,")")
 
 ####################################################################################
 
 class RoutingTable:
-    #Constructor
-    def __init__(self,routingTableDir):
-        self.table = [] #[smallStruct_0, smallStruct_1]
+    """
+        Efe: Creates an instance of the routing table
+        Req: routingTableDir = complete directory and name of the file used to create the routing table
+        Mod: The instance called table which is a list of the information per node
+    """
+    def __init__(self, routingTableDir):
+        self.table = [] #[smallStruct_0, smallStruct_1, .....]
         self.constructTable(routingTableDir)
 
-    #Parsing the data.txt file to create the routing table
-    def constructTable(self,routingTableDir):
+    """
+        Efe: Opens the file of the nodes and begin the parse of the file
+        Req: the complete directoy and name of the file to parse
+        Mod: the list of instances representing each of the nodes
+    """
+    def constructTable(self, routingTableDir):
         
         try:
              file = open(routingTableDir, "r")
@@ -42,7 +47,11 @@ class RoutingTable:
         except IOError:
              print("Error: cant find the file")
 
-    #Parsing each of the lines of the file
+    """
+        Efe: parse each line of the file
+        Req: one line of the file
+        Mod: ---
+    """
     def parseLine(self, line):
         node = int(line[0:1]) #nodo
         ip = str(line[2:line.index(":")]) #ip
@@ -50,27 +59,39 @@ class RoutingTable:
         ss = Small_struct(node, ip, port)
         self.table.append(ss)
 
-    #Printing the state of the table
+    """
+        Efe: Print the details of each of the instances stored in the table list
+        Req: ---
+        Mod: ---
+    """
     def printTable(self):
         for x in self.table:
-            x.print_data();
+            x.print_data()
 
-    #Returns the tuple of address and port regarding to the argument(node)
+    """
+        Efe: Retrieve information of one of the nodes stored in the table list
+        Req: a valid node
+        Mod: ---
+    """
     def retrieveAddress(self, node):
         for item in self.table:
-            if item.getNode() == node: ##This was a item.getNode() is node
-                address = (item.getIp(), item.getPort())
+            if item.node == node: ##This was a item.getNode() is node
+                address = (item.ip, item.port)
                 return address
 
-#def main():
-#     #Creando un routing table
-#     rt = RoutingTable()
-#     rt.printTable()
+def main():
+    #Creando un routing table sin especificar el directorio
+    rt = RoutingTable("routingTable.txt")
+    rt.printTable() #Imprimiendo los datos de la tabla
 
-#     #La siguiente es la dupla
-#     result = rt.retrieveAddress(3)
-#     print(result[0], " - ", result[1])
+    #La siguiente es la dupla
+    result = rt.retrieveAddress(0)
+    print(result[0], " - ", result[1])
+
+    #La siguiente es la dupla
+    result = rt.retrieveAddress(1)
+    print(result[0], " - ", result[1])
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
