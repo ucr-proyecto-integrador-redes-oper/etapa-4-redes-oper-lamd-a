@@ -2,7 +2,13 @@ import copy, struct, pickle
 
 class obPackage:
 
+    '''
+        EFE: Consturye la clase y sus atributos por defecto
+        REQ: ---
+        MOD: ---
+    '''
     def __init__(self, packetCategory = -1, sn = 0, communicationType = '*', obtainedGraphPosition = -1, blueAddressIP = '999.999.999.999', blueAddressPort = 0000, neighborList = []):
+        # Todos los espacios del header
         self.packetCategory = packetCategory
         self.sn = sn
         self.communicationType = communicationType
@@ -11,18 +17,31 @@ class obPackage:
         self.blueAddressPort = blueAddressPort
         self.neighborList = neighborList
 
+    '''
+        EFE: Imprime la info del paquete
+        REQ: ---
+        MOD: ---
+    '''
     def print_data(self):
         print(" packetCategory:",self.packetCategory, " sn: ", self.sn, " communicationType: ", self.communicationType, " obtainedGraphPosition: ", self.obtainedGraphPosition, " blueAddressIP: ", self.blueAddressIP, "blueAddressPort:", self.blueAddressPort, " neighborList: ", self.neighborList)
 
-    #returns a bytes object
+    '''
+        EFE: Serializa el paquete
+        REQ: ---
+        MOD: bytePacket
+    '''
     def serialize(self):
         bytePacket = struct.pack('bIch15ph',self.packetCategory,self.sn,self.communicationType.encode(),self.obtainedGraphPosition,self.blueAddressIP.encode(),self.blueAddressPort)
-
         bytePacket += pickle.dumps(self.neighborList)
         return bytePacket
+
+    '''
+        EFE: Deserializa el paquete entrante
+        REQ: Paquete serializado
+        MOD: ---
+    '''
     def unserialize(self, bytePacket):
         processedPacket = struct.unpack('bIch15ph',bytePacket[:30])
-
         self.packetCategory = processedPacket[0]
         self.sn = processedPacket[1]
         self.communicationType = processedPacket[2].decode("utf-8")
