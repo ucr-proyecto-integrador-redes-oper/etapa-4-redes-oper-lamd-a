@@ -297,19 +297,19 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
 		
 				elif pack.communicationType == 'd': #This is a declined package	
 									
-					  if debug == True: print("(Declined) from  orangeNode: %d about the request of: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))						
+					if debug == True:
+						print("(Declined) from  orangeNode: %d about the request of: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))						
 					  
-					  #If this is a declined for my request
-					  if requestNode == pack.requestedGraphPosition:
-							# We send a signal that the other thread should stop.
-							stop_eventMainThread.set() 
-							requestNodeWon = False
-							requestNode = -1
-							processingBlueNode = False 
-								 
-					  else:
-							if debug == True: print("This is a old ack")	  
-							  
+					#If this is a declined for my request
+					if requestNode == pack.requestedGraphPosition:
+						# We send a signal that the other thread should stop.
+						stop_eventMainThread.set() 
+						requestNodeWon = False
+						requestNode = -1
+						processingBlueNode = False 
+					else:
+						if debug == True: 
+							print("This is a old ack")
 				elif pack.communicationType == 'a': #This is a accept package	  
 						print("(Accept) from  orangeNode: %d about the request of: %d and my request was: %d" % (pack.orangeSource,pack.requestedGraphPosition,requestNode))
 					  
@@ -332,11 +332,11 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
 								acksDone = True
 
 						else:
-							if debug == True: print("This is a old ack")			  
-											
-				  
+							if debug == True: 
+								print("This is a old ack") 
+ 
 				elif pack.communicationType == 'w': #This is a write package  
-						print("(Write) the blueNode: %d" % (pack.requestedGraphPosition))				 
+						print("(Write) the blueNode: %d" % (pack.requestedGraphPosition))
 						#Writes the node IP and Port into the blueTable	
 						address = (pack.blueAddressIP,pack.blueAddressPort)
 						table.write(pack.requestedGraphPosition,address)
@@ -366,7 +366,8 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
 								acksWriteDone = True
 
 						else:
-							if debug == True: print("This is a old ack")
+							if debug == True: 
+								print("This is a old ack")
                 
 			else: #Orange & Blue  Tiene que mandar uno a la vez. Hay que ver como implementar eso
 			
@@ -557,4 +558,3 @@ def timer(timeout,stop_eventMainThread,stop_eventTimerThread):
 	 
 
 	exit() 
-	
