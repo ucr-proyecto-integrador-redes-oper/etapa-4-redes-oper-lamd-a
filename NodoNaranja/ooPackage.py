@@ -1,7 +1,11 @@
 import copy, struct
 
 class ooPackage:
-
+    '''
+        EFE: Construye la clase orange-orange Package
+        REQ: ---
+		MOD: ---
+    '''
     def __init__(self, packetCategory = -1, sn = 0, orangeSource = -1, orangeTarget = -1, communicationType = '*', requestedGraphPosition = -1, blueAddressIP = '999.999.999.999', blueAddressPort = 0000, priority = 0):
         self.packetCategory = packetCategory
         self.sn = sn
@@ -13,14 +17,28 @@ class ooPackage:
         self.blueAddressPort = blueAddressPort
         self.priority = priority
 
+    '''
+		EFE: Imprime la información del paquete
+		REQ: ---
+		MOD: ---
+	'''
     def print_data(self):
         print(" packetCategory:",self.packetCategory, " sn: ", self.sn, " orangeSource: ", self.orangeSource, " orangeTarget: ", self.orangeTarget, " communicationType: ", self.communicationType, " requestedGraphPosition: ", self.requestedGraphPosition, " blueAddressIP: ", self.blueAddressIP, "blueAddressPort:", self.blueAddressPort, " priority: ", self.priority)
 
-    #returns a bytes object
+    '''
+		EFE: Serializa el paquete, retorna un paquete de bytes
+		REQ: ---
+		MOD: bytePacket
+	'''
     def serialize(self):
         bytePacket = struct.pack('bIbbch15phI',self.packetCategory,self.sn,self.orangeSource,self.orangeTarget,self.communicationType.encode(),self.requestedGraphPosition,self.blueAddressIP.encode(),self.blueAddressPort,self.priority)
         return bytePacket
 
+    '''
+		EFE: Deserializa el paquete
+		REQ: Un bytePacket
+		MOD: ---
+	'''
     def unserialize(self, bytePacket):
         processedPacket = struct.unpack('BIBBcH15pHI',bytePacket)
 
