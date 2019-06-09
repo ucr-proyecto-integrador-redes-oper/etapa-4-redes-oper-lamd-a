@@ -81,8 +81,8 @@ class RoutingTable:
     """
     def retrieveAddress(self, node):
         for item in self.table:
-            if item.getNode() == node:  # This was a item.getNode() is node
-                address = (item.getIp(), item.getPort())
+            if item.node == node:  # This was a item.getNode() is node
+                address = (item.ip, item.port)
                 return address
 
 # def main():
