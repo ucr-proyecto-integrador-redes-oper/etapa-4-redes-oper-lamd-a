@@ -38,7 +38,7 @@ class orangeNode:
       table = blueNodeTable(self.blueGraphDir)
 
       ##Starts the UDP server
-      sock = socket.socket(sock.AF_INET,socket.SOCK_DGRAM)
+      sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
       sock.bind(server)
       print("Listening on ip: %s port %d Im orange: %d"  % (self.ip,self.port,self.nodeID))
 
@@ -214,38 +214,37 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                
                if pack.requestedGraphPosition == requestNode: ##If I request the same number
                   if pack.priority < priority: ##If my priority is bigger then I win
-                           
-                     if debug == True: print("\tI won the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))
-                      
-                        #Creates a decline package
-                        declinedPack = ooPackage(0,sn,nodeID,pack.orangeSource,'d',requestNode,blueNodeIP,blueNodePort,priority)
-                      
-                        #Serialize the package
-                        bytePacket = declinedPack.serialize()
-                      
-                        #Puts the package to the outputQueue
-                        outputQueue.put(bytePacket)
+
+                     if debug == True: 
+                        print("\tI won the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))
+
+                     #Creates a decline package
+                     declinedPack = ooPackage(0,sn,nodeID,pack.orangeSource,'d',requestNode,blueNodeIP,blueNodePort,priority)
+                     #Serialize the package
+                     bytePacket = declinedPack.serialize()
+                     #Puts the package to the outputQueue
+                     outputQueue.put(bytePacket)
 
                   elif pack.priority > priority: ##If my priority is smaller then the other node wins 
 
                      if debug == True: print("\tI lost the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))    
                                     
-                        #Creates a accept
-                        acceptPack = ooPackage(0,sn,nodeID,pack.orangeSource,'a',pack.requestedGraphPosition,pack.blueAddressIP,pack.blueAddressPort,pack.priority)
+                     #Creates a accept
+                     acceptPack = ooPackage(0,sn,nodeID,pack.orangeSource,'a',pack.requestedGraphPosition,pack.blueAddressIP,pack.blueAddressPort,pack.priority)
                       
-                        #Serialize the package
-                        bytePacket = acceptPack.serialize()
+                     #Serialize the package
+                     bytePacket = acceptPack.serialize()
                       
-                        #Puts the package to the outputQueue
-                        outputQueue.put(bytePacket)
+                     #Puts the package to the outputQueue
+                     outputQueue.put(bytePacket)
                       
-                        #If i was requesting the same number put my requestNode to -1 and clear the timer signals
-                        requestNode = -1
+                     #If i was requesting the same number put my requestNode to -1 and clear the timer signals
+                     requestNode = -1
                       
-                        # We send a signal that the other thread should stop.
-                        stop_eventMainThread.set()
+                     # We send a signal that the other thread should stop.
+                     stop_eventMainThread.set()
                       
-                        processingBlueNode = False 
+                     processingBlueNode = False 
                                         
                   else: #When both priorities are equal 
                         if debug == True: print("\tWe draw the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (requestNode,nodeID,priority,pack.orangeSource,pack.priority))                  
@@ -332,7 +331,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                            flagNoAck = True
                            break
                           
-                    if flagNoAck == False:  ##I got all the acks
+                     if flagNoAck == False:  ##I got all the acks
                         acksDone = True
 
                   else:
@@ -382,7 +381,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                             
 
        
-     if not requestNode == -1:  
+      if not requestNode == -1:  
          #Once the acks list is done. Send the write package (if u won the request)
          if acksDone == True:
                if debug == True: print("\tReceived all the acks for the requestNode: %d" % (requestNode)) 
@@ -488,7 +487,7 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
                t = threading.Thread(target=timer, args=(timeout,stop_eventMainThread,stop_eventTimerThread, ))
                t.start()
          
-     if processingBlueNode == False:
+      if processingBlueNode == False:
            
             
          #If the queue is not empty takes out a new request
@@ -500,45 +499,46 @@ def logicalThread(inputQueue,outputQueue,sock,table,nodeID,maxOrangeNodes,debug)
             blueNodeIP = pack.blueAddressIP
             blueNodePort = pack.blueAddressPort
             print("Testing %d" %(testingConfli))
-            requestNode = table.obtainAvailableNode(0)
+            requestNode = table.obtainAvailableNode()
                
             sn=0 
             #if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
                
                
             if not requestNode == -1: ##Checks if there is more requestNodes 
-               if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
-                  testingConfli += 1
-                  priority = random.randrange(4294967294)  
-                  #Marks the node as requested                       
-                  table.markNodeAsRequested(requestNode) 
-                  flagTimesUp == False  
-                  processingBlueNode = True
-                  stop_eventMainThread.clear()
-                  stop_eventTimerThread.clear()
+               if debug == True: 
+                  print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
+               testingConfli += 1
+               priority = random.randrange(4294967294)  
+               #Marks the node as requested                       
+               table.markNodeAsRequested(requestNode) 
+               flagTimesUp == False  
+               processingBlueNode = True
+               stop_eventMainThread.clear()
+               stop_eventTimerThread.clear()
                    
-                  #print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
+               #print("Local Variables request: %d requestWon %s blueIP: %s bluePort: %d maxOrange: %d acks :%d acksWrite :%d acksDone: %s acksWriteDone: %s Prio: %d sn :%d" %(requestNode,requestNodeWon,blueNodeIP,blueNodePort, MAXORANGENODES,len(acks), len(acksWrite),acksDone,acksWriteDone,priority,sn))
                    
-                  for node in range(0,MAXORANGENODES):
+               for node in range(0,MAXORANGENODES):
                       
-                     if node == nodeID: 
-                        acks[node] = 'a'
-                        acksWrite[node] = 's'
-                     elif not node == nodeID:    
-                        acks[node] = "x" #Fills with an x (not ack recived)-------------------------------------------------
-                        acksWrite[node] = 'x'
-                        requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
-                        #if debug == True: requestPack.print_data()
-                        byteRequestPack = requestPack.serialize()
-                        outputQueue.put(byteRequestPack)
+                  if node == nodeID: 
+                     acks[node] = 'a'
+                     acksWrite[node] = 's'
+                  elif not node == nodeID:    
+                     acks[node] = "x" #Fills with an x (not ack recived)-------------------------------------------------
+                     acksWrite[node] = 'x'
+                     requestPack = ooPackage(0,sn,nodeID,node,'r',requestNode,blueNodeIP,blueNodePort,priority)
+                     #if debug == True: requestPack.print_data()
+                     byteRequestPack = requestPack.serialize()
+                     outputQueue.put(byteRequestPack)
                           
-                  ##Creates the Timer Thread
-                  timeout = 5 #Waits 5 seconds
-                  t = threading.Thread(target=timer, args=(timeout,stop_eventMainThread,stop_eventTimerThread, ))
-                  t.start()
+               ##Creates the Timer Thread
+               timeout = 5 #Waits 5 seconds
+               t = threading.Thread(target=timer, args=(timeout,stop_eventMainThread,stop_eventTimerThread, ))
+               t.start()
                           
-               else:
-                  print("No more requestNumers available")  
+            else:
+               print("No more requestNumers available")  
      
      
-     file2.flush()  
+   file2.flush()  
