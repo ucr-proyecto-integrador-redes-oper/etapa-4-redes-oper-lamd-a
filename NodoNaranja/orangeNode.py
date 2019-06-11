@@ -202,7 +202,7 @@ def timer(timeout, stop_eventMainThread, stop_eventTimerThread):
 	MOD: ---
 '''
 
-def logicalThread(self, inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, debug):
+def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, debug):
 
     file2 = open("logicThread.out", "w+")
     file2.truncate(0)
@@ -517,8 +517,8 @@ def logicalThread(self, inputQueue, outputQueue, sock, table, nodeID, maxOrangeN
                 if debug == True:
                     print("Creating a (commit) package")
                     # commitPack.print_data()
-                byteCommitPack = commitPack.serialize()
-                outputQueue.put(byteCommitPack)
+               # byteCommitPack = commitPack.serialize()
+                #outputQueue.put(byteCommitPack)
 
                 print("(Done) with the blueNode %d" % (requestNode))
                 processingBlueNode = False
@@ -570,9 +570,9 @@ def logicalThread(self, inputQueue, outputQueue, sock, table, nodeID, maxOrangeN
                 # Creates the request packages
                 blueNodeIP = pack.blueAddressIP
                 blueNodePort = pack.blueAddressPort
-                print("Testing %d" % (testingConfli))
+                
                 requestNode = table.obtainAvailableNode()
-
+                #print("Testing %d" % (requestNode))
                 sn = 0
                 # if debug == True: print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (pack.blueAddressIP,pack.blueAddressPort,requestNode))
 
@@ -657,19 +657,23 @@ class orangeNode:
         sock.bind(server)
         print("Listening on ip: %s port %d Im orange: %d" %
               (self.ip, self.port, self.nodeID))
-
+              
         # Creates the Threads
         t = threading.Thread(target=inputThread, args=(
-            inputQueue, outputQueue, sock, self.nodeID, self.debug))
+            inputQueue, outputQueue, sock, self.nodeID, self.debug, ))
         t.start()
+       
+
         t2 = threading.Thread(target=outputThread, args=(
-            outputQueue, sock, routingTable, self.debug))
+            outputQueue, sock, routingTable, self.debug, ))
         t2.start()
+           
         t3 = threading.Thread(target=logicalThread, args=(
-            inputQueue, outputQueue, sock, table, self.nodeID, maxOrangeNodes, self.debug))
+            inputQueue, outputQueue, sock, table, self.nodeID, maxOrangeNodes,self.debug))
         t3.start()
 
-        # Testing. Every 5s a new blueNode is created
+
+       # Testing. Every 5s a new blueNode is created
         blueNodes = 0
         port = 0
         while blueNodes < 17:
@@ -681,3 +685,4 @@ class orangeNode:
             time.sleep(5)
             blueNodes += 1
             port += 1
+
