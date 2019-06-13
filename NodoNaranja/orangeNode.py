@@ -615,7 +615,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 else:
                     print("No more requestNumers available")
 
-    file2.flush()
+        file2.flush()
 
 
 class orangeNode:
