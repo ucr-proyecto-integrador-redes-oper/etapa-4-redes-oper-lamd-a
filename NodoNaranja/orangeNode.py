@@ -607,7 +607,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                             outputQueue.put(byteRequestPack)
 
                     # Creates the Timer Thread
-                    timeout = 5  # Waits 5 seconds
+                    timeout = 15 #Waits 15s
                     t = threading.Thread(target=timer, args=(
                         timeout, stop_eventMainThread, stop_eventTimerThread, ))
                     t.start()
