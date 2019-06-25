@@ -97,6 +97,7 @@ class SecureUdp:
 					print("Sending ",payload," To ",ip,port,modified_payload)
 					self.sock.sendto(modified_payload, client)   # Envía!!!
 					self.AckWindow.append(PacketStruct(ip, port, modified_payload, self.SNRN, time.time()))
+					self.SNRN = self.nextSNRN(self.SNRN)
 
 			self.checkTimeStamps()
 
