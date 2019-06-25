@@ -57,7 +57,7 @@ class SecureUdp:
 		to_delete = []
 		for item in self.AckWindow:
 			if (self.AcksReceived.count(item.sn + 1) > 0):
-				print("Put shit in the ackreceived queue")
+				#print("Put shit in the ackreceived queue")
 				to_delete.append(item)  # Haven't received the ack
 			elif ((time.time() - item.timeStamp) > self.TIMEOUT):
 				print("TimesUp ",item.payload)
@@ -128,35 +128,38 @@ class SecureUdp:
 			if int.from_bytes(payload[:1], byteorder='big') == 0:
 				# THIS ISNT GONNA WORK ON FIRST TRY
 				sn_received = int.from_bytes(payload[0:2],byteorder='big')
-				print("\got SN: %d" % (sn_received))
+				print("\T Received: %s with SN %d" % (payload, sn_received))
 				sn_to_send = self.nextSNRN(sn_received)
-				print("\tsending ACK with SN: %d" % (sn_to_send)) 
+				#print("\tsending ACK with SN: %d" % (sn_to_send)) 
 				ack_payload = struct.pack('!bH', 1, sn_to_send)
 				#print(payload)
 				self.sock.sendto(ack_payload, client_addr)
 				self.reciveQueue.put(payload)
 
 			else:
-				print("got ack for ", client_addr)
-				print("ACK Payload: ", payload)
+				ACK_received = int.from_bytes(payload[1:3],byteorder='big') + 1
+				print("Received: ACK ", ACK_received)
+				#print("ACK Payload: ", payload)
 				self.AcksReceived.append(int.from_bytes(payload[1:3],byteorder='big'))
 
 
 
 
 def main():
-	port = input()
-	port2 = input()
-	test = SecureUdp(4,"10.1.138.34",int(port))
-	payload = b'hola'
-	ip = "10.1.138.34"
+	ip = input("My ip ")
+	port = input("My port ")
+	ip2 = input("other ip ")
+	port2 = input("other port ")
+	test = SecureUdp(4,ip,int(port))
+	payload = b'luIS'
+
 	
-	for item in range(1):
-		test.dummySendto(payload,ip,int(port2))
+	for item in range(2):
+		test.dummySendto(payload,ip2,int(port2))
 	
-	
-	payload = test.recivefrom()
-	print("Receive ",payload)
+	while True:
+		payload = test.recivefrom()
+		print("Receive ",payload)
 
 
 if __name__ == "__main__":
