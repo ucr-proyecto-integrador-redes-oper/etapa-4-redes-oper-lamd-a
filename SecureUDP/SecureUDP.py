@@ -129,7 +129,7 @@ class SecureUdp:
 			if int.from_bytes(payload[:1], byteorder='big') == 0:
 				# THIS ISNT GONNA WORK ON FIRST TRY
 				sn_received = int.from_bytes(payload[0:2],byteorder='big')
-				print("\T Received: %s with SN %d" % (payload, sn_received))
+				print("\T Received: %s with SN %d" % (payload[0:2], sn_received))
 				sn_to_send = self.nextSNRN(sn_received)
 				#print("\tsending ACK with SN: %d" % (sn_to_send)) 
 				ack_payload = struct.pack('!bH', 1, sn_to_send)
