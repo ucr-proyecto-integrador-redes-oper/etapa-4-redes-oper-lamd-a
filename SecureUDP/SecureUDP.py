@@ -93,9 +93,8 @@ class SecureUdp:
 				if len(self.waiting_queue) > 0: # 
 					ip,port,payload = self.waiting_queue.pop(0)
 					client = (ip, port)
-					#self.SNRN = self.nextSNRN(self.SNRN)
 					modified_payload = struct.pack('!bH',0, self.SNRN) + payload
-					#print("Sending ",payload," To ",ip,port,modified_payload)
+					print("Sending To ",ip,":",str(port), "with Sn ",self.SNRN)
 					self.sock.sendto(modified_payload, client)   # Envía!!!
 					self.AckWindow.append(PacketStruct(ip, port, modified_payload, self.SNRN, time.time()))
 					#self.SNRN = self.SNRN + 1
@@ -141,7 +140,7 @@ class SecureUdp:
 
 			else:
 				ACK_received = int.from_bytes(payload[1:3],byteorder='big')
-				print("Received: ACK ", ACK_received,payload)
+				print("Received: ACK ", ACK_received)
 				#print("ACK Payload: ", payload)
 				self.AcksReceived.append(ACK_received)
 
