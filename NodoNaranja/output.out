@@ -1,85 +1,62 @@
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 1 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 2913699100 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: r requestedGraphPosition: 1 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 2913699100 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 1 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 2913699100 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: w requestedGraphPosition: 1 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 2913699100 
-	 Sended to 0.0.0.0:9999
-Sending a Orange & Blue packetCategory: 1  sn: 0  communicationType: c obtainedGraphPosition: 1 blueAddressIP: 0.0.0.0 blueAddressPort: 0 neighborList: [] 
-ERROR: clientAddress is wrong 0.0.0.0:0I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 15 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 3008768946 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 15 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 3008768946 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 13 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 4054472830 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 13 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 4054472830 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: a requestedGraphPosition: 4 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 3122572199 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: s requestedGraphPosition: 4 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 3122572199 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: a requestedGraphPosition: 6 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 2073547309 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: s requestedGraphPosition: 6 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 2073547309 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 5 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 2862025494 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: r requestedGraphPosition: 5 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 2862025494 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 5 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 2862025494 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: w requestedGraphPosition: 5 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 2862025494 
-	 Sended to 0.0.0.0:9999
-Sending a Orange & Blue packetCategory: 1  sn: 0  communicationType: c obtainedGraphPosition: 5 blueAddressIP: 0.0.0.0 blueAddressPort: 1 neighborList: [(4, '0.0.0.0', 0)] 
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 3 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 3542570581 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 3 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 3542570581 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: a requestedGraphPosition: 7 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 4033476694 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: s requestedGraphPosition: 7 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 4033476694 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 9 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 1485108656 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: r requestedGraphPosition: 9 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 1485108656 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 9 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 1485108656 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: w requestedGraphPosition: 9 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 1485108656 
-	 Sended to 0.0.0.0:9999
-Sending a Orange & Blue packetCategory: 1  sn: 0  communicationType: c obtainedGraphPosition: 9 blueAddressIP: 0.0.0.0 blueAddressPort: 2 neighborList: [(5, '0.0.0.0', 1), (7, '0.0.0.0', 2), (13, '0.0.0.0', 1)] 
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 12 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 2522690085 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 12 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 2522690085 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: a requestedGraphPosition: 8 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 4273335636 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: s requestedGraphPosition: 8 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 4273335636 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 3247238445 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: r requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 3247238445 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 3247238445 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: w requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 3247238445 
-	 Sended to 0.0.0.0:9999
-Sending a Orange & Blue packetCategory: 1  sn: 0  communicationType: c obtainedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 3 neighborList: [(1, '0.0.0.0', 0)] 
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 11 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 730193250 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 11 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 730193250 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: a requestedGraphPosition: 14 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 1747354264 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: s requestedGraphPosition: 14 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 1747354264 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 10 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 2137049002 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: r requestedGraphPosition: 10 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 2137049002 
-	 Sended to 0.0.0.0:9999
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 10 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 2137049002 
-	 Sended to 0.0.0.0:8765
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 2 communicationType: w requestedGraphPosition: 10 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 2137049002 
-	 Sended to 0.0.0.0:9999
-Sending a Orange & Blue packetCategory: 1  sn: 0  communicationType: c obtainedGraphPosition: 10 blueAddressIP: 0.0.0.0 blueAddressPort: 4 neighborList: [(1, '0.0.0.0', 0), (3, '0.0.0.0', 2), (9, '0.0.0.0', 2), (14, '0.0.0.0', 4)] 
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 5 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 1160314683 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 12 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 372251718 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 12 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 372251718 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 1285959986 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 1285959986 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 1  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 5 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 1160314683 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 1  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 5 blueAddressIP: 0.0.0.0 blueAddressPort: 0 priority: 1160314683 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 8 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 4069418918 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 8 blueAddressIP: 0.0.0.0 blueAddressPort: 1 priority: 4069418918 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 9 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 2212792820 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 9 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 2212792820 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 15 blueAddressIP: 0.0.0.0 blueAddressPort: 2 priority: 478667688 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 15 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 478667688 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 14 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 2562484054 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 14 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 2562484054 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 3 blueAddressIP: 0.0.0.0 blueAddressPort: 3 priority: 2882987992 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 3 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 2882987992 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 4 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 42172447 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 11 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 3695336573 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 4 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 42172447 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 11 blueAddressIP: 0.0.0.0 blueAddressPort: 4 priority: 3695336573 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 1 blueAddressIP: 0.0.0.0 blueAddressPort: 5 priority: 3026059710 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 1 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 3026059710 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 13 blueAddressIP: 0.0.0.0 blueAddressPort: 5 priority: 2901884968 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 13 blueAddressIP: 0.0.0.0 blueAddressPort: 5 priority: 2901884968 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 10 blueAddressIP: 0.0.0.0 blueAddressPort: 6 priority: 961366358 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: r requestedGraphPosition: 7 blueAddressIP: 0.0.0.0 blueAddressPort: 6 priority: 1519493308 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 10 blueAddressIP: 0.0.0.0 blueAddressPort: 6 priority: 961366358 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: w requestedGraphPosition: 7 blueAddressIP: 0.0.0.0 blueAddressPort: 6 priority: 1519493308 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 6 blueAddressIP: 0.0.0.0 blueAddressPort: 7 priority: 3345090307 
+	 Sended to 10.1.138.42:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 6 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 3345090307 
+	 Sended to 10.1.138.42:9020
