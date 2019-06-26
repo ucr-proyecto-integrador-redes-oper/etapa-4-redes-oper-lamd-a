@@ -44,7 +44,7 @@ class SecureUdp:
 		send.start()
 
 		##Creates the Threads
-		recive = threading.Thread(target=self.dummtReceive, args=())
+		recive = threading.Thread(target=self.dummyReceive, args=())
 		recive.start()	
 
 
@@ -62,7 +62,7 @@ class SecureUdp:
 				#print("Put shit in the ackreceived queue")
 				to_delete.append(item)  # Haven't received the ack
 			elif ((time.time() - item.timeStamp) > self.TIMEOUT):
-				print("TimesUp ",item.payload)
+				print("TimesUp For Ack ",item.sn)
 				self.sock.sendto(item.payload, (item.ip, item.port))
 				# resets the timestamp with the current time since we just resend it.
 				item.timeStamp = time.time()
@@ -105,7 +105,7 @@ class SecureUdp:
 
 
 
-	def dummySendto(self,payload,ip,port):
+	def sendto(self,payload,ip,port):
 		self.waiting_queue.append((ip,port,payload))
 
 
@@ -125,10 +125,10 @@ class SecureUdp:
 		return payload[3:]
 		
 
-	def dummtReceive(self):
+	def dummyReceive(self):
 		while True:  # matiene la conexión
 			payload, client_addr = self.sock.recvfrom(5000)  # Buffer size
-			print("i just receive ",payload," from client ",client_addr)
+#			print("i just receive ",payload," from client ",client_addr)
 			if int.from_bytes(payload[:1], byteorder='big') == 0:
 				# THIS ISNT GONNA WORK ON FIRST TRY
 				sn_received = int.from_bytes(payload[1:3],byteorder='big')
@@ -150,25 +150,25 @@ class SecureUdp:
 
 def main():
 #	ip = input("My ip ")
-	port = input("My port ")
+#	port = input("My port ")
 #	ip2 = input("other ip ")
-	port2 = input("other port ")
+#	port2 = input("other port ")
 
 
 	ooPackagex = ooPackage(2,1,3,9,'r',566,'0.0.0.0',8888,1000)
 	serializedObject = ooPackagex.serialize()
 
 
-	test = SecureUdp(100,4,"0.0.0.0",int(port))
+	test = SecureUdp(100,4,"10.1.138.41",6555)
 	#payload = b'\x13'
 
 	
 	for item in range(2):
-		test.dummySendto(serializedObject,"0.0.0.0",int(port2))
+		test.sendto(serializedObject,"10.1.137.152",6666)
 	
 	while True:
 		payload = test.recivefrom()
-		print("Capa superior ",payload)
+		print("Capa superior")
 		ooPackage2 = ooPackage()
 		ooPackage2.unserialize(payload)
 		ooPackage2.print_data()
