@@ -101,22 +101,22 @@ class blueNodeTable:
 		neighborsAddressList = []
 
 		for neighborNode in listOfNeighbors:
-			if self.nodeHasAddress(neighborNode):
-				neighborTuple = (neighborNode,) + \
-					self.obtainNodeAddress(neighborNode)
-				neighborsAddressList.append(
-					neighborTuple)  # (Node IP PORT)
+#			if self.nodeHasAddress(neighborNode):
+			neighborTuple = (neighborNode,) + \
+				self.obtainNodeAddress(neighborNode)
+			neighborsAddressList.append(
+				neighborTuple)  # (Node IP PORT)
 		return neighborsAddressList
 
 
 if __name__ == "__main__":
 
-    myBlueNodeTable = blueNodeTable("Grafo_Referencia.csv")
+    myBlueNodeTable = blueNodeTable("../Grafo_Referencia.csv")
     myBlueNodeTable.write(5, ('125.1.25.134', 88885))
     myBlueNodeTable.write(4, ('125.1.25.134', 88884))
     # myBlueNodeTable.write(9,('125.1.25.134',88889))
     myBlueNodeTable.write(8, ('125.1.25.134', 88888))
     myBlueNodeTable.markNodeAsRequested(2)
     print(myBlueNodeTable.availableBlueNodes)
-    print(myBlueNodeTable.obtainNodesNeighborsAdressList(5))
+    print(myBlueNodeTable.obtainNodesNeighborsAdressList(1))
     print(myBlueNodeTable.obtainAvailableNode())

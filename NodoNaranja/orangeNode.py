@@ -11,6 +11,7 @@ import struct
 import random
 from threading import Event
 import time
+from SecureUDP import SecureUdp
 
 # '''
 # 	EFE: Procesa los paquetes orangeblue
@@ -109,6 +110,18 @@ def inputThread(inputQueue, outputQueue, sock, nodeID, debug):
             file.flush()
 
 
+def inputThreadBlue(secureUDPBlue,inputQueue):
+    while True:
+        obPack = obPackage()
+        # Unserealize the payload to a obPack, in order to access the data inside
+        payload , addr = secureUDPBlue.recivefrom()
+        if int.from_bytes(payload[:1], byteorder='big') == 14:
+            obPack2 = obPackage(16,0,0,addr[0],addr[1])
+            byteobPack = obPack2.serialize(16)
+            inputQueue.put(byteobPack)
+
+
+
 '''
 	EFE: Envía los paquetes naranja naranja
 	REQ: Saber a donde los va a enviar
@@ -202,7 +215,7 @@ def timer(timeout, stop_eventMainThread, stop_eventTimerThread):
 	MOD: ---
 '''
 
-def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, debug):
+def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, debug,secureUDPBlue):
 
     file2 = open("logicThread.out", "w+")
     file2.truncate(0)
@@ -436,10 +449,8 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
             else:  # Orange & Blue  Tiene que mandar uno a la vez. Hay que ver como implementar eso
 
                 pack = obPackage()
-                pack.unserialize(bytePacket)
-
-                if pack.communicationType == 'e':  # Enroll package
-                    blueNodeEnrolls.put(pack)
+                pack.unserialize(bytePacket,16)
+                blueNodeEnrolls.put(pack)
 
         if not requestNode == -1:
             # Once the acks list is done. Send the write package (if u won the request)
@@ -510,10 +521,13 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 # if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
 
                 # Creates the commitPackage
-                neighborList = table.obtainNodesNeighborsAdressList(
-                    requestNode)
-                commitPack = obPackage(
-                    'c', requestNode, blueNodeIP, blueNodePort, neighborList)
+                neighborList = table.obtainNodesNeighborsAdressList(requestNode)
+                for neighbor in neighborList:
+                    print("vecino ",neighborList)
+                    commitPack = obPackage(16,requestNode,1,"10.0.0.1",9898)
+                    test = commitPack.serialize(16)
+                    secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
+
                 if debug == True:
                     print("Creating a (commit) package")
                     # commitPack.print_data()
@@ -655,9 +669,13 @@ class orangeNode:
         # Starts the UDP server
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(server)
-        print("Listening on ip: %s port %d Im orange: %d" %
+        print("Listening Oranges on ip: %s port %d Im orange: %d" %
               (self.ip, self.port, self.nodeID))
-              
+
+        # Starts the UDP Safe
+        SecureUdpBlue = SecureUdp(10,4,self.ip,self.port+2) #ventana de 10 con timeout de 2s
+        print("Listening Blues on ip: %s port %d Im orange: %d" %
+              (self.ip, self.port+2, self.nodeID))
         # Creates the Threads
         t = threading.Thread(target=inputThread, args=(
             inputQueue, outputQueue, sock, self.nodeID, self.debug, ))
@@ -669,20 +687,23 @@ class orangeNode:
         t2.start()
            
         t3 = threading.Thread(target=logicalThread, args=(
-            inputQueue, outputQueue, sock, table, self.nodeID, maxOrangeNodes,self.debug))
+            inputQueue, outputQueue, sock, table, self.nodeID, maxOrangeNodes,self.debug,SecureUdpBlue))
         t3.start()
 
+        t4 = threading.Thread(target=inputThreadBlue, args=(SecureUdpBlue,inputQueue,))
+        t4.start()
 
-       # Testing. Every 5s a new blueNode is created
-        blueNodes = 0
-        port = 0
-        while blueNodes < 17:
 
-            neighborList = []
-            testPack = obPackage(1, 2, 'e', 0, "0.0.0.0", port, neighborList)
-            ByteTestPack = testPack.serialize()
-            inputQueue.put(ByteTestPack)
-            time.sleep(5)
-            blueNodes += 1
-            port += 1
+    #    # Testing. Every 5s a new blueNode is created
+    #     blueNodes = 0
+    #     port = 0
+    #     while blueNodes < 17:
+
+    #         neighborList = []
+    #         testPack = obPackage(1, 2, 'e', 0, "0.0.0.0", port, neighborList)
+    #         ByteTestPack = testPack.serialize()
+    #         inputQueue.put(ByteTestPack)
+    #         time.sleep(5)
+    #         blueNodes += 1
+    #         port += 1
 
