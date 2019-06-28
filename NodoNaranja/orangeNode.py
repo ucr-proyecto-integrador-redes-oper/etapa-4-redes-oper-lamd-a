@@ -629,6 +629,11 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 else:
                     print("No more requestNumers available")
 
+        if table.availableBlueNodes == 0:
+            completeGraph = obPackage(17)
+            bytePacket =  completeGraph.serialize(17)
+            secureUDPBlue.sendto(bytePacket,blueNodeIP,blueNodePort)
+
         file2.flush()
 
 
@@ -694,16 +699,12 @@ class orangeNode:
         t4.start()
 
 
-    #    # Testing. Every 5s a new blueNode is created
-    #     blueNodes = 0
-    #     port = 0
-    #     while blueNodes < 17:
+if __name__== "__main__":
 
-    #         neighborList = []
-    #         testPack = obPackage(1, 2, 'e', 0, "0.0.0.0", port, neighborList)
-    #         ByteTestPack = testPack.serialize()
-    #         inputQueue.put(ByteTestPack)
-    #         time.sleep(5)
-    #         blueNodes += 1
-    #         port += 1
+	if len(sys.argv) == 4:		
+		orange = orangeNode(sys.argv[1],int(sys.argv[2]),int(sys.argv[3]),"routingTable.txt", "../Grafo_Referencia.csv")
+		orange.run()
+	else:
+		print("Error: need the ip and port of the server and the number of the orangeNode")
+		exit()
 

@@ -14,6 +14,8 @@ class PacketStruct:
 		self.timeStamp = timeStamp
 
 
+
+
 class SecureUdp:
 	TIMEOUT = 5
 	TimeStamp = 0
@@ -62,7 +64,7 @@ class SecureUdp:
 				#print("Put shit in the ackreceived queue")
 				to_delete.append(item)  # Haven't received the ack
 			elif ((time.time() - item.timeStamp) > self.TIMEOUT):
-				print("TimesUp For Ack ",item.sn)
+				#print("TimesUp For Ack ",item.sn)
 				self.sock.sendto(item.payload, (item.ip, item.port))
 				# resets the timestamp with the current time since we just resend it.
 				item.timeStamp = time.time()
@@ -94,7 +96,7 @@ class SecureUdp:
 					ip,port,payload = self.waiting_queue.pop(0)
 					client = (ip, port)
 					modified_payload = struct.pack('!bH',0, self.SNRN) + payload
-					print("Sending To ",ip,":",str(port), "with Sn ",self.SNRN)
+					#print("Sending To ",ip,":",str(port), "with Sn ",self.SNRN)
 					self.sock.sendto(modified_payload, client)   # Envía!!!
 					self.AckWindow.append(PacketStruct(ip, port, modified_payload, self.SNRN, time.time()))
 					#self.SNRN = self.SNRN + 1
@@ -127,7 +129,7 @@ class SecureUdp:
 	def dummyReceive(self):
 		while True:  # matiene la conexión
 			payload, client_addr = self.sock.recvfrom(5000)  # Buffer size
-			print("i just receive ",payload," from client ",client_addr)
+			#print("i just receive ",payload," from client ",client_addr)
 			if int.from_bytes(payload[:1], byteorder='big') == 0:
 				# THIS ISNT GONNA WORK ON FIRST TRY
 				sn_received = int.from_bytes(payload[1:3],byteorder='big')
@@ -140,7 +142,7 @@ class SecureUdp:
 
 			else:
 				ACK_received = int.from_bytes(payload[1:3],byteorder='big')
-				print("Received: ACK ", ACK_received)
+				#print("Received: ACK ", ACK_received)
 				#print("ACK Payload: ", payload)
 				self.AcksReceived.append(ACK_received)
 
