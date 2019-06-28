@@ -127,7 +127,7 @@ class SecureUdp:
 	def dummyReceive(self):
 		while True:  # matiene la conexión
 			payload, client_addr = self.sock.recvfrom(5000)  # Buffer size
-#			print("i just receive ",payload," from client ",client_addr)
+			print("i just receive ",payload," from client ",client_addr)
 			if int.from_bytes(payload[:1], byteorder='big') == 0:
 				# THIS ISNT GONNA WORK ON FIRST TRY
 				sn_received = int.from_bytes(payload[1:3],byteorder='big')
@@ -153,19 +153,17 @@ def recThread(udp):
 
 
 def main():
-	ip = input("My ip ")
-	port = input("My port ")
 	ip2 = input("other ip ")
 	port2 = input("other port ")
-	test = SecureUdp(100,4,ip,int(port))
+	test = SecureUdp(100,4,"10.1.138.34",4565)
 
 	# Creates the Threads
 	t = threading.Thread(target=recThread, args=(test,))
 	t.start()
 	
-#	while True:
-	pack = b'hola'
-	test.sendto(pack,ip2,int(port2))
+	while True:
+		pack = b'teamLEAD'
+		test.sendto(pack,ip2,int(port2))
 
 if __name__ == "__main__":
 	main()
