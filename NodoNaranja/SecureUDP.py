@@ -145,33 +145,28 @@ class SecureUdp:
 				self.AcksReceived.append(ACK_received)
 
 
+def recThread(udp):
+	while True:
+		payload = udp.recivefrom()
+		print("Capa superior ",payload)	
+
 
 
 def main():
-#	ip = input("My ip ")
-#	port = input("My port ")
-#	ip2 = input("other ip ")
-#	port2 = input("other port ")
+	ip = input("My ip ")
+	port = input("My port ")
 
+	test = SecureUdp(100,4,ip,int(port))
 
-	ooPackagex = ooPackage(2,1,3,9,'r',566,'0.0.0.0',8888,1000)
-	serializedObject = ooPackagex.serialize()
-
-
-	test = SecureUdp(100,4,"10.1.138.41",6555)
-	#payload = b'\x13'
-
-	
-	for item in range(2):
-		test.sendto(serializedObject,"10.1.137.152",6666)
+	# Creates the Threads
+	t = threading.Thread(target=recThread, args=(test,))
+	t.start()
 	
 	while True:
-		payload = test.recivefrom()
-		print("Capa superior")
-		ooPackage2 = ooPackage()
-		ooPackage2.unserialize(payload)
-		ooPackage2.print_data()
-
+		ip2 = input("other ip ")
+		port2 = input("other port ")
+		pack = b'hola'
+		test.sendto(pack,ip2,int(port2))
 
 if __name__ == "__main__":
 	main()
