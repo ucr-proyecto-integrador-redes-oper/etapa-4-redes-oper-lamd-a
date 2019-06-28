@@ -155,18 +155,17 @@ def recThread(udp):
 def main():
 	ip = input("My ip ")
 	port = input("My port ")
-
+	ip2 = input("other ip ")
+	port2 = input("other port ")
 	test = SecureUdp(100,4,ip,int(port))
 
 	# Creates the Threads
 	t = threading.Thread(target=recThread, args=(test,))
 	t.start()
 	
-	while True:
-		ip2 = input("other ip ")
-		port2 = input("other port ")
-		pack = b'hola'
-		test.sendto(pack,ip2,int(port2))
+#	while True:
+	pack = b'hola'
+	test.sendto(pack,ip2,int(port2))
 
 if __name__ == "__main__":
 	main()
