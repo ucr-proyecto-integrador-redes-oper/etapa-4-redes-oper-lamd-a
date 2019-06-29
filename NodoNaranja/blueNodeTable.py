@@ -15,7 +15,7 @@ class blueNodeTable:
 		self.graphOfBlueNodes = {}  # [key = node] = NeighborsAdress
 		self.addressesOfBlueNodes = {} # [key = node] = NodeAdress
 		self.availableBlueNodes = [] # Lista de nodos
-		self.EMPTY_ADDRESS = ('0.0.0.0', -1)
+		self.EMPTY_ADDRESS = ('0.0.0.0', 0)
 		try:
 			with open(blueGraphDir, newline='') as File:
 				reader = csv.reader(File)
@@ -111,12 +111,8 @@ class blueNodeTable:
 
 if __name__ == "__main__":
 
-    myBlueNodeTable = blueNodeTable("../Grafo_Referencia.csv")
-    myBlueNodeTable.write(5, ('125.1.25.134', 88885))
-    myBlueNodeTable.write(4, ('125.1.25.134', 88884))
-    # myBlueNodeTable.write(9,('125.1.25.134',88889))
-    myBlueNodeTable.write(8, ('125.1.25.134', 88888))
-    myBlueNodeTable.markNodeAsRequested(2)
-    print(myBlueNodeTable.availableBlueNodes)
-    print(myBlueNodeTable.obtainNodesNeighborsAdressList(1))
-    print(myBlueNodeTable.obtainAvailableNode())
+	myBlueNodeTable = blueNodeTable("../Grafo_Referencia.csv")
+	print(len(myBlueNodeTable.availableBlueNodes))
+	myBlueNodeTable.markNodeAsRequested(1)
+	print(len(myBlueNodeTable.availableBlueNodes))
+

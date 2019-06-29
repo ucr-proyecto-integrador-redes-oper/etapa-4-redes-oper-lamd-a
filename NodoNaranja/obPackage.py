@@ -39,6 +39,8 @@ class obPackage:
             bytePacket = struct.pack('!bHHBBBBH',self.packetCategory,self.nodeID,self.neighborID,int(ipSplit[0]),int(ipSplit[1]),int(ipSplit[2]),int(ipSplit[3]),self.blueAddressPort)
         elif tipo == 17:
             bytePacket = struct.pack('!b',self.packetCategory)
+        elif tipo == 1:
+            bytePacket = struct.pack('!b',self.packetCategory)
         return bytePacket
 
     '''

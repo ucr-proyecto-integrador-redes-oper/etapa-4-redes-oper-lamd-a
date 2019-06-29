@@ -13,45 +13,9 @@ from threading import Event
 import time
 from SecureUDP import SecureUdp
 
-# '''
-# 	EFE: Procesa los paquetes orangeblue
-# 	REQ: Ip y puerto del nodo azul
-# 	MOD: ---
-# '''
-
-# def orangeBlueProcessingThread(self, inputBlueOrangeQueue, IP, Port):
-
-#     file = open("input.out", "w+")
-#     file.truncate(0)
-
-#     while True:
-#         # Receive a package
-#         payload, client_address = secureUPD.recv()  # STANDIN
-
-#         # Orange & Blue
-#     obPack = obPackage()
-#     # Unserealize the payload to a obPack, in order to access the data inside
-#     obPack.unserialize(payload)
-
-#     # Puts the ip and port given by the sock.recvfrom inside the package
-#     obPack.blueAddressIP = client_address[0]
-#     obPack.blueAddressPort = client_address[1]
-
-#     if debug == True:
-#         file.write("I received a Orange & Blue packetCategory: %d  sn: %d  communicationType: %s obtainedGraphPosition: %d blueAddressIP: %s blueAddressPort: %d neighborList: %s \n" % (
-#             obPack.packetCategory, obPack.sn, obPack.communicationType, obPack.obtainedGraphPosition, obPack.blueAddressIP, obPack.blueAddressPort, obPack.neighborList))
-
-#     # Serialize the package
-#     byteobPack = obPack.serialize()
-
-#     # Puts the package into the inputQueue so the logicalThread can proccess it
-#     inputQueue.put(byteobPack)
-#     if debug == True:
-#         file.flush()
-
 
 '''
-	EFE: Recive solicitudes de azules y naranjas. para procesar o pasar
+	EFE: Recive solicitudes de y naranjas. para procesar o pasar
 	REQ: ---
 	MOD: ---
 '''
@@ -109,6 +73,12 @@ def inputThread(inputQueue, outputQueue, sock, nodeID, debug):
         if debug == True:
             file.flush()
 
+
+'''
+	EFE: Recive solicitudes de y naranjas. para procesar o pasar
+	REQ: ---
+	MOD: ---
+'''
 
 def inputThreadBlue(secureUDPBlue,inputQueue):
     while True:
@@ -215,6 +185,124 @@ def timer(timeout, stop_eventMainThread, stop_eventTimerThread):
 	MOD: ---
 '''
 
+def requestPackProcessing(outputQueue,table,nodeID,debug,file2,requestNode,priority,sn,blueNodeIP,blueNodePort,pack,blueNodeEnrolls,stop_eventMainThread,processingBlueNode):
+    # Marks the node as requested
+    table.markNodeAsRequested(pack.requestedGraphPosition)
+
+    if debug == True:
+        print("(Request) from: %s requesting the number: %d with the priority: %d " % (
+            pack.orangeSource, pack.requestedGraphPosition, pack.priority))
+
+    if pack.requestedGraphPosition == requestNode:  # If I request the same number
+        if pack.priority < priority:  # If my priority is bigger then I win
+
+            if debug == True:
+                print("\tI won the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (
+                    requestNode, nodeID, priority, pack.orangeSource, pack.priority))
+
+            # Creates a decline package
+            declinedPack = ooPackage(
+                0, sn, nodeID, pack.orangeSource, 'd', requestNode, blueNodeIP, blueNodePort, priority)
+            # Serialize the package
+            bytePacket = declinedPack.serialize()
+            # Puts the package to the outputQueue
+            outputQueue.put(bytePacket)
+
+        elif pack.priority > priority:  # If my priority is smaller then the other node wins
+
+            if debug == True:
+                print("\tI lost the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (
+                    requestNode, nodeID, priority, pack.orangeSource, pack.priority))
+
+            # Creates a accept
+            acceptPack = ooPackage(
+                0, sn, nodeID, pack.orangeSource, 'a', pack.requestedGraphPosition, pack.blueAddressIP, pack.blueAddressPort, pack.priority)
+
+            # Serialize the package
+            bytePacket = acceptPack.serialize()
+
+            # Puts the package to the outputQueue
+            outputQueue.put(bytePacket)
+
+            # If i was requesting the same number put my requestNode to -1 and clear the timer signals
+            requestNode = -1
+            
+            # Creates a new joinGraph package 
+            obPack2 = obPackage(16,0,0,blueNodeIP,blueNodePort)
+            byteobPack = obPack2.serialize(16)
+            blueNodeEnrolls.put(byteobPack)
+
+            # We send a signal that the other thread should stop.
+            stop_eventMainThread.set()
+
+            processingBlueNode = False
+
+        else:  # When both priorities are equal
+            if debug == True:
+                print("\tWe draw the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (
+                    requestNode, nodeID, priority, pack.orangeSource, pack.priority))
+            # Checks the nodeID and the bigger wins
+            if nodeID > pack.orangeSource:  # I win
+
+                if debug == True:
+                    print("\t\tI won the request of the blueNode:%d SecondRound (myID:%d) (otherNodeID:%d)" % (
+                        requestNode, nodeID, pack.orangeSource))
+
+                # Creates a decline package
+                declinedPack = ooPackage(
+                    0, sn, nodeID, pack.orangeSource, 'd', requestNode, blueNodeIP, blueNodePort, priority)
+
+                # Serialize the package
+                bytePacket = declinedPack.serialize()
+
+                # Puts the package to the outputQueue
+                outputQueue.put(bytePacket)
+
+            else:  # The other node wins
+
+                if debug == True:
+                    print("\t\tI lost the request of the blueNode:%d SecondRound (myID:%d) (otherNodeID:%d)" % (
+                        requestNode, nodeID, pack.orangeSource))
+
+                # Creates a accept
+                acceptPack = ooPackage(
+                    0, sn, nodeID, pack.orangeSource, 'a', pack.requestedGraphPosition, pack.blueAddressIP, pack.blueAddressPort, pack.priority)
+
+                # Serialize the package
+                bytePacket = acceptPack.serialize()
+
+                # Puts the package to the outputQueue
+                outputQueue.put(bytePacket)
+
+                # Creates a new joinGraph package 
+                obPack2 = obPackage(16,0,0,blueNodeIP,blueNodePort)
+                byteobPack = obPack2.serialize(16)
+                blueNodeEnrolls.put(byteobPack)
+                # If i was requesting the same number put my requestNode to -1 and clear the timer signals
+                requestNode = -1
+                # We send a signal that the other thread should stop.
+                stop_eventMainThread.set()
+
+                processingBlueNode = False
+
+    else:  # I did not request that node
+
+        if debug == True:
+            print("\tI dont have a problem with the request of the blueNode: %d from the orangeNode: %d" % (
+                pack.requestedGraphPosition, pack.orangeSource))
+
+        # Creates an accept package
+        acceptPack = ooPackage(0, sn, nodeID, pack.orangeSource, 'a', pack.requestedGraphPosition,
+                                pack.blueAddressIP, pack.blueAddressPort, pack.priority)
+
+        # Serialize the package
+        bytePacket = acceptPack.serialize()
+
+        # Puts the package to the outputQueue
+        outputQueue.put(bytePacket)
+
+
+
 def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, debug,secureUDPBlue):
 
     file2 = open("logicThread.out", "w+")
@@ -244,7 +332,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
     testingConfli = 0
 
     blueNodeEnrolls = queue.Queue()  # Pasarla como parámetro
-
+    blueNodes = []
     cheackingDebug = 0
 
     while True:
@@ -253,127 +341,22 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
             # Takes a package from the inputQueue.
             bytePacket = inputQueue.get()
             # this determines what type of packet it is (Orange&Orange = 0 or Orange&Blue = 1 )
-            # Orage & Orange
             if int.from_bytes(bytePacket[:1], byteorder='little') == 0:
+                # Orage & Orange
+
                 pack = ooPackage()
                 pack.unserialize(bytePacket)
+
                 if pack.communicationType == 'r':  # This a request package
-
-                    # Marks the node as requested
-                    table.markNodeAsRequested(pack.requestedGraphPosition)
-
-                    if debug == True:
-                        print("(Request) from: %s requesting the number: %d with the priority: %d " % (
-                            pack.orangeSource, pack.requestedGraphPosition, pack.priority))
-
-                    if pack.requestedGraphPosition == requestNode:  # If I request the same number
-                        if pack.priority < priority:  # If my priority is bigger then I win
-
-                            if debug == True:
-                                print("\tI won the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (
-                                    requestNode, nodeID, priority, pack.orangeSource, pack.priority))
-
-                            # Creates a decline package
-                            declinedPack = ooPackage(
-                                0, sn, nodeID, pack.orangeSource, 'd', requestNode, blueNodeIP, blueNodePort, priority)
-                            # Serialize the package
-                            bytePacket = declinedPack.serialize()
-                            # Puts the package to the outputQueue
-                            outputQueue.put(bytePacket)
-
-                        elif pack.priority > priority:  # If my priority is smaller then the other node wins
-
-                            if debug == True:
-                                print("\tI lost the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (
-                                    requestNode, nodeID, priority, pack.orangeSource, pack.priority))
-
-                            # Creates a accept
-                            acceptPack = ooPackage(
-                                0, sn, nodeID, pack.orangeSource, 'a', pack.requestedGraphPosition, pack.blueAddressIP, pack.blueAddressPort, pack.priority)
-
-                            # Serialize the package
-                            bytePacket = acceptPack.serialize()
-
-                            # Puts the package to the outputQueue
-                            outputQueue.put(bytePacket)
-
-                            # If i was requesting the same number put my requestNode to -1 and clear the timer signals
-                            requestNode = -1
-
-                            # We send a signal that the other thread should stop.
-                            stop_eventMainThread.set()
-
-                            processingBlueNode = False
-
-                        else:  # When both priorities are equal
-                            if debug == True:
-                                print("\tWe draw the request of the blueNode: %d (myID: %d myPriority: %d) (otherNodeID: %d otherNodeIDpriority: %d)" % (
-                                    requestNode, nodeID, priority, pack.orangeSource, pack.priority))
-                            # Checks the nodeID and the bigger wins
-                            if nodeID > pack.orangeSource:  # I win
-
-                                if debug == True:
-                                    print("\t\tI won the request of the blueNode:%d SecondRound (myID:%d) (otherNodeID:%d)" % (
-                                        requestNode, nodeID, pack.orangeSource))
-
-                                # Creates a decline package
-                                declinedPack = ooPackage(
-                                    0, sn, nodeID, pack.orangeSource, 'd', requestNode, blueNodeIP, blueNodePort, priority)
-
-                                # Serialize the package
-                                bytePacket = declinedPack.serialize()
-
-                                # Puts the package to the outputQueue
-                                outputQueue.put(bytePacket)
-
-                            else:  # The other node wins
-
-                                if debug == True:
-                                    print("\t\tI lost the request of the blueNode:%d SecondRound (myID:%d) (otherNodeID:%d)" % (
-                                        requestNode, nodeID, pack.orangeSource))
-
-                                # Creates a accept
-                                acceptPack = ooPackage(
-                                    0, sn, nodeID, pack.orangeSource, 'a', pack.requestedGraphPosition, pack.blueAddressIP, pack.blueAddressPort, pack.priority)
-
-                                # Serialize the package
-                                bytePacket = acceptPack.serialize()
-
-                                # Puts the package to the outputQueue
-                                outputQueue.put(bytePacket)
-
-                                # If i was requesting the same number put my requestNode to -1 and clear the timer signals
-                                requestNode = -1
-                                # We send a signal that the other thread should stop.
-                                stop_eventMainThread.set()
-
-                                processingBlueNode = False
-
-                    else:  # I did not request that node
-
-                        if debug == True:
-                            print("\tI dont have a problem with the request of the blueNode: %d from the orangeNode: %d" % (
-                                pack.requestedGraphPosition, pack.orangeSource))
-
-                        # Creates an accept package
-                        acceptPack = ooPackage(0, sn, nodeID, pack.orangeSource, 'a', pack.requestedGraphPosition,
-                                               pack.blueAddressIP, pack.blueAddressPort, pack.priority)
-
-                        # Serialize the package
-                        bytePacket = acceptPack.serialize()
-
-                        # Puts the package to the outputQueue
-                        outputQueue.put(bytePacket)
-
+                    requestPackProcessing(outputQueue,table,nodeID,debug,file2,requestNode,priority,sn,blueNodeIP,blueNodePort,pack,blueNodeEnrolls,stop_eventMainThread,processingBlueNode)
                 elif pack.communicationType == 'd':  # This is a declined package
-
                     if debug == True:
                         print("(Declined) from  orangeNode: %d about the request of: %d and my request was: %d" % (
-                            pack.orangeSource, pack.requestedGraphPosition, requestNode))
+                        pack.orangeSource, pack.requestedGraphPosition, requestNode))
 
                     # If this is a declined for my request
                     if requestNode == pack.requestedGraphPosition:
-                            # We send a signal that the other thread should stop.
+                        # We send a signal that the other thread should stop.
                         stop_eventMainThread.set()
                         requestNodeWon = False
                         requestNode = -1
@@ -523,18 +506,22 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 # Creates the commitPackage
                 neighborList = table.obtainNodesNeighborsAdressList(requestNode)
                 for neighbor in neighborList:
-                    print("vecino ",neighborList)
-                    commitPack = obPackage(16,requestNode,1,"10.0.0.1",9898)
-                    test = commitPack.serialize(16)
-                    secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
+                    if neighbor[2] == 0: #No tengo la IP y Port del nodo
+                        commitPack = obPackage(15,requestNode,neighbor[0])
+                        test = commitPack.serialize(15)
+                        secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
+                    else:
+                        commitPack = obPackage(16,requestNode,neighbor[0],neighbor[1],neighbor[2])
+                        test = commitPack.serialize(16)
+                        secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
 
                 if debug == True:
                     print("Creating a (commit) package")
-                    # commitPack.print_data()
-               # byteCommitPack = commitPack.serialize()
-                #outputQueue.put(byteCommitPack)
 
+                blueNodes.append((blueNodeIP,blueNodePort))
                 print("(Done) with the blueNode %d" % (requestNode))
+
+                #Resets the variables
                 processingBlueNode = False
                 requestNode = -1
                 requestNodeWon = False
@@ -629,10 +616,13 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 else:
                     print("No more requestNumers available")
 
-        if table.availableBlueNodes == 0:
-            completeGraph = obPackage(17)
-            bytePacket =  completeGraph.serialize(17)
-            secureUDPBlue.sendto(bytePacket,blueNodeIP,blueNodePort)
+        #Sends the graphComplete package to the blueNodes, when theres no more blueNodesID's to assign
+        if len(table.availableBlueNodes) == 0:
+            for element in range(len(blueNodes)):
+                addr  = blueNodes.pop(element)
+                completeGraph = obPackage(17)
+                bytePacket =  completeGraph.serialize(17)
+                secureUDPBlue.sendto(bytePacket,addr[0],addr[1])
 
         file2.flush()
 
