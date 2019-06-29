@@ -5,7 +5,7 @@ import sys
 import queue
 
 class blueNode:
-    neighborTuple = []
+    neighborTuple = []# Tuple with (NodeID,IP,PORT,STREE) STREE = When STREE equals 1 it means thats the neighbor with the connection to the root  
     myID = 0
     packageQueue = queue.Queue()
 
@@ -49,7 +49,7 @@ class blueNode:
 
             elif int.from_bytes(payload[:1], byteorder='big') == 1:
                 print("Tipo Hello")
-                self.neighborTuple.append((self.myID,addr[0],addr[1]))
+                #self.neighborTuple.append((self.myID,addr[0],addr[1]))
 
 
     def logicalThread(self):

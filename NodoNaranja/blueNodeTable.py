@@ -108,11 +108,20 @@ class blueNodeTable:
 				neighborTuple)  # (Node IP PORT)
 		return neighborsAddressList
 
+	def tableIsDone(self):
+		flag = True
+		for listOfNeighbors in self.graphOfBlueNodes:
+			for neighborNode in self.graphOfBlueNodes[listOfNeighbors]:
+				if not self.nodeHasAddress(neighborNode):
+					flag = False
+					break
+		return flag
 
 if __name__ == "__main__":
 
 	myBlueNodeTable = blueNodeTable("../Grafo_Referencia.csv")
-	print(len(myBlueNodeTable.availableBlueNodes))
-	myBlueNodeTable.markNodeAsRequested(1)
-	print(len(myBlueNodeTable.availableBlueNodes))
+	myBlueNodeTable.write(1,("10.2.434.1",8767))
+	myBlueNodeTable.write(2,("10.2.434.1",8767))
+	print(len(myBlueNodeTable.graphOfBlueNodes))
+	print(myBlueNodeTable.tableIsDone())
 

@@ -504,21 +504,21 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 # if debug == True: print("Creating the commitPackage for the requestNode: %d to the blueNode IP: %s Port: %d" % (requestNode,blueNodeIP,blueNodePort))
 
                 # Creates the commitPackage
-                neighborList = table.obtainNodesNeighborsAdressList(requestNode)
-                for neighbor in neighborList:
-                    if neighbor[2] == 0: #No tengo la IP y Port del nodo
-                        commitPack = obPackage(15,requestNode,neighbor[0])
-                        test = commitPack.serialize(15)
-                        secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
-                    else:
-                        commitPack = obPackage(16,requestNode,neighbor[0],neighbor[1],neighbor[2])
-                        test = commitPack.serialize(16)
-                        secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
+                # neighborList = table.obtainNodesNeighborsAdressList(requestNode)
+                # for neighbor in neighborList:
+                #     if neighbor[2] == 0: #No tengo la IP y Port del nodo
+                #         commitPack = obPackage(15,requestNode,neighbor[0])
+                #         test = commitPack.serialize(15)
+                #         secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
+                #     else:
+                #         commitPack = obPackage(16,requestNode,neighbor[0],neighbor[1],neighbor[2])
+                #         test = commitPack.serialize(16)
+                #         secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
 
                 if debug == True:
                     print("Creating a (commit) package")
 
-                blueNodes.append((blueNodeIP,blueNodePort))
+                blueNodes.append((requestNode,blueNodeIP,blueNodePort))
                 print("(Done) with the blueNode %d" % (requestNode))
 
                 #Resets the variables
@@ -617,9 +617,28 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                     print("No more requestNumers available")
 
         #Sends the graphComplete package to the blueNodes, when theres no more blueNodesID's to assign
-        if len(table.availableBlueNodes) == 0:
+        if table.tableIsDone() == True and graph:
             for element in range(len(blueNodes)):
                 addr  = blueNodes.pop(element)
+                print("Bluenode ",addr)
+                # Creates the commitPackage
+                neighborList = table.obtainNodesNeighborsAdressList(addr[0])
+                print(neighborList)
+                for neighbor in neighborList:
+                    # print("vecino ",neighbor)
+                    # print(neighbor[0],neighbor[1],neighbor[2])
+                    if neighbor[2] == 0: #No tengo la IP y Port del nodo
+                        print("No add")
+                        commitPack = obPackage(15,addr[0],neighbor[0])
+                        test = commitPack.serialize(15)
+                        secureUDPBlue.sendto(test,addr[1],addr[2])
+                    else:
+                        print(" add")
+                        commitPack = obPackage(16,addr[0],neighbor[0],neighbor[1],neighbor[2])
+                        test = commitPack.serialize(16)
+                        secureUDPBlue.sendto(test,addr[1],addr[2])
+                
+                time.sleep(5)        
                 completeGraph = obPackage(17)
                 bytePacket =  completeGraph.serialize(17)
                 secureUDPBlue.sendto(bytePacket,addr[0],addr[1])
