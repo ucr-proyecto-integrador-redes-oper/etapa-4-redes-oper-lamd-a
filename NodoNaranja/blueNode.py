@@ -24,6 +24,8 @@ class blueNode:
         t2 = threading.Thread(target=self.logicalThread, args=(SecureUDP,))
         t2.start()
 
+        t2 = threading.Thread(target=self.userInputThread, args=())
+        t2.start()
 
         obPackagex = obPackage(14)
         serializedObject = obPackagex.serialize(14)
@@ -36,7 +38,11 @@ class blueNode:
             self.packageQueue.put((payload,addr))
 
 
-    
+    def userInputThread(self):
+        while True:
+            user = input()
+            if user == '$':
+                print("myID ",str(self.myID)," neighbors ",self.neighborTuple, " chunksStored: ",self.chunksStored , " blueSavedChunks: ",self.blueSavedChunks)
 
     def logicalThread(self,SecureUDP):
         while True:

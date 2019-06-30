@@ -6,10 +6,10 @@ import queue
 
 class greenNode:
 
-    fileIDByte1 = 0
     myID = 0
-    fileName = ""
-    fileIDRest = 0
+    myGroupID = 1 #This can be change in order to make greens for others teams. In this case is just for LAMDa team
+    fileDataBase = {} #[key = (fileIDByte1,fileIDRest)] = (filename,total Chunks of that file)
+
     def __init__(self,MyID,BlueIP,BluePort):
         SecureUDP = SecureUdp(10,4) #ventana de 10 con timeout de 2s
         print("GreenNode Listening on ip: %s port %d " %
@@ -17,6 +17,7 @@ class greenNode:
         #Creates the Threads
         t = threading.Thread(target=self.inputThread, args=(SecureUDP,))
         t.start()
+        
         #Del 64 al 95
         #64 = Nuestro primer verde. VerdeID = 0
         self.myID = MyID
@@ -44,6 +45,18 @@ class greenNode:
         existsPack.fileIDRest = self.fileIDRest
         serializedObject = existsPack.serialize(2)
         SecureUDP.sendto(serializedObject,BlueIP,BluePort)
+
+    def userInputThread(self,SecureUDP):
+        while True:
+            userIput = input()
+            if userIput == "put":
+            
+    
+    def fileIDGenerator(self):
+
+
+    def chunkSeparator(self,filename,fileIDByte1,fileIDRest):
+        chunkID = 0
 
     def inputThread(self,SecureUDP):
         while True:
