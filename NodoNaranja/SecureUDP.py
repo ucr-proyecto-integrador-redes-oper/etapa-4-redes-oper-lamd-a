@@ -40,7 +40,7 @@ class SecureUdp:
 		self.TIMEOUT = timeout
 		self.MAX_WINDOW_SIZE = window_size
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Socket UDP
-		self.sock.bind((ip, port))
+		self.sock.bind(('', 0))
 		##Creates the Threads
 		send = threading.Thread(target=self.dummysendThread, args=())
 		send.start()

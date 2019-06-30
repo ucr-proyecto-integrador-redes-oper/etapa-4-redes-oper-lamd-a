@@ -10,8 +10,7 @@ class blueNode:
     sTreeSonsNodes = []
     myID = 0
     packageQueue = queue.Queue() # Tuple with (bytePackage,addr). Addr is a tuple with the ip and port 
-    blueSavedChunks = [] #Tuple with (ArchivoID,ChunkID,Chunk). Cant be more than 40
-    SecureUdp
+    blueSavedChunks = [] #Tuple with (fileIDByte1,fileIDRest,chunkID,Chunk). Cant be more than 40
 
     def __init__(self,MyIP,MyPort,OtherIP,OtherPort):
         SecureUDP = SecureUdp(10,4,MyIP,MyPort) #ventana de 10 con timeout de 2s
@@ -48,7 +47,7 @@ class blueNode:
                 chunkPack.unserialize(bytePackage,0)
                 #If theres less than 40 chunks saved, then save the chunk
                 if len(blueSavedChunks) < 40:
-                    blueSavedChunks.append(chunkPack.chunk)
+                    blueSavedChunks.append((chunkPack.fileIDByte1,chunkPack.fileIDRest,chunkPack.chunkID,chunkPack.chunk))
                 #Otherwise it sends the chunk to the neighbors
                 else:
                     #Creates a putChunk package
