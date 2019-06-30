@@ -617,7 +617,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                     print("No more requestNumers available")
 
         #Sends the graphComplete package to the blueNodes, when theres no more blueNodesID's to assign
-        if table.tableIsDone() == True and graph:
+        if table.tableIsDone() == True:
             for element in range(len(blueNodes)):
                 addr  = blueNodes.pop(element)
                 print("Bluenode ",addr)
@@ -641,7 +641,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 time.sleep(5)        
                 completeGraph = obPackage(17)
                 bytePacket =  completeGraph.serialize(17)
-                secureUDPBlue.sendto(bytePacket,addr[0],addr[1])
+                secureUDPBlue.sendto(bytePacket,addr[1],addr[2])
 
         file2.flush()
 

@@ -30,7 +30,7 @@ class obPackage:
     '''
     def serialize(self,tipo):
         #Tipo joinGraph
-        if tipo == 14:
+        elif tipo == 14:
             bytePacket = struct.pack('!b',self.packetCategory)
         elif tipo == 15:
             bytePacket = struct.pack('!bHH',self.packetCategory,self.nodeID,self.neighborID)
