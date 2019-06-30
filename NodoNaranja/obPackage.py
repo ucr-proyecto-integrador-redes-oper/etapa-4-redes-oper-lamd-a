@@ -26,7 +26,8 @@ class obPackage:
         MOD: ---
     '''
     def print_data(self):
-        print(" packetCategory:",self.packetCategory, " nodeId:",self.nodeID ," neighborID:",self.neighborID," blueAddressIP: ", self.blueAddressIP, "blueAddressPort:", self.blueAddressPort)
+        print(" packetCategory:",self.packetCategory, " nodeId:",self.nodeID ," neighborID:",self.neighborID," blueAddressIP: ", self.blueAddressIP, 
+        "blueAddressPort:", self.blueAddressPort,"chunkPayload: ",self.chunkPayload," fileIDByte1: ",self.fileIDByte1," fileIDRest: ",self.fileIDRest," chunkID: ",self.chunkID)
     '''
         EFE: Serializa el paquete
         REQ: ---
@@ -36,7 +37,10 @@ class obPackage:
         #Tipo joinGraph
         if (tipo == 0 or tipo == 7): #chunk
             bytePacket = struct.pack('!bBHI',self.packetCategory,self.fileIDByte1,self.fileIDRest,self.chunkID)
-            bytePacket + self.chunkPayload
+            print("No payload ",bytePacket)
+            print("chunk ",self.chunkPayload)
+            bytePacket += self.chunkPayload
+            print(" payload ",bytePacket)
         elif tipo == 1: #hello
             bytePacket = struct.pack('!b',self.packetCategory,self.packetCategory)
         elif (tipo == 2 or tipo == 3 or tipo == 4 or tipo == 6 or tipo == 8 or tipo == 10): #exists, exists r, complete, get, locate, delete
@@ -66,11 +70,11 @@ class obPackage:
     '''
     def unserialize(self, bytePacket,tipo):
         if (tipo == 0 or tipo == 7): #main packet, chunk
-            processedPacket = struct.unpack('!bBHI',bytePacket)
+            processedPacket = struct.unpack('!bBHI',bytePacket[:struct.calcsize('!bBHI')])
             self.fileIDByte1 = processedPacket[0]
             self.fileIDRest = processedPacket[1]
             self.chunkID = processedPacket[2]
-            self.chunkPayload = processedPacket[3]
+            self.chunkPayload = bytePacket[struct.calcsize('!bBHI'):]
 
         elif tipo == 1: #hello
             processedPacket = struct.unpack('!b', bytePacket)
@@ -134,45 +138,19 @@ class obPackage:
 
 
 def main():
-
-# testing type 14
-    # obPackagex = obPackage(14)
-    # obPackagex.print_data()
-    # serializedObject = obPackagex.serialize(14)
-    # print(serializedObject)
-
-# Testing type 15
-    # obPackagex = obPackage(15,32766,32766)
-    # obPackagex.print_data()
-    # serializedObject = obPackagex.serialize(15)
-    # print(serializedObject)
-
-# Testing type 16
-#     obPackagex = obPackage(16,7,10,"10.1.135.32",90)
-#     obPackagex.print_data()
-#     serializedObject = obPackagex.serialize(16)
-#     print(serializedObject)
-
-
-# testing type 17
-    obPackagex = obPackage(17)
+    chunk = b'nepe'
+    obPackagex = obPackage(0)
+    obPackagex.chunkPayload = chunk
     obPackagex.print_data()
-    serializedObject = obPackagex.serialize(17)
+    
+    serializedObject = obPackagex.serialize(0)
     print(serializedObject)
+    print(serializedObject[:8])
+    obPackagex2 = obPackage(0)
+    obPackagex2.unserialize(serializedObject,0)
+    obPackagex2.print_data()
 
 
-    if int.from_bytes(serializedObject[:1], byteorder='big') == 14:
-        print("Tipo JoinGraph")
-    elif int.from_bytes(serializedObject[:1], byteorder='big') == 15:
-        print("Tipo yourGraphposition")
-        obPackagex.unserialize(serializedObject,15)
-        obPackagex.print_data()
-    elif int.from_bytes(serializedObject[:1], byteorder='big') == 16:
-        print("Tipo yourGraphposition2")
-        obPackagex.unserialize(serializedObject,16)
-        obPackagex.print_data()
-    elif int.from_bytes(serializedObject[:1], byteorder='big') == 17:
-        print("Tipo GraphComplete")
 
 if __name__ == "__main__":
     main()
