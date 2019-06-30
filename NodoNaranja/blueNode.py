@@ -8,13 +8,16 @@ class blueNode:
     neighborTuple = []# Tuple with (NodeID,IP,PORT)
     sTreeDadNode = -1
     sTreeSonsNodes = []
+    imInTheSpanningTree = False
     myID = 0
     packageQueue = queue.Queue() # Tuple with (bytePackage,addr). Addr is a tuple with the ip and port 
     chunksStored = 0 #Cant be more than 40
     blueSavedChunks = {} # [key = (fileIDByte1,fileIDRest)] = tuples (chunkID,Chunk).The key helps to find the FileID then list holds all the chunks stored from that fileID
-    SecureUDP = 0
+    SecureUDP = 0 
+    spanningTreeMsgQueue = queue.Queue()
+
     def __init__(self,orangeIP,orangePort):
-        self.SecureUDP = SecureUdp(10,4,False) #ventana de 10 con timeout de 2s
+        self.SecureUDP = SecureUdp(10,4,True) #ventana de 10 con timeout de 2s
         print("BlueNode Listening on ip: %s port %d " %
               ( self.SecureUDP.sock.getsockname()[0], self.SecureUDP.sock.getsockname()[1]))
         # Creates the Threads
@@ -35,6 +38,9 @@ class blueNode:
         while True:
             payload , addr = self.SecureUDP.recivefrom()
             # print(payload)
+            Type = int.from_bytes(payload[:1], byteorder='big')
+            if Type == 12 or Type == 18:
+                self.spanningTreeMsgQueue.put((payload,addr))
             self.packageQueue.put((payload,addr))
 
 
@@ -89,6 +95,8 @@ class blueNode:
                     genericPack.packetCategory = 3
                     responseExist = genericPack.serialize(3)
                     self.SecureUDP.sendto(responseExist,package[1][0],package[1][1])
+                else:
+                    print("I dont have a chunk. I need to ask my spanningTree")
                 
             elif Type == 15:
                 print("(NeighborNoAddrs) from ",package[1])
@@ -108,8 +116,15 @@ class blueNode:
 
             elif Type == 17:
                 print("(GraphComplete) from ",package[1])
-                print("vecinos ",self.neighborTuple)
-
+                #If im the blueNode 0 then im the root of the spanningTree
+                if self.myID == 1:
+                    print("Hey im the root")
+                    imInTheSpanningTree = True
+                #If not then join the spanningTree    
+                else:
+                    sTreeDadNode = self.joinSpanningTree()
+    def joinSpanningTree(self):
+        print("Spannning")
 
 
 

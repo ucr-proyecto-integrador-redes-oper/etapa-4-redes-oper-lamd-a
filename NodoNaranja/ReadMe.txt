@@ -6,6 +6,16 @@ Example:
 The program generates 3 files input.out, output.out and logicalThread.out. For debuging 
 
 To compile blueNode.py:
-	pyhton3 blueNode.py OrangeIP OrangePort
+	pyhton3 blueNode.py OrangeIP OrangeBluePort
 Example:
-	pyhton3 blueNode.py 10.1.137.34 9876
+	pyhton3 blueNode.py 10.1.137.34 9012
+
+To generate multiple blueNodes:
+	./blueNodeGeneratorScript.h OrangeIP OrangeBluePort
+Example:
+	./blueNodeGeneratorScript.h 10.2.137.32 9012
+
+To compile greenNode.py:
+	pyhton3 greenNode.py myGroupID MyID BlueIP BluePort
+Example:
+	pyhton3 greenNode.py 1 0 0.0.0.0 9675
