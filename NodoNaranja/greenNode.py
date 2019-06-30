@@ -79,23 +79,24 @@ class greenNode:
 
 
     def chunkSeparator(self,filename,fileIDByte1,fileIDRest):
-        chunkID = 0
+        //chunkID = 0
         #Creates a generic putChunk package
-        putChunkPack = obPackage(0)
-        putChunkPack.fileIDByte1 = fileIDByte1
-        putChunkPack.fileIDRest = fileIDRest
+        chunkPacketToSend = obPackage(0)
+        chunkPacketToSend.fileIDByte1 = fileIDByte1
+        chunkPacketToSend.fileIDRest = fileIDRest
+        fileName , totalChunks = self.fileDataBase[fileIDRest]
+
+        fileAsBytes = open(fileName, "rb") # opening for [r]eading as [b]inary
 
         #Envia los chunks
-        for x in range(4):
-             
-            name , totalChunks = self.fileDataBase[fileIDRest]
-            self.fileDataBase[fileIDRest] = (name,totalChunks+1)
-
-            chunk = b'elcapi'
-            putChunkPack.chunkPayload = chunk
-            putChunkPack.chunkID = x
-            putChunkPack.print_data()
-            serializedObject = putChunkPack.serialize(0)
+        for chunkID in range(totalChunks):             
+            
+            fileSlice = fileAsBytes.read(1024)
+            fileAsBytes.seek(1024)
+            chunkPacketToSend.chunkPayload = fileSlice
+            chunkPacketToSend.chunkID = chunkID
+            chunkPacketToSend.print_data()
+            serializedObject = chunkPacketToSend.serialize(0)
             self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
         print("Testing ",self.fileDataBase[fileIDRest])
