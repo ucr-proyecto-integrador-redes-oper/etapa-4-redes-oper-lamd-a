@@ -691,7 +691,7 @@ class orangeNode:
               (sock.getsockname()[0], self.port, self.nodeID))
 
         # Starts the UDP Safe
-        SecureUdpBlue = SecureUdp(10,4) #ventana de 10 con timeout de 4s
+        SecureUdpBlue = SecureUdp(10,4,True) #ventana de 10 con timeout de 4s
         print("Listening Blues on ip: %s port %d Im orange: %d" %
               (SecureUdpBlue.sock.getsockname()[0], SecureUdpBlue.sock.getsockname()[1], self.nodeID))
         # Creates the Threads

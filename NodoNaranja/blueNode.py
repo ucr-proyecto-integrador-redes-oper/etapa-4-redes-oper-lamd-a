@@ -12,16 +12,16 @@ class blueNode:
     packageQueue = queue.Queue() # Tuple with (bytePackage,addr). Addr is a tuple with the ip and port 
     chunksStored = 0 #Cant be more than 40
     blueSavedChunks = {} # [key = (fileIDByte1,fileIDRest)] = tuples (chunkID,Chunk).The key helps to find the FileID then list holds all the chunks stored from that fileID
-
+    SecureUDP = 0
     def __init__(self,orangeIP,orangePort):
-        SecureUDP = SecureUdp(10,4) #ventana de 10 con timeout de 2s
+        self.SecureUDP = SecureUdp(10,4,False) #ventana de 10 con timeout de 2s
         print("BlueNode Listening on ip: %s port %d " %
-              (SecureUDP.sock.getsockname()[0], SecureUDP.sock.getsockname()[1]))
+              ( self.SecureUDP.sock.getsockname()[0], self.SecureUDP.sock.getsockname()[1]))
         # Creates the Threads
-        t = threading.Thread(target=self.inputThread, args=(SecureUDP,))
+        t = threading.Thread(target=self.inputThread, args=())
         t.start()
 
-        t2 = threading.Thread(target=self.logicalThread, args=(SecureUDP,))
+        t2 = threading.Thread(target=self.logicalThread, args=())
         t2.start()
 
         t2 = threading.Thread(target=self.userInputThread, args=())
@@ -29,11 +29,11 @@ class blueNode:
 
         obPackagex = obPackage(14)
         serializedObject = obPackagex.serialize(14)
-        SecureUDP.sendto(serializedObject,orangeIP,orangePort)
+        self.SecureUDP.sendto(serializedObject,orangeIP,orangePort)
 
-    def inputThread(self,SecureUDP):
+    def inputThread(self):
         while True:
-            payload , addr = SecureUDP.recivefrom()
+            payload , addr = self.SecureUDP.recivefrom()
             # print(payload)
             self.packageQueue.put((payload,addr))
 
@@ -44,7 +44,7 @@ class blueNode:
             if user == '$':
                 print("myID ",str(self.myID)," neighbors ",self.neighborTuple, " chunksStored: ",self.chunksStored , " blueSavedChunks: ",self.blueSavedChunks)
 
-    def logicalThread(self,SecureUDP):
+    def logicalThread(self):
         while True:
             package = self.packageQueue.get(block=True,timeout=None)
             # print(package)
@@ -76,7 +76,7 @@ class blueNode:
                     #Creates a putChunk package
                     serializedPutChunkPack = chunkPack.serialize(0)
                     for neighbor in self.neighborTuple:
-                        SecureUDP.sendto(serializedPutChunkPack,neighbor[1],neighbor[2])
+                        self.SecureUDP.sendto(serializedPutChunkPack,neighbor[1],neighbor[2])
 
 
             elif Type == 1:
@@ -88,7 +88,7 @@ class blueNode:
                 if (genericPack.fileIDByte1,genericPack.fileIDRest) in self.blueSavedChunks:
                     genericPack.packetCategory = 3
                     responseExist = genericPack.serialize(3)
-                    SecureUDP.sendto(responseExist,package[1][0],package[1][1])
+                    self.SecureUDP.sendto(responseExist,package[1][0],package[1][1])
                 
             elif Type == 15:
                 print("(NeighborNoAddrs) from ",package[1])
@@ -104,7 +104,7 @@ class blueNode:
                 self.myID = obPackagex.nodeID
                 helloPack = obPackage(1)
                 serializedHelloPack = helloPack.serialize(1)
-                SecureUDP.sendto(serializedHelloPack,obPackagex.blueAddressIP,obPackagex.blueAddressPort)
+                self.SecureUDP.sendto(serializedHelloPack,obPackagex.blueAddressIP,obPackagex.blueAddressPort)
 
             elif Type == 17:
                 print("(GraphComplete) from ",package[1])

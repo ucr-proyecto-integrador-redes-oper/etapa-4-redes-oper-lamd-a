@@ -11,23 +11,23 @@ class greenNode:
     fileDataBase = {} #[key = (fileIDByte1,fileIDRest)] = (filename,total Chunks of that file)
 
     def __init__(self,MyID,BlueIP,BluePort):
-        SecureUDP = SecureUdp(10,4) #ventana de 10 con timeout de 2s
+        SecureUDP = SecureUdp(10,4,True) #ventana de 10 con timeout de 2s
         print("GreenNode Listening on ip: %s port %d " %
               (SecureUDP.sock.getsockname()[0], SecureUDP.sock.getsockname()[1]))
         #Creates the Threads
         t = threading.Thread(target=self.inputThread, args=(SecureUDP,))
         t.start()
-        
+
         #Del 64 al 95
         #64 = Nuestro primer verde. VerdeID = 0
         self.myID = MyID
-        self.fileIDByte1 = 64 +  self.myID
+
 
 
         #Creates a generic putChunk package
         putChunkPack = obPackage(0)
-        putChunkPack.fileIDByte1 = self.fileIDByte1
-        putChunkPack.fileIDRest = self.fileIDRest
+        putChunkPack.fileIDByte1 = 64 +  self.myID
+        putChunkPack.fileIDRest = 20
 
 
         #Envia los chunks
@@ -50,9 +50,11 @@ class greenNode:
         while True:
             userIput = input()
             if userIput == "put":
-            
-    
+                print("hello")
+
+
     def fileIDGenerator(self):
+        print("TREAR")
 
 
     def chunkSeparator(self,filename,fileIDByte1,fileIDRest):

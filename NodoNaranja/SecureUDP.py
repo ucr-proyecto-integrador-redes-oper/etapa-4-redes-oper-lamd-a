@@ -35,19 +35,23 @@ class SecureUdp:
 		MOD: ---
 	'''
 
-	def __init__(self, window_size,timeout):
+	def __init__(self, window_size,timeout,flag): #flag == True then it automatic selects the ip and port
 		self.window_size = window_size
 		self.TIMEOUT = timeout
 		self.MAX_WINDOW_SIZE = window_size
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Socket UDP
 
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		s.connect(("8.8.8.8", 80))
-		myIP = s.getsockname()[0]
-		s.close()
+		if flag == True:
+			s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			s.connect(("8.8.8.8", 80))
+			myIP = s.getsockname()[0]
+			s.close()
 
-		self.sock.bind((myIP, 0))
-
+			self.sock.bind((myIP, 0))
+		else:
+			ip = input("Insert the ip ") 
+			port = input("Insert the port ") 
+			self.sock.bind((ip, int(port)))
 		# print(self.sock.getsockname()[1])
 		##Creates the Threads
 		send = threading.Thread(target=self.dummysendThread, args=())
