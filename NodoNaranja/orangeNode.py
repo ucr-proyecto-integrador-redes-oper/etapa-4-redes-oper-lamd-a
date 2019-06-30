@@ -332,7 +332,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
     testingConfli = 0
 
     blueNodeEnrolls = queue.Queue()  # Pasarla como parámetro
-    blueNodes = []
+    blueNodes = [] # Tuple with (requestNode,blueNodeIP,blueNodePort). Saves all the connections with the blueNodes
     cheackingDebug = 0
 
     while True:
@@ -653,9 +653,9 @@ class orangeNode:
 		MOD: ---
     '''
 
-    def __init__(self, ip='0.0.0.0', port=8888, nodeID=0,  routingTableDir="routingTable.txt", blueGraphDir="Grafo_Referencia.csv"):
+    def __init__(self, port=8888, nodeID=0,  routingTableDir="routingTable.txt", blueGraphDir="Grafo_Referencia.csv"):
         # Especificaciones del paquete
-        self.ip = ip
+        self.ip = 0
         self.port = port
         self.nodeID = nodeID
         self.routingTableDir = routingTableDir
@@ -669,7 +669,6 @@ class orangeNode:
 	'''
 
     def run(self):
-        server = (self.ip, self.port)
         inputQueue = queue.Queue()
         outputQueue = queue.Queue()
 
@@ -680,16 +679,21 @@ class orangeNode:
         # Creates the orange graph and the blueNodeTable
         table = blueNodeTable(self.blueGraphDir)
 
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        self.ip = s.getsockname()[0]
+        s.close()
+
         # Starts the UDP server
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind(server)
+        sock.bind((self.ip,self.port))
         print("Listening Oranges on ip: %s port %d Im orange: %d" %
-              (self.ip, self.port, self.nodeID))
+              (sock.getsockname()[0], self.port, self.nodeID))
 
         # Starts the UDP Safe
-        SecureUdpBlue = SecureUdp(10,4,self.ip,self.port+2) #ventana de 10 con timeout de 2s
+        SecureUdpBlue = SecureUdp(10,4) #ventana de 10 con timeout de 4s
         print("Listening Blues on ip: %s port %d Im orange: %d" %
-              (self.ip, self.port+2, self.nodeID))
+              (SecureUdpBlue.sock.getsockname()[0], SecureUdpBlue.sock.getsockname()[1], self.nodeID))
         # Creates the Threads
         t = threading.Thread(target=inputThread, args=(
             inputQueue, outputQueue, sock, self.nodeID, self.debug, ))
@@ -710,8 +714,8 @@ class orangeNode:
 
 if __name__== "__main__":
 
-	if len(sys.argv) == 4:		
-		orange = orangeNode(sys.argv[1],int(sys.argv[2]),int(sys.argv[3]),"routingTable.txt", "../Grafo_Referencia.csv")
+	if len(sys.argv) == 3:		
+		orange = orangeNode(int(sys.argv[1]),int(sys.argv[2]),"routingTable.txt", "../Grafo_Referencia.csv")
 		orange.run()
 	else:
 		print("Error: need the ip and port of the server and the number of the orangeNode")

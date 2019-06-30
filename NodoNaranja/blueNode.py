@@ -10,10 +10,13 @@ class blueNode:
     sTreeSonsNodes = []
     myID = 0
     packageQueue = queue.Queue() # Tuple with (bytePackage,addr). Addr is a tuple with the ip and port 
-    blueSavedChunks = [] #Tuple with (fileIDByte1,fileIDRest,chunkID,Chunk). Cant be more than 40
+    chunksStored = 0 #Cant be more than 40
+    blueSavedChunks = {} # [key = (fileIDByte1,fileIDRest)] = tuples (chunkID,Chunk).The key helps to find the FileID then list holds all the chunks stored from that fileID
 
-    def __init__(self,MyIP,MyPort,OtherIP,OtherPort):
-        SecureUDP = SecureUdp(10,4,MyIP,MyPort) #ventana de 10 con timeout de 2s
+    def __init__(self,orangeIP,orangePort):
+        SecureUDP = SecureUdp(10,4) #ventana de 10 con timeout de 2s
+        print("BlueNode Listening on ip: %s port %d " %
+              (SecureUDP.sock.getsockname()[0], SecureUDP.sock.getsockname()[1]))
         # Creates the Threads
         t = threading.Thread(target=self.inputThread, args=(SecureUDP,))
         t.start()
@@ -24,40 +27,63 @@ class blueNode:
 
         obPackagex = obPackage(14)
         serializedObject = obPackagex.serialize(14)
-        SecureUDP.sendto(serializedObject,OtherIP,OtherPort)
+        SecureUDP.sendto(serializedObject,orangeIP,orangePort)
 
     def inputThread(self,SecureUDP):
         while True:
             payload , addr = SecureUDP.recivefrom()
-            print(payload)
+            # print(payload)
             self.packageQueue.put((payload,addr))
 
 
-
+    
 
     def logicalThread(self,SecureUDP):
         while True:
             package = self.packageQueue.get(block=True,timeout=None)
-            print(package)
+            # print(package)
             bytePackage = package[0]
             Type = int.from_bytes(bytePackage[:1], byteorder='big')
+            genericPack = obPackage()
             if Type == 0:
                 print("(PutChunk) from ",package[1])
                 chunkPack = obPackage()
                 chunkPack.unserialize(bytePackage,0)
+                #chunkPack.print_data()
                 #If theres less than 40 chunks saved, then save the chunk
-                if len(blueSavedChunks) < 40:
-                    blueSavedChunks.append((chunkPack.fileIDByte1,chunkPack.fileIDRest,chunkPack.chunkID,chunkPack.chunk))
+                if self.chunksStored < 40:
+                    #Checks if the key exists
+                    if (chunkPack.fileIDByte1,chunkPack.fileIDRest) in self.blueSavedChunks:
+                        #If the key exists then just append the new chunkID and chunkPayload
+                        self.blueSavedChunks[(chunkPack.fileIDByte1,chunkPack.fileIDRest)].append((chunkPack.chunkID,chunkPack.chunkPayload))
+                        
+                    else:
+                        #If not then creates a list witht the chunkID and chunkPayload and assign it to the key
+                        tempList = []
+                        tempList.append((chunkPack.chunkID,chunkPack.chunkPayload))
+                        self.blueSavedChunks[(chunkPack.fileIDByte1,chunkPack.fileIDRest)] = tempList
+
+                    self.chunksStored += 1
+
                 #Otherwise it sends the chunk to the neighbors
                 else:
                     #Creates a putChunk package
                     serializedPutChunkPack = chunkPack.serialize(0)
-                    for neighbor in neighborTuple:
+                    for neighbor in self.neighborTuple:
                         SecureUDP.sendto(serializedPutChunkPack,neighbor[1],neighbor[2])
 
 
             elif Type == 1:
                 print("(Hello) from ",package[1])
+            elif Type == 2:
+                print("(Exist) from ",package[1])
+                genericPack.unserialize(bytePackage,2)
+                #Checks if I have a chunk of that file
+                if (genericPack.fileIDByte1,genericPack.fileIDRest) in self.blueSavedChunks:
+                    genericPack.packetCategory = 3
+                    responseExist = genericPack.serialize(3)
+                    SecureUDP.sendto(responseExist,package[1][0],package[1][1])
+                
             elif Type == 15:
                 print("(NeighborNoAddrs) from ",package[1])
                 obPackagex = obPackage()
@@ -76,6 +102,7 @@ class blueNode:
 
             elif Type == 17:
                 print("(GraphComplete) from ",package[1])
+                print("vecinos ",self.neighborTuple)
 
 
 
@@ -83,8 +110,8 @@ class blueNode:
 
 
 def main():
-    if len(sys.argv) == 5:
-        blueNode(sys.argv[1],int(sys.argv[2]),sys.argv[3],int(sys.argv[4]))
+    if len(sys.argv) == 3:
+        blueNode(sys.argv[1],int(sys.argv[2]))
     else:
         print("Error!! To compile do it like this: python3 blueNode.py MyIP MyPort OtherIP OtherPort")
         exit()

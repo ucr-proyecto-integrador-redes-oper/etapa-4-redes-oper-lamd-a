@@ -31,7 +31,7 @@ class ooPackage:
 		MOD: bytePacket
 	'''
     def serialize(self):
-        bytePacket = struct.pack('bIbbch15phI',self.packetCategory,self.sn,self.orangeSource,self.orangeTarget,self.communicationType.encode(),self.requestedGraphPosition,self.blueAddressIP.encode(),self.blueAddressPort,self.priority)
+        bytePacket = struct.pack('BIBBcH15pHI',self.packetCategory,self.sn,self.orangeSource,self.orangeTarget,self.communicationType.encode(),self.requestedGraphPosition,self.blueAddressIP.encode(),self.blueAddressPort,self.priority)
         return bytePacket
 
     '''

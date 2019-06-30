@@ -37,12 +37,9 @@ class obPackage:
         #Tipo joinGraph
         if (tipo == 0 or tipo == 7): #chunk
             bytePacket = struct.pack('!bBHI',self.packetCategory,self.fileIDByte1,self.fileIDRest,self.chunkID)
-            print("No payload ",bytePacket)
-            print("chunk ",self.chunkPayload)
             bytePacket += self.chunkPayload
-            print(" payload ",bytePacket)
         elif tipo == 1: #hello
-            bytePacket = struct.pack('!b',self.packetCategory,self.packetCategory)
+            bytePacket = struct.pack('!b',self.packetCategory)
         elif (tipo == 2 or tipo == 3 or tipo == 4 or tipo == 6 or tipo == 8 or tipo == 10): #exists, exists r, complete, get, locate, delete
             bytePacket = struct.pack('!bBH',self.packetCategory,self.fileIDByte1,self.fileIDRest)
         elif tipo == 5: #complete reply
@@ -71,9 +68,10 @@ class obPackage:
     def unserialize(self, bytePacket,tipo):
         if (tipo == 0 or tipo == 7): #main packet, chunk
             processedPacket = struct.unpack('!bBHI',bytePacket[:struct.calcsize('!bBHI')])
-            self.fileIDByte1 = processedPacket[0]
-            self.fileIDRest = processedPacket[1]
-            self.chunkID = processedPacket[2]
+            self.packetCategory = processedPacket[0]
+            self.fileIDByte1 = processedPacket[1]
+            self.fileIDRest = processedPacket[2]
+            self.chunkID = processedPacket[3]
             self.chunkPayload = bytePacket[struct.calcsize('!bBHI'):]
 
         elif tipo == 1: #hello
