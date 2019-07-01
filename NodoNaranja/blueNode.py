@@ -110,15 +110,14 @@ class blueNode:
                 print("(PutChunk) from ",package[1])
                 chunkPack = obPackage()
                 chunkPack.unserialize(bytePackage,0)
-                #chunkPack.print_data()
 
                 actions = ["save","save&Clone","clone","drop"]
-                percentages = [0.24,0.24,0.48,0.04] # 48% guardarlo %48 de clonarlo y 4% de botarlo
+                percentages = [0.40,0.30,0.26,0.04] # 40% save 30% save&Clone %26 clone 4% drop
                 result = 0
                 if self.chunksStored < self.maxChunks:
                     result = self.putChunkRandomChoiceGenerator(percentages)
                 else:
-                    percentages = [0,0,0.96,0.04] # 0% guardarlo %96 de clonarlo y 4% de botarlo
+                    percentages = [0,0,0.96,0.04] # 0% save 0% save&Clone %96 clone 4% drop
                     result = self.putChunkRandomChoiceGenerator(percentages)
                 print("Accion ",actions[result])
                 if actions[result] == "save":
@@ -142,11 +141,11 @@ class blueNode:
                         randomNeighbors = random.randrange(1,totalNeighbors+1)
                         #Picks random one neighbor
                         for x in range(randomNeighbors):
-                            randomChoiceNeighbor = random.choice(copyNeighborTuple)
+                            randomChoiceNeighbor = random.choice(list(copyNeighborTuple))
                             #Creates a putChunk package
                             serializedPutChunkPack = chunkPack.serialize(0)
-                            self.SecureUDP.sendto(serializedPutChunkPack,randomChoiceNeighbor[1],randomChoiceNeighbor[2])
-                            copyNeighborTuple.remove(randomChoiceNeighbor)
+                            self.SecureUDP.sendto(serializedPutChunkPack,copyNeighborTuple[randomChoiceNeighbor][0],copyNeighborTuple[randomChoiceNeighbor][1])
+                            del copyNeighborTuple[randomChoiceNeighbor]
 
                 elif actions[result] == "save&Clone":
                     #Checks if the key exists
@@ -168,11 +167,11 @@ class blueNode:
                         randomNeighbors = random.randrange(1,totalNeighbors+1)
                         #Picks random one neighbor
                         for x in range(randomNeighbors):
-                            randomChoiceNeighbor = random.choice(copyNeighborTuple)
+                            randomChoiceNeighbor = random.choice(list(copyNeighborTuple))
                             #Creates a putChunk package
                             serializedPutChunkPack = chunkPack.serialize(0)
-                            self.SecureUDP.sendto(serializedPutChunkPack,randomChoiceNeighbor[1],randomChoiceNeighbor[2])
-                            copyNeighborTuple.remove(randomChoiceNeighbor)
+                            self.SecureUDP.sendto(serializedPutChunkPack,copyNeighborTuple[randomChoiceNeighbor][0],copyNeighborTuple[randomChoiceNeighbor][1])
+                            del copyNeighborTuple[randomChoiceNeighbor]
                 
 
  
@@ -253,6 +252,7 @@ class blueNode:
                     else:
                         self.sTreeDadNode  = self.joinSpanningTree() #(node, IP, PORT)
 
+                    print("Im part of the spanning Tree ",self.myID)
                     self.imInTheSpanningTree = True
                     #Sends the daddyPack
                     daddyPackage = obPackage(13)
@@ -283,12 +283,13 @@ class blueNode:
         while (True):
             neighborAlive = 0
             for neighbour in self.neighborTuple: #neighborTuple es de la forma (node, IP, PORT)
+                print("Vecino ",self.neighborTuple[neighbour])
                 if self.neighborTuple[neighbour][0] != -1: #If the neighbor has a address
                     # Creo el paquetico de tipo 11
                     JoinTreePack = obPackage(11)
                     JoinTreePack.nodeID = self.myID
                     bytesJoinTreePack = JoinTreePack.serialize(11) 
-                    #print("Sending Join")
+                    print("Sending Join ", self.neighborTuple[neighbour])
                     self.SecureUDP.sendto(bytesJoinTreePack, self.neighborTuple[neighbour][0],self.neighborTuple[neighbour][1])
                     neighborAlive += 1
             # Saca las respuestas
@@ -307,11 +308,11 @@ class blueNode:
                     #print("response ",dad)
                     return (dad[0],dad[1],dad[2]) #(nodeID,IP,PORT)
                 elif responseListSize > 1: # si hay 0 vecinos
-                    minNodeID = (-1,"0.0.0.0",0)
+                    maxNodeID = (99999999,"0.0.0.0",0)
                     for candidate in responseList: # Battle to ask for a sugar Daddy
-                        if candidate[0] < minNodeID[0]:
-                            minNodeID = candidate 
-                        return minNodeID
+                        if candidate[0] < maxNodeID[0]:
+                            maxNodeID = candidate 
+                    return maxNodeID
             else:
                 time.sleep(5)
 
