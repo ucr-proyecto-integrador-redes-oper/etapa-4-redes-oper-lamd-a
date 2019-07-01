@@ -39,7 +39,7 @@ class obPackage:
             bytePacket = struct.pack('!bBHI',self.packetCategory,self.fileIDByte1,self.fileIDRest,self.chunkID)
             bytePacket += self.chunkPayload
         elif tipo == 1: #hello
-            bytePacket = struct.pack('!b',self.packetCategory)
+            bytePacket = struct.pack('!bH',self.packetCategory,self.nodeID)
         elif (tipo == 2 or tipo == 3 or tipo == 4 or tipo == 6 or tipo == 8 or tipo == 10): #exists, exists r, complete, get, locate, delete
             bytePacket = struct.pack('!bBH',self.packetCategory,self.fileIDByte1,self.fileIDRest)
         elif tipo == 5: #complete reply
@@ -75,8 +75,9 @@ class obPackage:
             self.chunkPayload = bytePacket[struct.calcsize('!bBHI'):]
 
         elif tipo == 1: #hello
-            processedPacket = struct.unpack('!b', bytePacket)
+            processedPacket = struct.unpack('!bH', bytePacket)
             self.packetCategory = processedPacket[0]
+            self.nodeID = processedPacket[1]
 
         elif (tipo == 2 or tipo == 3 or tipo == 4 or tipo == 6 or tipo == 8 or tipo == 10): #exists, exists r, complete, get, locate, delete
             processedPacket = struct.unpack('!bBH', bytePacket)

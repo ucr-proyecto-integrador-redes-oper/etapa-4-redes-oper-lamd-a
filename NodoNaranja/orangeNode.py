@@ -12,6 +12,7 @@ import random
 from threading import Event
 import time
 from SecureUDP import SecureUdp
+import os
 
 
 '''
@@ -334,6 +335,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
     blueNodeEnrolls = queue.Queue()  # Pasarla como parámetro
     blueNodes = [] # Tuple with (requestNode,blueNodeIP,blueNodePort). Saves all the connections with the blueNodes
     cheackingDebug = 0
+    workDone = False
 
     while True:
         # If the queue is not empty
@@ -521,6 +523,19 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 blueNodes.append((requestNode,blueNodeIP,blueNodePort))
                 print("(Done) with the blueNode %d" % (requestNode))
 
+                # Creates the commitPackage
+                neighborList = table.obtainNodesNeighborsAdressList(requestNode)
+                for neighbor in neighborList:
+                    # print(neighbor[0],neighbor[1],neighbor[2])
+                    if neighbor[2] == 0: #No tengo la IP y Port del nodo
+                        commitPack = obPackage(15,requestNode,neighbor[0])
+                        test = commitPack.serialize(15)
+                        secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
+                    else:
+                        commitPack = obPackage(16,requestNode,neighbor[0],neighbor[1],neighbor[2])
+                        test = commitPack.serialize(16)
+                        secureUDPBlue.sendto(test,blueNodeIP,blueNodePort)
+
                 #Resets the variables
                 processingBlueNode = False
                 requestNode = -1
@@ -616,32 +631,18 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 else:
                     print("No more requestNumers available")
 
-        #Sends the graphComplete package to the blueNodes, when theres no more blueNodesID's to assign
-        if table.tableIsDone() == True:
-            for element in range(len(blueNodes)):
-                addr  = blueNodes.pop(element)
-                print("Bluenode ",addr)
-                # Creates the commitPackage
-                neighborList = table.obtainNodesNeighborsAdressList(addr[0])
-                print(neighborList)
-                for neighbor in neighborList:
-                    # print("vecino ",neighbor)
-                    # print(neighbor[0],neighbor[1],neighbor[2])
-                    if neighbor[2] == 0: #No tengo la IP y Port del nodo
-                        print("No add")
-                        commitPack = obPackage(15,addr[0],neighbor[0])
-                        test = commitPack.serialize(15)
-                        secureUDPBlue.sendto(test,addr[1],addr[2])
-                    else:
-                        print(" add")
-                        commitPack = obPackage(16,addr[0],neighbor[0],neighbor[1],neighbor[2])
-                        test = commitPack.serialize(16)
-                        secureUDPBlue.sendto(test,addr[1],addr[2])
-                
-                time.sleep(5)        
-                completeGraph = obPackage(17)
-                bytePacket =  completeGraph.serialize(17)
-                secureUDPBlue.sendto(bytePacket,addr[1],addr[2])
+
+            #Sends the graphComplete package to the blueNodes, when theres no more blueNodesID's to assign
+            if table.tableIsDone() == True and workDone == False:
+                for element in range(len(blueNodes)):
+                    addr  = blueNodes[element]
+
+                        
+                    completeGraph = obPackage(17)
+                    bytePacket =  completeGraph.serialize(17)
+                    print("sending completeGraph to ",addr[1],str(addr[2]))
+                    secureUDPBlue.sendto(bytePacket,addr[1],addr[2])
+                    workDone = True
 
         file2.flush()
 

@@ -3,6 +3,7 @@ from obPackage import obPackage
 import threading
 import sys , os
 import queue
+import math
 
 class greenNode:
 
@@ -30,10 +31,6 @@ class greenNode:
 
             t = threading.Thread(target=self.userInputThread, args=())
             t.start()
-
-
-
-
         else:
             print("Sorry This GreenNodeID: ",str(self.myID)," is not available for the Group ",str(self.myGroupID))
             os._exit(0)
@@ -53,10 +50,10 @@ class greenNode:
                 fileIDRest = input("Enter fileIDRest: ")
                 #Creates a generic Exists package
                 existsPack = obPackage(2)
-                existsPack.fileIDByte1 = fileIDByte1
-                existsPack.fileIDRest = fileIDRest
+                existsPack.fileIDByte1 = int(fileIDByte1)
+                existsPack.fileIDRest = int(fileIDRest)
                 serializedObject = existsPack.serialize(2)
-                self.SecureUDP.sendto(serializedObject,BlueIP,BluePort)
+                self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
                 
 
@@ -79,27 +76,30 @@ class greenNode:
 
 
     def chunkSeparator(self,filename,fileIDByte1,fileIDRest):
-        //chunkID = 0
+        #chunkID = 0
         #Creates a generic putChunk package
         chunkPacketToSend = obPackage(0)
         chunkPacketToSend.fileIDByte1 = fileIDByte1
         chunkPacketToSend.fileIDRest = fileIDRest
         fileName , totalChunks = self.fileDataBase[fileIDRest]
 
-        fileAsBytes = open(fileName, "rb") # opening for [r]eading as [b]inary
+
+        fd = os.open(fileName, os.O_RDWR)
+        totalChunks = math.ceil(os.fstat(fd).st_size/1024)
+        self.fileDataBase[fileIDRest] = (fileName, totalChunks)
 
         #Envia los chunks
         for chunkID in range(totalChunks):             
             
-            fileSlice = fileAsBytes.read(1024)
-            fileAsBytes.seek(1024)
+            fileSlice = os.read(fd,1024)
             chunkPacketToSend.chunkPayload = fileSlice
             chunkPacketToSend.chunkID = chunkID
-            chunkPacketToSend.print_data()
+            # chunkPacketToSend.print_data()
             serializedObject = chunkPacketToSend.serialize(0)
             self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
-        print("Testing ",self.fileDataBase[fileIDRest])
+        os.close(fd)
+        print("File: ",fileIDRest ,"sent ",self.fileDataBase[fileIDRest])
 
     def inputThread(self):
         while True:
@@ -109,7 +109,8 @@ class greenNode:
             genericPack = obPackage()
             if Type == 3:
                 print("FILE EXIST from ",addr)
-                print("The File ",str(fileIDByte1)," ",str(fileIDRest),"Exist")
+                genericPack.unserialize(bytePackage,3)
+                print("The File (",str(genericPack.fileIDByte1),str(genericPack.fileIDRest),") Exist")
 
 
 
