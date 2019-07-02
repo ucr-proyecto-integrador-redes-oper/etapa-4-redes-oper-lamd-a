@@ -17,7 +17,7 @@ class PacketStruct:
 
 
 class SecureUdp:
-	TIMEOUT = 5
+	TIMEOUT = 1
 	TimeStamp = 0
 	# Esta es la ventana que muestra el espacio libre
 	AckWindow = []

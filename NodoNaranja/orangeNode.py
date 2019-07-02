@@ -584,6 +584,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                 pack = obPackage()
                 pack = blueNodeEnrolls.get()
                 # Creates the request packages
+                
                 blueNodeIP = pack.blueAddressIP
                 blueNodePort = pack.blueAddressPort
                 
@@ -594,6 +595,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
 
                 if not requestNode == -1:  # Checks if there is more requestNodes
                     if debug == True:
+                        print("NodeId: %d"%(pack.nodeID))
                         print("(Enroll) from the blueNode IP: %s Port: %d requesting %d" % (
                             pack.blueAddressIP, pack.blueAddressPort, requestNode))
                     testingConfli += 1
@@ -619,6 +621,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                             requestPack = ooPackage(
                                 0, sn, nodeID, node, 'r', requestNode, blueNodeIP, blueNodePort, priority)
                             # if debug == True: requestPack.print_data()
+                            #print("NodeID: %d, node: %d" % (nodeID, node))
                             byteRequestPack = requestPack.serialize()
                             outputQueue.put(byteRequestPack)
 
