@@ -7,7 +7,7 @@ class obPackage:
         REQ: ---
         MOD: ---
     '''                                           
-    def __init__(self, packetCategory = -1, nodeID = -1, neighborID = -1, blueAddressIP = '999.999.999.999', blueAddressPort = 0000, fileIDByte1 = 0, fileIDRest = 0, chunkID = 0, chunkPayload = b'0'):
+    def __init__(self, packetCategory = -1, nodeID = -1, neighborID = -1, blueAddressIP = '999.999.999.999', blueAddressPort = 0000, fileIDByte1 = 0, fileIDRest = 0, chunkID = 0, chunkPayload = b'0',filename=""):
         # Todos los espacios del header
         self.packetCategory = packetCategory
         self.nodeID = nodeID
@@ -18,6 +18,7 @@ class obPackage:
         self.fileIDRest = fileIDRest
         self.chunkID = chunkID
         self.chunkPayload = chunkPayload
+        self.fileName = filename
         
 
     '''
@@ -27,7 +28,8 @@ class obPackage:
     '''
     def print_data(self):
         print(" packetCategory:",self.packetCategory, " nodeId:",self.nodeID ," neighborID:",self.neighborID," blueAddressIP: ", self.blueAddressIP, 
-        "blueAddressPort:", self.blueAddressPort,"chunkPayload: ",self.chunkPayload," fileIDByte1: ",self.fileIDByte1," fileIDRest: ",self.fileIDRest," chunkID: ",self.chunkID)
+        "blueAddressPort:", self.blueAddressPort,"chunkPayload: ",self.chunkPayload," fileIDByte1: ",self.fileIDByte1," fileIDRest: ",self.fileIDRest,
+        " chunkID: ",self.chunkID,"fileName: ",self.fileName)
     '''
         EFE: Serializa el paquete
         REQ: ---
@@ -57,6 +59,9 @@ class obPackage:
             bytePacket = struct.pack('!bHHBBBBH',self.packetCategory,self.nodeID,self.neighborID,int(ipSplit[0]),int(ipSplit[1]),int(ipSplit[2]),int(ipSplit[3]),self.blueAddressPort)
         elif tipo == 17: #graphComplete
             bytePacket = struct.pack('!b',self.packetCategory)
+        elif tipo == 20: #dummyGreen to Green put Chunk
+            bytePacket = struct.pack('!bI',self.packetCategory,self.chunkID)
+            bytePacket += self.fileName.encode(encoding='UTF-8',errors='replace')
 
         return bytePacket
 
@@ -132,21 +137,28 @@ class obPackage:
 
         elif tipo == 17: #graphComplete
             processedPacket = struct.pack('!b', bytePacket)
-            sself.packetCategory = processedPacket[0]
+            self.packetCategory = processedPacket[0]
+        elif tipo == 20:
+            processedPacket = struct.unpack('!bI',bytePacket[:struct.calcsize('!bI')])
+            self.packetCategory = processedPacket[0]
+            self.chunkID = processedPacket[1]
+            self.fileName = bytePacket[struct.calcsize('!bI'):].decode("utf-8")
+
 #----------------------------------------------------------
 
 
 def main():
-    chunk = b'nepe'
-    obPackagex = obPackage(0)
-    obPackagex.chunkPayload = chunk
+    filename = "diego.png"
+    obPackagex = obPackage(20)
+    obPackagex.fileName = filename
+    obPackagex.chunkID = 983
     obPackagex.print_data()
     
-    serializedObject = obPackagex.serialize(0)
+    serializedObject = obPackagex.serialize(20)
     print(serializedObject)
-    print(serializedObject[:8])
-    obPackagex2 = obPackage(0)
-    obPackagex2.unserialize(serializedObject,0)
+
+    obPackagex2 = obPackage(20)
+    obPackagex2.unserialize(serializedObject,20)
     obPackagex2.print_data()
 
 

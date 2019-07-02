@@ -9,7 +9,7 @@ class greenNode:
 
     myID = 0
     myGroupID = 2 #This can be change in order to make greens for others teams. In this case is just for LAMDa team
-    fileDataBase = {} #[key = fileIDRest] = (filename,total Chunks of that file)
+    fileDataBase = {} #[key = (fileIDByte1 , fileIDRest) ] = (filename,total Chunks of that file)
     fileIDByte1 = 0
     fileIDRest = 0
     SecureUDP = 0
@@ -39,13 +39,15 @@ class greenNode:
         while True:
             userInput = input()
             if userInput == "1":
-                filename = input("Enter path of the file: ")
+                print("Files ",self.fileDataBase)
+                # filename = input("Enter path of the file: ")
 
-                self.fileDataBase[self.fileIDRest] = (filename,0)
-                print("Your ID for the file ",filename," is: fileIDByte1: ",self.fileIDByte1," fileIDRest: ",self.fileIDRest)
-                self.chunkSeparator(filename,self.fileIDByte1,self.fileIDRest)
-                self.fileIDRest += 1
+                # self.fileDataBase[self.fileIDRest] = (filename,0)
+                # print("Your ID for the file ",filename," is: fileIDByte1: ",self.fileIDByte1," fileIDRest: ",self.fileIDRest)
+                # self.chunkSeparator(filename,self.fileIDByte1,self.fileIDRest)
+                # self.fileIDRest += 1
             elif userInput == "2": #Check if file Exist
+                print("Going to check if a file exist")
                 fileIDByte1 = input("Enter fileIDByte1: ")
                 fileIDRest = input("Enter fileIDRest: ")
                 #Creates a generic Exists package
@@ -111,6 +113,25 @@ class greenNode:
                 print("FILE EXIST from ",addr)
                 genericPack.unserialize(bytePackage,3)
                 print("The File (",str(genericPack.fileIDByte1),str(genericPack.fileIDRest),") Exist")
+            elif Type == 0:
+                print("Chunk")
+                self.SecureUDP.sendto(bytePackage,self.BlueIP,self.BluePort)
+                # genericPack.unserialize(bytePackage,0)
+                # genericPack.print_data()
+            elif Type == 20: #Going to recieve a new file
+                genericPack.unserialize(bytePackage,20)
+                print("New File: ",genericPack.fileName,"totalChunks: ",str(genericPack.chunkID))
+                #genericPack.print_data()
+                
+                self.fileDataBase[(self.fileIDByte1,self.fileIDRest)] = (genericPack.fileName, genericPack.chunkID)
+
+                responseNewFilePack = obPackage(2)
+                responseNewFilePack.fileIDByte1 = self.fileIDByte1
+                responseNewFilePack.fileIDRest = self.fileIDRest
+                byteResponseNewFilePack = responseNewFilePack.serialize(2)
+                self.SecureUDP.sendto(byteResponseNewFilePack,addr[0],addr[1])
+
+                self.fileIDRest += 1
 
 
 
