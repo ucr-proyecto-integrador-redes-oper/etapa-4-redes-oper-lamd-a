@@ -22,7 +22,7 @@ class blueNode:
     maxChunks = 10
 
     def __init__(self,orangeIP,orangePort):
-        self.SecureUDP = SecureUdp(10,4,True) #ventana de 10 con timeout de 2s
+        self.SecureUDP = SecureUdp(100,1,True) #ventana de 100 con timeout de 1s
         print("BlueNode Listening on ip: %s port %d " %
               ( self.SecureUDP.sock.getsockname()[0], self.SecureUDP.sock.getsockname()[1]))
         # Creates the Threads
@@ -245,12 +245,12 @@ class blueNode:
                 else:
                     time.sleep(5)
                     #ask for daddy
-                    if self.root in self.neighborTuple:
-                        addr = self.neighborTuple[1]
-                        self.sTreeDadNode = (self.root,addr[0],addr[1])
-                        self.imInTheSpanningTree = True
-                    else:
-                        self.sTreeDadNode  = self.joinSpanningTree() #(node, IP, PORT)
+                    # if self.root in self.neighborTuple:
+                    #     addr = self.neighborTuple[1]
+                    #     self.sTreeDadNode = (self.root,addr[0],addr[1])
+                    #     self.imInTheSpanningTree = True
+                    # else:
+                    self.sTreeDadNode  = self.joinSpanningTree() #(node, IP, PORT)
 
                     print("Im part of the spanning Tree ",self.myID)
                     self.imInTheSpanningTree = True

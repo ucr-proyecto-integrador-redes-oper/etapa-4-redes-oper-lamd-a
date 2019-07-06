@@ -4,6 +4,7 @@ import threading
 import sys , os
 import queue
 import math
+import time
 
 class greenNode:
 
@@ -15,8 +16,11 @@ class greenNode:
     SecureUDP = 0
     BlueIP = ""
     BluePort = 0
+    existsMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT)
+    inputQueue = queue.Queue() # Tuple (pack,addr)
+
     def __init__(self,myGroupID,MyID,BlueIP,BluePort):
-        self.SecureUDP = SecureUdp(10,4,True) #ventana de 10 con timeout de 2s
+        self.SecureUDP = SecureUdp(100,1,True) #ventana de 10 con timeout de 1s
         self.myGroupID = myGroupID
         self.myID = MyID
         self.BlueIP = BlueIP
@@ -29,8 +33,12 @@ class greenNode:
             t = threading.Thread(target=self.inputThread, args=())
             t.start()
 
-            t = threading.Thread(target=self.userInputThread, args=())
-            t.start()
+            t2 = threading.Thread(target=self.userInputThread, args=())
+            t2.start()
+
+            t3 = threading.Thread(target=self.logicThread, args=())
+            t3.start()
+
         else:
             print("Sorry This GreenNodeID: ",str(self.myID)," is not available for the Group ",str(self.myGroupID))
             os._exit(0)
@@ -83,12 +91,10 @@ class greenNode:
         chunkPacketToSend = obPackage(0)
         chunkPacketToSend.fileIDByte1 = fileIDByte1
         chunkPacketToSend.fileIDRest = fileIDRest
-        fileName , totalChunks = self.fileDataBase[fileIDRest]
 
-
-        fd = os.open(fileName, os.O_RDWR)
+        fd = os.open(filename, os.O_RDWR)
         totalChunks = math.ceil(os.fstat(fd).st_size/1024)
-        self.fileDataBase[fileIDRest] = (fileName, totalChunks)
+        self.fileDataBase[(fileIDByte1,fileIDRest)] = (filename, totalChunks)
 
         #Envia los chunks
         for chunkID in range(totalChunks):             
@@ -101,37 +107,79 @@ class greenNode:
             self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
         os.close(fd)
-        print("File: ",fileIDRest ,"sent ",self.fileDataBase[fileIDRest])
+        print("File: ",filename ,"sent ",self.fileDataBase[(fileIDByte1,fileIDRest)])
 
     def inputThread(self):
         while True:
             bytePackage , addr = self.SecureUDP.recivefrom()
-            # print(package)
-            Type = int.from_bytes(bytePackage[:1], byteorder='big')
-            genericPack = obPackage()
-            if Type == 3:
-                print("FILE EXIST from ",addr)
-                genericPack.unserialize(bytePackage,3)
-                print("The File (",str(genericPack.fileIDByte1),str(genericPack.fileIDRest),") Exist")
-            elif Type == 0:
-                print("Chunk")
-                self.SecureUDP.sendto(bytePackage,self.BlueIP,self.BluePort)
-                # genericPack.unserialize(bytePackage,0)
-                # genericPack.print_data()
-            elif Type == 20: #Going to recieve a new file
-                genericPack.unserialize(bytePackage,20)
-                print("New File: ",genericPack.fileName,"totalChunks: ",str(genericPack.chunkID))
-                #genericPack.print_data()
-                
-                self.fileDataBase[(self.fileIDByte1,self.fileIDRest)] = (genericPack.fileName, genericPack.chunkID)
+            print("re",bytePackage)
+            self.inputQueue.put((bytePackage,addr))
 
-                responseNewFilePack = obPackage(2)
-                responseNewFilePack.fileIDByte1 = self.fileIDByte1
-                responseNewFilePack.fileIDRest = self.fileIDRest
-                byteResponseNewFilePack = responseNewFilePack.serialize(2)
-                self.SecureUDP.sendto(byteResponseNewFilePack,addr[0],addr[1])
 
-                self.fileIDRest += 1
+
+    def logicThread(self):
+        while True:
+            # If the queue is not empty
+            if not self.inputQueue.empty():
+                print("IM in")
+                inputPack = self.inputQueue.get()
+                bytePackage = inputPack[0]
+                addr = inputPack[1] 
+                print(inputPack)
+                Type = int.from_bytes(bytePackage[:1], byteorder='big')
+                genericPack = obPackage()
+                if Type == 3:
+                    print("(EXIST Resp) from ",addr)
+                    genericPack.unserialize(bytePackage,3)
+                    print("The File (",str(genericPack.fileIDByte1),str(genericPack.fileIDRest),") Exist")
+                    
+                    if (genericPack.fileIDByte1,genericPack.fileIDRest) in self.existsMap:
+                        print("Enviando1")
+                        responseAddr = self.existsMap[(genericPack.fileIDByte1,genericPack.fileIDRest)]
+                        test = obPackage(3)
+                        test.fileIDByte1 = genericPack.fileIDByte1
+                        test.fileIDRest = genericPack.fileIDRest
+                        test.print_data()
+                        test = genericPack.serialize(3)
+                        self.SecureUDP.sendto(test,responseAddr[1],responseAddr[2])
+                        del self.existsMap[(genericPack.fileIDByte1,genericPack.fileIDRest)]
+                    else:
+                        print("Error!!! That file no longer exist")
+                elif Type == 20: #Going to recieve a new file
+                    genericPack.unserialize(bytePackage,20)
+                    print("New File: ",genericPack.fileName)
+                    #genericPack.print_data()
+                    
+                    #Sends the id of the file to the user
+                    responseNewFilePack = obPackage(2)
+                    responseNewFilePack.fileIDByte1 = self.fileIDByte1
+                    responseNewFilePack.fileIDRest = self.fileIDRest
+                    byteResponseNewFilePack = responseNewFilePack.serialize(2)
+                    self.SecureUDP.sendto(byteResponseNewFilePack,addr[0],addr[1])
+
+                    #Separates the file into chunks
+                    self.chunkSeparator(genericPack.fileName,self.fileIDByte1,self.fileIDRest)
+
+                    self.fileIDRest += 1
+                elif Type == 2:
+                    print("(Exist) from ",addr)
+                    existsPack = obPackage(2)
+                    existsPack.unserialize(bytePackage,2)
+                    TimeStamp = time.time()
+                    self.existsMap[(existsPack.fileIDByte1,existsPack.fileIDRest)] = (TimeStamp,addr[0],addr[1])
+                    serializedObject = existsPack.serialize(2)
+                    self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
+            else:
+                #Checks TimeOuts for the exist request. TimeOut is 5s
+                for request in list(self.existsMap):
+                    if ( time.time() - self.existsMap[request][0]) >= 5:
+                        print("self.existsMap[request]")
+                        genericPack = obPackage(3)
+                        serializedObject = genericPack.serialize(3)
+                        self.SecureUDP.sendto(serializedObject,self.existsMap[request][1],self.existsMap[request][2])
+                        del self.existsMap[request]
+
+
 
 
 

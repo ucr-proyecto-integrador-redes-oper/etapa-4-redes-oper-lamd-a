@@ -626,7 +626,7 @@ def logicalThread(inputQueue, outputQueue, sock, table, nodeID, maxOrangeNodes, 
                             outputQueue.put(byteRequestPack)
 
                     # Creates the Timer Thread
-                    timeout = 15 #Waits 15s
+                    timeout = 5 #Waits 5s
                     t = threading.Thread(target=timer, args=(
                         timeout, stop_eventMainThread, stop_eventTimerThread, ))
                     t.start()
@@ -695,7 +695,7 @@ class orangeNode:
               (sock.getsockname()[0], self.port, self.nodeID))
 
         # Starts the UDP Safe
-        SecureUdpBlue = SecureUdp(10,4,True) #ventana de 10 con timeout de 4s
+        SecureUdpBlue = SecureUdp(100,1,True) #ventana de 100 con timeout de 1s
         print("Listening Blues on ip: %s port %d Im orange: %d" %
               (SecureUdpBlue.sock.getsockname()[0], SecureUdpBlue.sock.getsockname()[1], self.nodeID))
         # Creates the Threads
@@ -719,7 +719,7 @@ class orangeNode:
 if __name__== "__main__":
 
 	if len(sys.argv) == 3:		
-		orange = orangeNode(int(sys.argv[1]),int(sys.argv[2]),"routingTable.txt", "../Grafo_Referencia.csv")
+		orange = orangeNode(int(sys.argv[1]),int(sys.argv[2]),"routingTable.txt", "../Grafo.csv")
 		orange.run()
 	else:
 		print("Error: need the ip and port of the server and the number of the orangeNode")

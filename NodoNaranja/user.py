@@ -26,15 +26,12 @@ def putFileLogic(fatherWindow,entry1,entry2):
 	fatherWindow.grab_set()
 	rowIndex +=1
 	print("Name ",filename)
-	fd = os.open(filename, os.O_RDWR)
-	totalChunks = math.ceil(os.fstat(fd).st_size/1024)
 
-	ip = entry1.get()
+	ip = SecureUDP.sock.getsockname()[0]
 	port = int(entry2.get())
 
 	newFilePack = obPackage(20)
 	newFilePack.fileName = filename
-	newFilePack.chunkID = totalChunks
 	byteNewFilePack = newFilePack.serialize(20)
 	SecureUDP.sendto(byteNewFilePack,ip,int(port))
 	bytePackage , addr = SecureUDP.recivefrom()
@@ -46,19 +43,6 @@ def putFileLogic(fatherWindow,entry1,entry2):
 	fileID = ( FileAdrrPack.fileIDByte1 , FileAdrrPack.fileIDRest)
 	filesList.append((filename,fileID))
 
-	chunkPacketToSend = obPackage(0)
-	chunkPacketToSend.fileIDByte1 = fileID[0]
-	chunkPacketToSend.fileIDRest = fileID[1]
-	#Envia los chunks
-	for chunkID in range(totalChunks):             
-		fileSlice = os.read(fd,1024)
-		chunkPacketToSend.chunkPayload = fileSlice
-		chunkPacketToSend.chunkID = chunkID
-		# chunkPacketToSend.print_data()
-		serializedObject = chunkPacketToSend.serialize(0)
-		SecureUDP.sendto(serializedObject,ip,int(port))
-
-	os.close(fd)
 
 	lbl1 = Label(master=fatherWindow,text="File Successfully transferred your key: ")
 	lbl1.grid(row=3, column=1)
@@ -87,8 +71,6 @@ def putFile(fatherWindow):
 	filename = filedialog.askopenfilename()
 	
 
-
-
 	lbl1 = Label(master=slave,text="File: ")
 	lbl1.grid(row=0, column=0)
 
@@ -97,7 +79,7 @@ def putFile(fatherWindow):
 
 	lbl1 = Label(master=slave,text="Insert IP: ")
 	lbl1.grid(row=1, column=0)
-	entry1 = Entry(slave)
+	entry1 = Label(master=slave,text=SecureUDP.sock.getsockname()[0])
 	entry1.grid(row=1,column=1)
 
 	lbl2 = Label(master=slave,text="Insert Port: ")
@@ -116,11 +98,6 @@ def putFile(fatherWindow):
 
 
 
-def printAddr(window,ip,port):
-	window.withdraw()
-	print(type(ip.get()))
-	print(type(port.get()))
-	window.deiconify()
 
 
 
@@ -129,12 +106,47 @@ def goBack(myWindow,fatherWindow):
 	myWindow.destroy()
 
 
+def SendExist(window,ip,port,fileIDByte1,fileIDRest):
+	window.grab_set()
+	existsPack = obPackage(2)
+	existsPack.fileIDByte1 = int(fileIDByte1.get())
+	existsPack.fileIDRest = int(fileIDRest.get())
+
+	clear = Label(master=window,text="                                               ")
+	clear.grid(row=4,column=1)
+
+
+	label1 = Label(master=window,text="Looking for the file")
+	label1.grid(row=4,column=1)
+
+
+	greenIP = ip.get()
+	greenPort = int(port.get())
+	byteExistPack = existsPack.serialize(2)
+	SecureUDP.sendto(byteExistPack,greenIP,greenPort)
+
+
+	bytePackage , addr = SecureUDP.recivefrom()
+	responsePack = obPackage(3)
+
+	clear = Label(master=window,text="                                               ")
+	clear.grid(row=4,column=1)
+	
+	responsePack.unserialize(bytePackage,3)
+	if responsePack.fileIDByte1 == 0:
+		label1 = Label(master=window,text="!!!File NOT found!!!!")
+		label1.grid(row=4,column=1)
+	else:
+		label1 = Label(master=window,text="File FOUND!!!!")
+		label1.grid(row=4,column=1)
+	window.grab_release()
+
 
 def exits(window):
 	window.withdraw()
 	slave = Tk()
 	slave.title("ExistBox")
-	slave.geometry("300x100")
+	slave.geometry("600x300")
 	
 	lbl1 = Label(master=slave,text="Insert IP: ")
 	lbl1.grid(row=0, column=0)
@@ -146,13 +158,82 @@ def exits(window):
 	entry2 = Entry(slave)
 	entry2.grid(row=1,column=1)
 
-	button1 = Button(slave,text="Done",command=lambda: printAddr(slave,entry1,entry2))
-	button1.grid(row=2,column=0)
+	lbl3 = Label(master=slave,text="First Number File ID: ")
+	lbl3.grid(row=2, column=0)
+	entry3 = Entry(slave)
+	entry3.grid(row=2,column=1)
+
+	lbl4 = Label(master=slave,text="Second Number File ID: ")
+	lbl4.grid(row=3, column=0)
+	entry4 = Entry(slave)
+	entry4.grid(row=3,column=1)
+
+
+	button1 = Button(slave,text="Done",command=lambda: SendExist(slave,entry1,entry2,entry3,entry4))
+	button1.grid(row=4,column=0)
 
 	button1 = Button(slave,text="Back",command=lambda: goBack(slave,window))
-	button1.grid(row=3,column=0)
+	button1.grid(row=5,column=0)
 
 
+def SendDelete(window,ip,port,fileIDByte1,fileIDRest):
+	window.withdraw()
+	existsPack = obPackage(10)
+	existsPack.fileIDByte1 = int(fileIDByte1.get())
+	existsPack.fileIDRest = int(fileIDRest.get())
+
+	greenIP = ip.get()
+	greenPort = int(port.get())
+	byteExistPack = existsPack.serialize(2)
+	SecureUDP.sendto(byteExistPack,greenIP,greenPort)
+
+	# bytePackage , addr = SecureUDP.recivefrom()
+	# responsePack = obPackage(3)
+	# if responsePack.fileIDByte1 == -1:
+	# 	label1 = Label(master=window,text="!!!File NOT found!!!!")
+	# 	label1.grid(row=4,column=1)
+	# else:
+	# 	label1 = Label(master=window,text="File FOUND!!!!")
+	# 	label1.grid(row=4,column=1)
+
+	label1 = Label(master=window,text="File Deleted!!!!")
+	label1.grid(row=4,column=1)
+
+	window.deiconify()
+
+
+def delete(window):
+	window.withdraw()
+	slave = Tk()
+	slave.title("DeleteBox")
+	slave.geometry("600x300")
+	
+	lbl1 = Label(master=slave,text="Insert IP: ")
+	lbl1.grid(row=0, column=0)
+	entry1 = Entry(slave)
+	entry1.grid(row=0,column=1)
+
+	lbl2 = Label(master=slave,text="Insert Port: ")
+	lbl2.grid(row=1, column=0)
+	entry2 = Entry(slave)
+	entry2.grid(row=1,column=1)
+
+	lbl3 = Label(master=slave,text="First Number File ID: ")
+	lbl3.grid(row=2, column=0)
+	entry3 = Entry(slave)
+	entry3.grid(row=2,column=1)
+
+	lbl4 = Label(master=slave,text="Second Number File ID: ")
+	lbl4.grid(row=3, column=0)
+	entry4 = Entry(slave)
+	entry4.grid(row=3,column=1)
+
+
+	button1 = Button(slave,text="Done",command=lambda: SendDelete(slave,entry1,entry2,entry3,entry4))
+	button1.grid(row=4,column=0)
+
+	button1 = Button(slave,text="Back",command=lambda: goBack(slave,window))
+	button1.grid(row=5,column=0)
 
 
 def fileList():
@@ -177,6 +258,9 @@ button2.grid(row=1, column=0)
 button2 = Button(text="Exist", command=lambda: exits(root))
 # button2.pack(anchor=W)#row=0, column=6)
 button2.grid(row=2,column=0)
+
+button3 = Button(text="Delete", command=lambda: delete(root))
+button3.grid(row=2, column=1)
 
 root.mainloop()
 
