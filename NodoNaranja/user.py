@@ -66,12 +66,20 @@ def putFile(fatherWindow):
 	global filename
 	fatherWindow.withdraw()
 	slave = Tk()
-	slave.title("PutFileBox")
+	slave.title("LoadFile")
 	slave.geometry("600x200")
+
+	"""
+	im1 = PIL.Image.open('images/back.jpg')
+	icon = PIL.ImageTk.PhotoImage(im1)
+	icon.image = icon 
+
+	label1 = Label(slave, image = icon)
+	label1.pack()
+	"""
 
 	filename = filedialog.askopenfilename()
 	
-
 	lbl1 = Label(master=slave,text="File: ")
 	lbl1.grid(row=0, column=0)
 
@@ -142,7 +150,7 @@ def SendExist(window,ip,port,fileIDByte1,fileIDRest):
 def exits(window):
 	window.withdraw()
 	slave = Tk()
-	slave.title("ExistBox")
+	slave.title("Exist")
 	slave.geometry("600x300")
 	
 	lbl1 = Label(master=slave,text="Insert IP: ")
@@ -202,7 +210,7 @@ def SendDelete(window,ip,port,fileIDByte1,fileIDRest):
 def delete(window):
 	window.withdraw()
 	slave = Tk()
-	slave.title("DeleteBox")
+	slave.title("Delete")
 	slave.geometry("600x300")
 	
 	lbl1 = Label(master=slave,text="Insert IP: ")
@@ -246,24 +254,53 @@ def fileList():
 root = Tk()
 
 root.title("Green Node")
-root.geometry("600x500")
+root.geometry("500x350")
 
-button = Button(text="SeeFiles", command=fileList)
-button.grid(row=0, column=0) # Lo pone en una pos
 
-button1 = Button(text="PutFile", font = ("Helvetica", 16), command=lambda: putFile(root))
-button1.grid(row=1, column=0)
+im2 = PIL.Image.open('images/back.jpg') # buscar otra imagen
+icon = PIL.ImageTk.PhotoImage(im2)
+icon.image = icon 
 
-button2 = Button(text="Exist", fg="green", command=lambda: exits(root))
-button2.grid(row=2,column=0)
+label = Label(root, image = icon)
+label.pack()
 
-button3 = Button(text="Delete", fg="green", command=lambda: delete(root))
-button3.grid(row=2, column=1)
+group = Label(root, text="LAMDa", fg="black", font=("Helvetica", 24, 'bold'))
+group.place(relx=0.45, rely=0.06)
 
-quitBottom = Button(text="Quit", fg="red", command=lambda: quit())
-quitBottom.grid(row = 3, colum = 0)
+button = Button(text="SeeFiles", bd = 3, font = ("Helvetica", 16),command=fileList)
+#button.grid(row=0, column=0) # Lo pone en una pos
+button.place(relx = 0.01, rely =  0.05)
+
+button1 = Button(text="LoadFile", bd = 3, font = ("Helvetica", 16), command=lambda: putFile(root))
+#button1.grid(row=1, column=0)
+button1.place(relx = 0.01, rely =  0.20)
+
+button2 = Button(text="Exist", fg="green", bd = 3,  width=10, font = ("Helvetica", 16),command=lambda: exits(root))
+#button2.grid(row=5,column=0)
+button2.place(relx = 0.01, rely =  0.40)
+
+button3 = Button(text="Delete", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+#button3.grid(row=5, column=1)
+button3.place(relx = 0.01, rely =  0.70)
+
+button4 = Button(text="Complete", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+button4.place(relx = 0.01, rely =  0.55)
+
+button5 = Button(text="Nepe", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+button5.place(relx = 0.33, rely =  0.40)
+
+button6 = Button(text="NEPE1", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+button6.place(relx = 0.33, rely =  0.55)
+
+button6 = Button(text="NEPE2", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+button6.place(relx = 0.33, rely =  0.70)
+
+button7 = Button(text="Chunck", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+button7.place(relx = 0.15, rely =  0.85)
+
+quitBottom = Button(text="QUIT", fg="red", bd = 3, font = ("Helvetica", 16), command=lambda: root.destroy())
+#quitBottom.grid(row = 7, column = 3)
+quitBottom.place(relx = 0.70, rely =  0.80)
+
 
 root.mainloop()
-"""
-
-"""
