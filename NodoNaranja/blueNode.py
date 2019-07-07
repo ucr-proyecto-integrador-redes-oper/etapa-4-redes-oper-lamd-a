@@ -14,12 +14,13 @@ class blueNode:
     myID = 0
     packageQueue = queue.Queue() # Tuple with (bytePackage,addr). Addr is a tuple with the ip and port 
     chunksStored = 0 #Cant be more than 40
-    blueSavedChunks = {} # [key = (fileIDByte1,fileIDRest)] = tuples (chunkID,Chunk).The key helps to find the FileID then list holds all the chunks stored from that fileID
+    blueSavedChunks = {} # [key = (fileIDByte1,fileIDRest)] = list [tuples (chunkID,Chunk)].The key helps to find the FileID then list holds all the chunks stored from that fileID
     SecureUDP = 0 
     spanningTreeMsgQueue = queue.Queue() #(Type,nodeID,IP,PORT)
     existsMap = {} # [key = (fileIDByte1,fileIDRest)] = (IP,PORT)
+    locateMap = {} # [key = (fileIDByte1,fileIDRest)] = (IP,PORT)
     root = 1
-    maxChunks = 10
+    maxChunks = 40
 
     def __init__(self,orangeIP,orangePort):
         self.SecureUDP = SecureUdp(100,1,True) #ventana de 100 con timeout de 1s
@@ -89,6 +90,46 @@ class blueNode:
                 serializedHelloPack = helloPack.serialize(1)
                 self.SecureUDP.sendto(serializedHelloPack,obPackagex.blueAddressIP,obPackagex.blueAddressPort)
 
+            elif Type == 8:
+                print("(Locate) from ",addr[0],str(addr[1]))
+                genericPack = obPackage()
+                genericPack.unserialize(payload,8)
+                self.locateMap[(genericPack.fileIDByte1,genericPack.fileIDRest)] = (addr[0],addr[1])
+                #Checks if I have a chunk of that file
+                if (genericPack.fileIDByte1,genericPack.fileIDRest) in self.blueSavedChunks:
+                    print("I have a chunk")
+                    responseLocate = obPackage(9)
+                    responseLocate.fileIDByte1 = genericPack.fileIDByte1
+                    responseLocate.fileIDRest = genericPack.fileIDRest
+                    responseLocate.nodeID = self.myID
+                    byteResponseLocate = responseLocate.serialize(9)
+                    self.SecureUDP.sendto(byteResponseLocate,addr[0],addr[1])
+
+                # print("I need to ask my spanningTree")
+                listNode = self.getSpanningTreeNodes((addr[0],addr[1]))
+                #If theres a path to take
+                if (len(listNode) != 0):
+                    for node in listNode:
+                        #Creates a Exists package
+                        print("Creando Locate ",node)
+                        existsPack = obPackage(8)
+                        existsPack.fileIDByte1 = genericPack.fileIDByte1
+                        existsPack.fileIDRest = genericPack.fileIDRest
+                        byteExistsPack = existsPack.serialize(8)
+                        self.SecureUDP.sendto(byteExistsPack,node[0],node[1])
+
+            elif Type == 9:
+                print("(LocateRes) from ",addr[0],str(addr[1]))
+                responseLocate = obPackage(9)
+                responseLocate.unserialize(payload,9)
+                responseLocate.print_data()
+                if (responseLocate.fileIDByte1,responseLocate.fileIDRest) in self.locateMap: #If theres a exist request for that file id
+                    addrs = self.locateMap[(responseLocate.fileIDByte1,responseLocate.fileIDRest)]
+                    responseLocate = responseLocate.serialize(9)
+                    self.SecureUDP.sendto(responseLocate,addrs[0],addrs[1])
+                else:
+                    print("I dont have a exist request for that file")
+
             else:
                 self.packageQueue.put((payload,addr))
 
@@ -107,7 +148,7 @@ class blueNode:
             Type = int.from_bytes(bytePackage[:1], byteorder='big')
             genericPack = obPackage()
             if Type == 0:
-                print("(PutChunk) from ",package[1])
+                # print("(PutChunk) from ",package[1])
                 chunkPack = obPackage()
                 chunkPack.unserialize(bytePackage,0)
 
@@ -119,7 +160,7 @@ class blueNode:
                 else:
                     percentages = [0,0,0.96,0.04] # 0% save 0% save&Clone %96 clone 4% drop
                     result = self.putChunkRandomChoiceGenerator(percentages)
-                print("Accion ",actions[result])
+                # print("Accion ",actions[result])
                 if actions[result] == "save":
                     #Checks if the key exists
                     if (chunkPack.fileIDByte1,chunkPack.fileIDRest) in self.blueSavedChunks:
@@ -128,24 +169,31 @@ class blueNode:
                         
                     else:
                         #If not then creates a list witht the chunkID and chunkPayload and assign it to the key
-                        tempList = []
-                        tempList.append((chunkPack.chunkID,chunkPack.chunkPayload))
+                        tempList = [(chunkPack.chunkID,chunkPack.chunkPayload)]
                         self.blueSavedChunks[(chunkPack.fileIDByte1,chunkPack.fileIDRest)] = tempList
 
                     self.chunksStored += 1
                 elif actions[result] == "clone":
-                    totalNeighbors = len(self.neighborTuple)
-                    if totalNeighbors > 0:
-                        copyNeighborTuple = self.neighborTuple
-                        #Picks random how many neighbors are gonna get the chunk 
-                        randomNeighbors = random.randrange(1,totalNeighbors+1)
-                        #Picks random one neighbor
-                        for x in range(randomNeighbors):
-                            randomChoiceNeighbor = random.choice(list(copyNeighborTuple))
-                            #Creates a putChunk package
-                            serializedPutChunkPack = chunkPack.serialize(0)
-                            self.SecureUDP.sendto(serializedPutChunkPack,copyNeighborTuple[randomChoiceNeighbor][0],copyNeighborTuple[randomChoiceNeighbor][1])
-                            del copyNeighborTuple[randomChoiceNeighbor]
+                    listNode = self.getSpanningTreeNodes((package[1][0],package[1][1]))
+                    # print("Path ",listNode)
+                    #If theres a path to take
+                    if len(listNode) != 0:
+                        serializedPutChunkPack = chunkPack.serialize(0)
+                        for node in listNode:
+                            self.SecureUDP.sendto(serializedPutChunkPack,node[0],node[1])
+                    # totalNeighbors = len(self.neighborTuple)
+                    # if totalNeighbors > 0:
+                    #     copyNeighborTuple = self.neighborTuple.copy()
+                    #     #Picks random how many neighbors are gonna get the chunk 
+                    #     randomNeighbors = totalNeighbors #random.randrange(1,totalNeighbors+1)
+                    #     #Picks random one neighbor
+                    #     for x in range(randomNeighbors):
+                    #         randomChoiceNeighbor = random.choice(list(copyNeighborTuple))
+                    #     #     #Creates a putChunk package
+                    #         serializedPutChunkPack = chunkPack.serialize(0)
+                    #         # print("Clone to",copyNeighborTuple[randomChoiceNeighbor][0],str(copyNeighborTuple[randomChoiceNeighbor][1]))
+                    #         self.SecureUDP.sendto(serializedPutChunkPack,copyNeighborTuple[randomChoiceNeighbor][0],copyNeighborTuple[randomChoiceNeighbor][1])
+                    #         del copyNeighborTuple[randomChoiceNeighbor]
 
                 elif actions[result] == "save&Clone":
                     #Checks if the key exists
@@ -160,18 +208,29 @@ class blueNode:
                         self.blueSavedChunks[(chunkPack.fileIDByte1,chunkPack.fileIDRest)] = tempList
                     
                     self.chunksStored += 1
-                    totalNeighbors = len(self.neighborTuple)
-                    if totalNeighbors > 0:
-                        copyNeighborTuple = self.neighborTuple
-                        #Picks random how many neighbors are gonna get the chunk 
-                        randomNeighbors = random.randrange(1,totalNeighbors+1)
-                        #Picks random one neighbor
-                        for x in range(randomNeighbors):
-                            randomChoiceNeighbor = random.choice(list(copyNeighborTuple))
-                            #Creates a putChunk package
-                            serializedPutChunkPack = chunkPack.serialize(0)
-                            self.SecureUDP.sendto(serializedPutChunkPack,copyNeighborTuple[randomChoiceNeighbor][0],copyNeighborTuple[randomChoiceNeighbor][1])
-                            del copyNeighborTuple[randomChoiceNeighbor]
+
+
+                    listNode = self.getSpanningTreeNodes((package[1][0],package[1][1]))
+                    # print("Path ",listNode)
+                    #If theres a path to take
+                    if len(listNode) != 0:
+                        serializedPutChunkPack = chunkPack.serialize(0)
+                        for node in listNode:
+                            self.SecureUDP.sendto(serializedPutChunkPack,node[0],node[1])
+
+                    # totalNeighbors = len(self.neighborTuple)
+                    # if totalNeighbors > 0:
+                    #     copyNeighborTuple = self.neighborTuple.copy()
+                    #     #Picks random how many neighbors are gonna get the chunk 
+                    #     randomNeighbors = random.randrange(1,totalNeighbors+1)
+                    #     #Picks random one neighbor
+                    #     for x in range(randomNeighbors):
+                    #         randomChoiceNeighbor = random.choice(list(copyNeighborTuple))
+                    #         #Creates a putChunk package
+                    #         serializedPutChunkPack = chunkPack.serialize(0)
+                    #         # print("Save Clone to",copyNeighborTuple[randomChoiceNeighbor][0],str(copyNeighborTuple[randomChoiceNeighbor][1]))
+                    #         self.SecureUDP.sendto(serializedPutChunkPack,copyNeighborTuple[randomChoiceNeighbor][0],copyNeighborTuple[randomChoiceNeighbor][1])
+                    #         del copyNeighborTuple[randomChoiceNeighbor]
                 
 
  
@@ -194,8 +253,12 @@ class blueNode:
                 # else:
                 #     #Creates a putChunk package
                 #     serializedPutChunkPack = chunkPack.serialize(0)
-                #     for neighbor in self.neighborTuple:
-                #         self.SecureUDP.sendto(serializedPutChunkPack,self.neighborTuple[neighbor][0],self.neighborTuple[neighbor][1])
+                #     listNode = self.getSpanningTreeNodes((package[1][0],package[1][1]))
+                #     print("Path ",listNode)
+                #     #If theres a path to take
+                #     if len(listNode) != 0:
+                #         for node in listNode:
+                #             self.SecureUDP.sendto(serializedPutChunkPack,node[0],node[1])
 
             elif Type == 2:
                 print("(Exist) from ",package[1])
@@ -206,9 +269,9 @@ class blueNode:
                     responseExist = genericPack.serialize(3)
                     self.SecureUDP.sendto(responseExist,package[1][0],package[1][1])
                 else:
-                    print("I dont have a chunk. I need to ask my spanningTree")
+                    # print("I dont have a chunk. I need to ask my spanningTree")
                     listNode = self.getSpanningTreeNodes((package[1][0],package[1][1]))
-                    print("Path ",listNode)
+                    # print("Path ",listNode)
                     #If theres a path to take
                     if len(listNode) != 0:
                         self.existsMap[(genericPack.fileIDByte1,genericPack.fileIDRest)] = (package[1][0],package[1][1])
@@ -259,15 +322,20 @@ class blueNode:
                     daddyPackage.nodeID = self.myID
                     bytesDaddyPackage = daddyPackage.serialize(13)
                     self.SecureUDP.sendto(bytesDaddyPackage, self.sTreeDadNode[1], self.sTreeDadNode[2])
+            
+
+
+
+
 
     def getSpanningTreeNodes(self,addr): #Returns a list with the possible nodes to go from a inicial node in the spanningTree
         listNodes = []
         #Checks if the dadNode is not the one sending the msg
        # print("Dad ",self.sTreeDadNode[1],str(self.sTreeDadNode[2]))
         if self.myID != self.root:
-            if self.sTreeDadNode[1] != addr[0]:
+            if self.sTreeDadNode[0] != -1 and self.sTreeDadNode[1] != addr[0]:
                 listNodes.append((self.sTreeDadNode[1],self.sTreeDadNode[2]))
-            elif self.sTreeDadNode[2] != addr[1]:
+            elif self.sTreeDadNode[0] != -1 and self.sTreeDadNode[2] != addr[1]:
                 listNodes.append((self.sTreeDadNode[1],self.sTreeDadNode[2]))
         for node in self.sTreeSonsNodes: #(NodeID,IP,Port)
             #print("Sons ",node[1],str(node[2]))

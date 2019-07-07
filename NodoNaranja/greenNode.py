@@ -17,6 +17,7 @@ class greenNode:
     BlueIP = ""
     BluePort = 0
     existsMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT)
+    locateMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT,ListBlueNodes)
     inputQueue = queue.Queue() # Tuple (pack,addr)
 
     def __init__(self,myGroupID,MyID,BlueIP,BluePort):
@@ -59,10 +60,17 @@ class greenNode:
                 fileIDByte1 = input("Enter fileIDByte1: ")
                 fileIDRest = input("Enter fileIDRest: ")
                 #Creates a generic Exists package
-                existsPack = obPackage(2)
+                
+                TimeStamp = time.time()
+                ListBlueNodes = []
+                self.locateMap[(int(fileIDByte1),int(fileIDRest))] = (TimeStamp,self.BlueIP,self.BluePort,ListBlueNodes)
+                
+                existsPack = obPackage(8)
                 existsPack.fileIDByte1 = int(fileIDByte1)
                 existsPack.fileIDRest = int(fileIDRest)
-                serializedObject = existsPack.serialize(2)
+                serializedObject = existsPack.serialize(8)
+
+
                 self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
                 
@@ -112,7 +120,7 @@ class greenNode:
     def inputThread(self):
         while True:
             bytePackage , addr = self.SecureUDP.recivefrom()
-            print("re",bytePackage)
+            # print("re",bytePackage)
             self.inputQueue.put((bytePackage,addr))
 
 
@@ -121,11 +129,11 @@ class greenNode:
         while True:
             # If the queue is not empty
             if not self.inputQueue.empty():
-                print("IM in")
+                # print("IM in")
                 inputPack = self.inputQueue.get()
                 bytePackage = inputPack[0]
                 addr = inputPack[1] 
-                print(inputPack)
+                # print(inputPack)
                 Type = int.from_bytes(bytePackage[:1], byteorder='big')
                 genericPack = obPackage()
                 if Type == 3:
@@ -169,6 +177,28 @@ class greenNode:
                     self.existsMap[(existsPack.fileIDByte1,existsPack.fileIDRest)] = (TimeStamp,addr[0],addr[1])
                     serializedObject = existsPack.serialize(2)
                     self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
+                elif Type == 8:
+                    print("(Locate) from ",addr)
+                    locatePack = obPackage(8)
+                    locatePack.unserialize(bytePackage,8)
+                    TimeStamp = time.time()
+                    ListBlueNodes = []
+                    self.locateMap[(locatePack.fileIDByte1,locatePack.fileIDRest)] = (TimeStamp,addr[0],addr[1],addrListBlueNodes)
+                    serializedObject = locatePack.serialize(8)
+                    self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
+                elif Type == 9:
+                    print("(Locate Res) from ",addr)
+                    locateResPack = obPackage(9)
+                    locateResPack.unserialize(bytePackage,9)
+                    fileIDByte1 = locateResPack.fileIDByte1
+                    fileIDRest = locateResPack.fileIDRest
+                    #If theres a request for that FileID
+                    if (fileIDByte1,fileIDRest) in self.locateMap:
+                        #If the TimeOut is not over
+                        if (time.time() - self.locateMap[(fileIDByte1,fileIDRest)][0]) <= 10:
+                            #Add the blueNode to the listBlueNodes
+                            self.locateMap[(fileIDByte1,fileIDRest)][3].append(str(locateResPack.nodeID))
+                
             else:
                 #Checks TimeOuts for the exist request. TimeOut is 5s
                 for request in list(self.existsMap):
@@ -178,6 +208,16 @@ class greenNode:
                         serializedObject = genericPack.serialize(3)
                         self.SecureUDP.sendto(serializedObject,self.existsMap[request][1],self.existsMap[request][2])
                         del self.existsMap[request]
+
+                #Checks TimeOuts for the Locate request. TimeOut is 10s
+                for request in list(self.locateMap):
+                    if ( time.time() - self.locateMap[request][0]) > 10:
+                        print("Sending locateMap for ",request)
+                        locateListPack = obPackage(20)
+                        locateListPack.fileName = ';'.join(self.locateMap[request][3]) #1;2;...;4  NodeID;NodeID;...;NodeID
+                        byteLocateListPack = locateListPack.serialize(20)
+                        self.SecureUDP.sendto(byteLocateListPack,self.locateMap[request][1],self.locateMap[request][2])
+                        del self.locateMap[request]
 
 
 

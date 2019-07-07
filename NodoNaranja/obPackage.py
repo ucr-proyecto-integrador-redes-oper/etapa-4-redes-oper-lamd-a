@@ -60,7 +60,7 @@ class obPackage:
         elif tipo == 17: #graphComplete
             bytePacket = struct.pack('!b',self.packetCategory)
         elif tipo == 20: #dummyGreen to Green put Chunk
-            bytePacket = struct.pack('!bI',self.packetCategory,self.chunkID)
+            bytePacket = struct.pack('!b',self.packetCategory)
             bytePacket += self.fileName.encode(encoding='UTF-8',errors='replace')
 
         return bytePacket
@@ -139,10 +139,9 @@ class obPackage:
             processedPacket = struct.pack('!b', bytePacket)
             self.packetCategory = processedPacket[0]
         elif tipo == 20:
-            processedPacket = struct.unpack('!bI',bytePacket[:struct.calcsize('!bI')])
+            processedPacket = struct.unpack('!b',bytePacket[:struct.calcsize('!b')])
             self.packetCategory = processedPacket[0]
-            self.chunkID = processedPacket[1]
-            self.fileName = bytePacket[struct.calcsize('!bI'):].decode("utf-8")
+            self.fileName = bytePacket[struct.calcsize('!b'):].decode("utf-8")
 
 #----------------------------------------------------------
 
