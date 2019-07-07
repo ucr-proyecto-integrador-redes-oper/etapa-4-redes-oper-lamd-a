@@ -120,7 +120,7 @@ def SendExist(window,ip,port,fileIDByte1,fileIDRest):
 	existsPack.fileIDByte1 = int(fileIDByte1.get())
 	existsPack.fileIDRest = int(fileIDRest.get())
 
-	clear = Label(master=window,text="                                               ")
+	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
 	clear.grid(row=4,column=1)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
@@ -134,15 +134,15 @@ def SendExist(window,ip,port,fileIDByte1,fileIDRest):
 	bytePackage , addr = SecureUDP.recivefrom()
 	responsePack = obPackage(3)
 
-	clear = Label(master=window,text="                                               ")
+	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
 	clear.grid(row=4,column=1)
 	
 	responsePack.unserialize(bytePackage,3)
 	if responsePack.fileIDByte1 == 0:
-		label1 = Label(master=window,text="!!!File NOT found!!!!", font=("Helvetica", 14))
+		label1 = Label(master=window,text="FILE NOT found!!!!", font=("Helvetica", 14))
 		label1.grid(row=4,column=1)
 	else:
-		label1 = Label(master=window,text="File FOUND!!!!", font=("Helvetica", 14))
+		label1 = Label(master=window,text="FILE FOUND!!!!", font=("Helvetica", 14))
 		label1.grid(row=4,column=1)
 	window.grab_release()
 
@@ -193,7 +193,7 @@ def SendDelete(window,ip,port,fileIDByte1,fileIDRest):
 	byteExistPack = existsPack.serialize(2)
 	SecureUDP.sendto(byteExistPack,greenIP,greenPort)
 
-	label1 = Label(master=window,text="File DELETED!!!!", font=("Helvetica", 14))
+	label1 = Label(master=window,text="FILE DELETED!!!!", font=("Helvetica", 14))
 	label1.grid(row=4,column=1)
 
 	window.deiconify()
@@ -225,11 +225,9 @@ def delete(window):
 	entry4.grid(row=3,column=1)
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: SendDelete(slave,entry1,entry2,entry3,entry4))
-	#button1.grid(row=4,column=0)
 	button1.place(relx = 0.10, rely = 0.65)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
-	#button1.grid(row=5,column=0)
 	button1.place(relx = 0.40, rely = 0.65)
 #-------------------------------Delete-----------------------------------------------
 
@@ -267,13 +265,12 @@ def complete(window):
 	button1.place(relx = 0.40, rely = 0.55)
 
 def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
-	
 	window.grab_set()
-	completePack = obPackage(4)
+	completePack = obPackage(4) #Tipe 4
 	completePack.fileIDByte1 = int(fileIDByte1.get())
 	completePack.fileIDRest = int(fileIDRest.get())
 
-	clear = Label(master=window,text="                                               ")
+	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
 	clear.grid(row=4,column=1)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
@@ -287,18 +284,152 @@ def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
 	bytePackage , addr = SecureUDP.recivefrom()
 	responsePack = obPackage(3)
 
-	clear = Label(master=window,text="                                               ")
+	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
 	clear.grid(row=4,column=1)
 	
 	responsePack.unserialize(bytePackage,3)
 	if responsePack.fileIDByte1 == 0:
-		label1 = Label(master=window,text="!!!File NOT COMPLETE!!!!", font=("Helvetica", 14))
+		label1 = Label(master=window,text="FILE NOT COMPLETE!!!!", font=("Helvetica", 14))
 		label1.grid(row=4,column=1)
 	else:
-		label1 = Label(master=window,text="File COMPLETE!!!!", font=("Helvetica", 14))
+		label1 = Label(master=window,text="FILE COMPLETED!!!!", font=("Helvetica", 14))
 		label1.grid(row=4,column=1)
 	window.grab_release()
 #-------------------------------Complete-----------------------------------------------
+
+#-------------------------------Locate-----------------------------------------------
+def locate(window):
+	window.withdraw()
+	slave = Tk()
+	slave.title("Locate")
+	slave.geometry("500x200")
+	
+	lbl1 = Label(master=slave,text="Insert IP: ", font=("Helvetica", 14))
+	lbl1.grid(row=0, column=0)
+	entry1 = Entry(slave)
+	entry1.grid(row=0,column=1)
+
+	lbl2 = Label(master=slave,text="Insert Port: ", font=("Helvetica", 14))
+	lbl2.grid(row=1, column=0)
+	entry2 = Entry(slave)
+	entry2.grid(row=1,column=1)
+
+	lbl3 = Label(master=slave,text="First Number File ID: ", font=("Helvetica", 14))
+	lbl3.grid(row=2, column=0)
+	entry3 = Entry(slave)
+	entry3.grid(row=2,column=1)
+
+	lbl4 = Label(master=slave,text="Second Number File ID: ", font=("Helvetica", 14))
+	lbl4.grid(row=3, column=0)
+	entry4 = Entry(slave)
+	entry4.grid(row=3,column=1)
+
+	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: sendLocate(slave,entry1,entry2,entry3,entry4))
+	button1.place(relx = 0.10, rely = 0.55)
+
+	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
+	button1.place(relx = 0.40, rely = 0.55)
+
+def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
+	window.grab_set()
+	locatePack = obPackage(8) #Tipe 8
+	locatePack.fileIDByte1 = int(fileIDByte1.get())
+	locatePack.fileIDRest = int(fileIDRest.get())
+
+	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
+	clear.grid(row=4,column=1)
+
+	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
+	label1.grid(row=4,column=1)
+
+	greenIP = ip.get()
+	greenPort = int(port.get())
+	byteLocatePack = locatePack.serialize(2)
+	SecureUDP.sendto(byteLocatePack,greenIP,greenPort)
+
+	bytePackage , addr = SecureUDP.recivefrom()
+	responsePack = obPackage(3)
+
+	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
+	clear.grid(row=4,column=1)
+	
+	responsePack.unserialize(bytePackage,3)
+	if responsePack.fileIDByte1 == 0:
+		label1 = Label(master=window,text="FILE CAN NOT BE LOCATE!!!!", font=("Helvetica", 14))
+		label1.grid(row=4,column=1)
+	else:
+		label1 = Label(master=window,text="FILE LOCATED!!!!", font=("Helvetica", 14))
+		label1.grid(row=4,column=1)
+	window.grab_release()
+
+#-------------------------------Locate-----------------------------------------------
+
+#-------------------------------GET-----------------------------------------------
+def get(window):
+	window.withdraw()
+	slave = Tk()
+	slave.title("Get")
+	slave.geometry("500x200")
+	
+	lbl1 = Label(master=slave,text="Insert IP: ", font=("Helvetica", 14))
+	lbl1.grid(row=0, column=0)
+	entry1 = Entry(slave)
+	entry1.grid(row=0,column=1)
+
+	lbl2 = Label(master=slave,text="Insert Port: ", font=("Helvetica", 14))
+	lbl2.grid(row=1, column=0)
+	entry2 = Entry(slave)
+	entry2.grid(row=1,column=1)
+
+	lbl3 = Label(master=slave,text="First Number File ID: ", font=("Helvetica", 14))
+	lbl3.grid(row=2, column=0)
+	entry3 = Entry(slave)
+	entry3.grid(row=2,column=1)
+
+	lbl4 = Label(master=slave,text="Second Number File ID: ", font=("Helvetica", 14))
+	lbl4.grid(row=3, column=0)
+	entry4 = Entry(slave)
+	entry4.grid(row=3,column=1)
+
+	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: sendGet(slave,entry1,entry2,entry3,entry4))
+	button1.place(relx = 0.10, rely = 0.55)
+
+	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
+	button1.place(relx = 0.40, rely = 0.55)
+
+def sendGet(window,ip,port,fileIDByte1,fileIDRest):
+	window.grab_set()
+	getPack = obPackage(6) #Tipe 6
+	getPack.fileIDByte1 = int(fileIDByte1.get())
+	getPack.fileIDRest = int(fileIDRest.get())
+
+	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
+	clear.grid(row=4,column=1)
+
+	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
+	label1.grid(row=4,column=1)
+
+	greenIP = ip.get()
+	greenPort = int(port.get())
+	byteGetPack = getPack.serialize(2)
+	SecureUDP.sendto(byteGetPack,greenIP,greenPort)
+
+	bytePackage , addr = SecureUDP.recivefrom()
+	responsePack = obPackage(3)
+
+	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
+	clear.grid(row=4,column=1)
+	
+	responsePack.unserialize(bytePackage,3)
+	if responsePack.fileIDByte1 == 0:
+		label1 = Label(master=window,text="UNABLE TO GET FILE!!!!", font=("Helvetica", 14))
+		label1.grid(row=4,column=1)
+	else:
+		label1 = Label(master=window,text="FILE GETTED!!!!", font=("Helvetica", 14))
+		label1.grid(row=4,column=1)
+	window.grab_release()
+
+#-------------------------------GET-----------------------------------------------
 
 def fileList():
 	global  filesList
@@ -345,17 +476,17 @@ button3.place(relx = 0.01, rely =  0.70)
 button4 = Button(text="Complete", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: complete(root))
 button4.place(relx = 0.01, rely =  0.55)
 
-button5 = Button(text="Locate", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+button5 = Button(text="Locate", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: locate(root))
 button5.place(relx = 0.33, rely =  0.40)
 
-button6 = Button(text="Get", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+button6 = Button(text="Get", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: get(root))
 button6.place(relx = 0.33, rely =  0.55)
 
-button6 = Button(text="NEPE2", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
-button6.place(relx = 0.33, rely =  0.70)
+#button6 = Button(text="NEPE2", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
+#button6.place(relx = 0.33, rely =  0.70)
 
-button7 = Button(text="Chunck", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
-button7.place(relx = 0.15, rely =  0.85)
+button7 = Button(text="Chunck", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root)) # Este es el raro
+button7.place(relx = 0.33, rely =  0.70)
 
 quitBottom = Button(text="QUIT", fg="red", bd = 3, font = ("Helvetica", 16), command=lambda: root.destroy())
 #quitBottom.grid(row = 7, column = 3)
