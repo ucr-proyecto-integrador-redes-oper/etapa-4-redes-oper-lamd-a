@@ -2,8 +2,6 @@
 # filename = askopenfilename()
 # print(filename)
 
-
-
 from tkinter import filedialog
 from tkinter import *
 from SecureUDP import SecureUdp
@@ -11,6 +9,9 @@ from obPackage import obPackage
 import os
 import math
 from tkinter import messagebox
+import PIL 
+import PIL.Image
+import PIL.ImageTk
 
 rowIndex = 1
 filesList = [] #Tuple (filename, FileID)
@@ -21,7 +22,7 @@ filename = "hola.png"
 
 def putFileLogic(fatherWindow,entry1,entry2):
 	global rowIndex
-	global  filesList
+	global filesList
 	global filename
 	fatherWindow.grab_set()
 	rowIndex +=1
@@ -95,10 +96,6 @@ def putFile(fatherWindow):
 
 	addFileButton = Button(slave,text="Add a new file",command=lambda: addNewFile(slave))
 	addFileButton.grid(row=7,column=0)
-
-
-
-
 
 
 def goBack(myWindow,fatherWindow):
@@ -248,19 +245,25 @@ def fileList():
 
 root = Tk()
 
-root.title("LAMDa Green")
-root.geometry("300x100")
-button2 = Button(text="SeeFiles", command=fileList)
-# button2.pack(anchor=W)          #row=0, column=3)
-button2.grid(row=0, column=0)
-button2 = Button(text="PutFile", command=lambda: putFile(root))
-button2.grid(row=1, column=0)
-button2 = Button(text="Exist", command=lambda: exits(root))
-# button2.pack(anchor=W)#row=0, column=6)
+root.title("Green Node")
+root.geometry("600x500")
+
+button = Button(text="SeeFiles", command=fileList)
+button.grid(row=0, column=0) # Lo pone en una pos
+
+button1 = Button(text="PutFile", font = ("Helvetica", 16), command=lambda: putFile(root))
+button1.grid(row=1, column=0)
+
+button2 = Button(text="Exist", fg="green", command=lambda: exits(root))
 button2.grid(row=2,column=0)
 
-button3 = Button(text="Delete", command=lambda: delete(root))
+button3 = Button(text="Delete", fg="green", command=lambda: delete(root))
 button3.grid(row=2, column=1)
 
-root.mainloop()
+quitBottom = Button(text="Quit", fg="red", command=lambda: quit())
+quitBottom.grid(row = 3, colum = 0)
 
+root.mainloop()
+"""
+
+"""
