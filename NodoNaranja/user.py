@@ -14,6 +14,8 @@ import PIL
 import PIL.Image
 import PIL.ImageTk
 
+
+
 rowIndex = 1
 filesList = [] #Tuple (filename, FileID)
 SecureUDP = SecureUDP = SecureUdp(10,4,True)
@@ -344,21 +346,22 @@ def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
-	byteLocatePack = locatePack.serialize(2)
+	byteLocatePack = locatePack.serialize(8)
 	SecureUDP.sendto(byteLocatePack,greenIP,greenPort)
 
 	bytePackage , addr = SecureUDP.recivefrom()
-	responsePack = obPackage(3)
+	responsePack = obPackage(9)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
 	clear.grid(row=4,column=1)
 	
-	responsePack.unserialize(bytePackage,3)
-	if responsePack.fileIDByte1 == 0:
+	responsePack.unserialize(bytePackage,9)
+	if len(responsePack.filename) == 0:
 		label1 = Label(master=window,text="FILE CAN NOT BE LOCATE!!!!", font=("Helvetica", 14))
 		label1.grid(row=4,column=1)
 	else:
 		label1 = Label(master=window,text="FILE LOCATED!!!!", font=("Helvetica", 14))
+		print(responsePack.filename)
 		label1.grid(row=4,column=1)
 	window.grab_release()
 
