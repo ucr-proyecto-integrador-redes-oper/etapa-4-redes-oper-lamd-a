@@ -183,7 +183,7 @@ class greenNode:
                     locatePack.unserialize(bytePackage,8)
                     TimeStamp = time.time()
                     ListBlueNodes = []
-                    self.locateMap[(locatePack.fileIDByte1,locatePack.fileIDRest)] = (TimeStamp,addr[0],addr[1],addrListBlueNodes)
+                    self.locateMap[(locatePack.fileIDByte1,locatePack.fileIDRest)] = (TimeStamp,addr[0],addr[1],ListBlueNodes)
                     serializedObject = locatePack.serialize(8)
                     self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
                 elif Type == 9:
