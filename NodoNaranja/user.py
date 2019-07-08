@@ -350,18 +350,18 @@ def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 	SecureUDP.sendto(byteLocatePack,greenIP,greenPort)
 
 	bytePackage , addr = SecureUDP.recivefrom()
-	responsePack = obPackage(9)
+	responsePack = obPackage(20)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
 	clear.grid(row=4,column=1)
 	
-	responsePack.unserialize(bytePackage,9)
-	if len(responsePack.filename) == 0:
+	responsePack.unserialize(bytePackage,20)
+	if len(responsePack.fileName) == 0:
 		label1 = Label(master=window,text="FILE CAN NOT BE LOCATE!!!!", font=("Helvetica", 14))
 		label1.grid(row=4,column=1)
 	else:
 		label1 = Label(master=window,text="FILE LOCATED!!!!", font=("Helvetica", 14))
-		print(responsePack.filename)
+		print(responsePack.fileName)
 		label1.grid(row=4,column=1)
 	window.grab_release()
 
