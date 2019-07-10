@@ -225,6 +225,17 @@ class greenNode:
 							#Add the blueNode to the listBlueNodes
 							self.locateMap[(fileIDByte1,fileIDRest)][3].append(str(locateResPack.nodeID))
 
+				elif Type == 10:
+					print("(Delete) from ",addr)
+					deletePack = obPackage(10)
+					deletePack.unserialize(bytePackage,10)
+					if (deletePack.fileIDByte1,deletePack.fileIDRest) in self.fileDataBase:
+						del self.fileDataBase[(deletePack.fileIDByte1,deletePack.fileIDRest)]
+						serializedObject = deletePack.serialize(10)
+						self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
+					else:
+						print("I dont have that fileID")
+
 				elif Type == 4: #UNTESTED UNTESTED
 					print("(COMPLETE) from ",addr)
 					completePack = obPackage(Type)
@@ -323,8 +334,10 @@ class greenNode:
 							filename = "ArchivosReensamblado/" + filename
 							fd = os.open(filename, os.O_RDWR|os.O_CREAT )
 							for chunk in listChunks:
+								print("[",str(chunk[0]),"] ", end = '')
 								os.write(fd,chunk[1])
 							os.close(fd)
+							print(" ")
 							# getResPack = obPackage(7)
 							# byteGetResPack = getResPack.serialize(7)
 							# self.SecureUDP.sendto(byteGetResPack,self.getMap[request][1],self.getMap[request][2])

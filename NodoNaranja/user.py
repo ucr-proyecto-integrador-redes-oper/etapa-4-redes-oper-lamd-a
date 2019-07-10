@@ -186,14 +186,14 @@ def exits(window):
 #-------------------------------Delete-----------------------------------------------
 def SendDelete(window,ip,port,fileIDByte1,fileIDRest):
 	window.withdraw()
-	existsPack = obPackage(10) #Tipo 10
-	existsPack.fileIDByte1 = int(fileIDByte1.get())
-	existsPack.fileIDRest = int(fileIDRest.get())
+	deletePack = obPackage(10) #Tipo 10
+	deletePack.fileIDByte1 = int(fileIDByte1.get())
+	deletePack.fileIDRest = int(fileIDRest.get())
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
-	byteExistPack = existsPack.serialize(2)
-	SecureUDP.sendto(byteExistPack,greenIP,greenPort)
+	byteDeletePack = deletePack.serialize(10)
+	SecureUDP.sendto(byteDeletePack,greenIP,greenPort)
 
 	label1 = Label(master=window,text="FILE DELETED!!!!", font=("Helvetica", 14))
 	label1.place(relx = 0.10, rely = 0.65)
@@ -227,10 +227,10 @@ def delete(window):
 	entry4.grid(row=3,column=1)
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: SendDelete(slave,entry1,entry2,entry3,entry4))
-	button1.place(relx = 0.10, rely = 0.65)
+	button1.place(relx = 0.10, rely = 0.75)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
-	button1.place(relx = 0.40, rely = 0.65)
+	button1.place(relx = 0.40, rely = 0.75)
 #-------------------------------Delete-----------------------------------------------
 
 #-------------------------------Complete-----------------------------------------------

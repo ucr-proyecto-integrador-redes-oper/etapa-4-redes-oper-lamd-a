@@ -220,6 +220,8 @@ class blueNode:
 
 				#If I have that FileID delete all the chunks
 				if (deletePack.fileIDByte1,deletePack.fileIDRest) in self.blueSavedChunks:
+					totalChunks = len(self.blueSavedChunks[(deletePack.fileIDByte1,deletePack.fileIDRest)])
+					self.chunksStored -=  totalChunks
 					del self.blueSavedChunks[(deletePack.fileIDByte1,deletePack.fileIDRest)]
 				
 				#Sending delete request to the rest of the spanning three
@@ -241,6 +243,16 @@ class blueNode:
 			user = input()
 			if user == '$':
 				print("myID ",str(self.myID)," neighbors: ",self.neighborTuple," imInTheSpanningTree:",self.imInTheSpanningTree," sTreeDadNode: ",self.sTreeDadNode,"sTreeSonsNodes ",self.sTreeSonsNodes ," chunksStored: ",self.chunksStored)
+			elif user == "%":
+				fileIDByte1 = input("Enter fileIDByte1 ")
+				fileIDRest = input("Enter fileIDRest ")
+				if (int(fileIDByte1),int(fileIDRest)) in self.blueSavedChunks:
+					lista = self.blueSavedChunks[(int(fileIDByte1),int(fileIDRest))]
+					print("Total chunks: ",str(len(lista)))
+					for chunkID in lista:
+						print("[",str(chunkID[0]),"] ", end = '')
+					print(" ")
+				
 
 	def logicalThread(self):
 		while True:
@@ -255,14 +267,14 @@ class blueNode:
 				chunkPack.unserialize(bytePackage,0)
 
 				actions = ["save","save&Clone","clone","drop"]
-				percentages = [0.44,0.30,0.26,0] # 44% save 30% save&Clone %26 clone 0% drop
+				percentages = [0.80,0,0.20,0] # 80% save 0% save&Clone %20 clone 0% drop
 				result = 0
 				if self.chunksStored < self.maxChunks:
 					result = self.putChunkRandomChoiceGenerator(percentages)
 				else:
 					percentages = [0,0,1,0] # 0% save 0% save&Clone %100 clone 0% drop
 					result = self.putChunkRandomChoiceGenerator(percentages)
-				# print("Accion ",actions[result])
+				print("Accion ",actions[result])
 				if actions[result] == "save":
 					#Checks if the key exists
 					if (chunkPack.fileIDByte1,chunkPack.fileIDRest) in self.blueSavedChunks:
@@ -275,13 +287,16 @@ class blueNode:
 
 					self.chunksStored += 1
 				elif actions[result] == "clone":
-					listNode = self.getSpanningTreeNodes((package[1][0],package[1][1]))
+					ramdomNeighbor random.choice(self.neighborTuple)
+					self.SecureUDP.sendto(serializedPutChunkPack,ramdomNeighbor[0],ramdomNeighbor[1])
+					# listNode = self.getSpanningTreeNodes((package[1][0],package[1][1]))
 					# print("Path ",listNode)
+
 					#If theres a path to take
-					if len(listNode) != 0:
-						serializedPutChunkPack = chunkPack.serialize(0)
-						for node in listNode:
-							self.SecureUDP.sendto(serializedPutChunkPack,node[0],node[1])
+					# if len(listNode) != 0:
+					# 	serializedPutChunkPack = chunkPack.serialize(0)
+					# 	for node in listNode:
+					# 		self.SecureUDP.sendto(serializedPutChunkPack,node[0],node[1])
 					# totalNeighbors = len(self.neighborTuple)
 					# if totalNeighbors > 0:
 					#     copyNeighborTuple = self.neighborTuple.copy()
