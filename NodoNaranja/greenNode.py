@@ -19,8 +19,9 @@ class greenNode:
 	existsMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT)
 	locateMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT,ListBlueNodes)
 	getMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT,DictChunks,filename) DictChunks = [key = chunkID] = Chunk
-	completeRequestsMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT)
-	completeChunkIDAccumulator = [] # 
+	completeMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT,ListChunkIDs)
+	ListChunkIDs = []
+	#completeChunkIDAccumulator = [] # 
 	inputQueue = queue.Queue() # Tuple (pack,addr)
 
 	def __init__(self,myGroupID,MyID,BlueIP,BluePort):
@@ -79,7 +80,6 @@ class greenNode:
 				fileIDByte1 = input("Enter fileIDByte1: ")
 				fileIDRest = input("Enter fileIDRest: ")
 				filename = input("Enter filename: ")
-				chunkNumber = input("Enter the ammount of chunks: ")
 				#Creates a generic Complete package
 				completePack = obPackage(22)
 				completePack.fileIDByte1 = int(fileIDByte1)
@@ -230,9 +230,10 @@ class greenNode:
 				elif Type == 4: #UNTESTED UNTESTED
 					print("(COMPLETE) from ",addr)
 					completePack = obPackage(Type)
-					completePack.unserialize(bytePackage,Type)
+					completePack.unserialize(bytePackage,Type)					
 					TimeStamp = time.time()
-					self.completeRequestsMap[(completePack.fileIDByte1,completePack.fileIDRest)] = (TimeStamp,addr[0],addr[1])
+					ListChunkIDs = [False] * self.fileDataBase[completePack.fileIDByte1,completePack.fileIDRest][3] #obtain chunkNumber from filedatabase
+					self.completeMap[(completePack.fileIDByte1,completePack.fileIDRest)] = (TimeStamp,addr[0],addr[1],ListChunkIDs)					
 					serializedObject = completePack.serialize(Type)
 					self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
@@ -246,11 +247,12 @@ class greenNode:
 					chunk = completeResPack.chunkPayload
 					print(completeResPack.chunkPayload)
 					#If theres a request for that FileID
-					if (fileIDByte1,fileIDRest) in self.completeChunkIDAccumulator:
+					if (fileIDByte1,fileIDRest) in self.completeMap:
 						#If the TimeOut is not over
-						if (time.time() - self.completeChunkIDAccumulator[(fileIDByte1,fileIDRest)][0]) <= 10:
+						if (time.time() - self.completeMap[(fileIDByte1,fileIDRest)][0]) <= 10:							
 							#Add the blueNode to the DictChunks
-							self.completeChunkIDAccumulator[(fileIDByte1,fileIDRest)][3][chunkID] = chunk				
+							self.completeMap[(fileIDByte1,fileIDRest)][3][chunkID] = True
+
 
 				elif Type == 6:
 					print("(Get) from ",addr)
@@ -300,6 +302,18 @@ class greenNode:
 						self.SecureUDP.sendto(byteLocateListPack,self.locateMap[request][1],self.locateMap[request][2])
 						del self.locateMap[request]
 
+				#Checks TimeOuts for the Complete request. TimeOut is 10s
+				for request in list(self.completeMap):
+					if ( time.time() - self.completeMap[request][0]) > 10:
+						print("Sending completeMap for ",request)
+						completeResponsePack = obPackage(5)						
+						completeResponsePack.fileIDByte1, completeResponsePack.fileIDRest = request
+						allpacksavailable = all(chunkID == True for chunkID in self.completeMap[request][3])
+						completeResponsePack.chunkID = allpacksavailable
+						bytecompleteResponsePack = completeResponsePack.serialize(5)
+						self.SecureUDP.sendto(bytecompleteResponsePack,self.locateMap[request][1],self.locateMap[request][2])
+						del self.completeMap[request]
+
 				#Checks TimeOuts for the Get request. TimeOut is 10s
 				for request in list(self.getMap):
 					if ( time.time() - self.getMap[request][0]) > 10:
@@ -323,16 +337,6 @@ class greenNode:
 							byteResp = resp.serialize(21)
 							self.SecureUDP.sendto(byteResp,self.getMap[request][1],self.getMap[request][2])
 						del self.getMap[request]
-
-
-
-
-
-
-
-
-
-
 
 def main():
 	if len(sys.argv) == 5:
