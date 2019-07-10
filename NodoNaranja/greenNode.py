@@ -117,7 +117,7 @@ class greenNode:
 		self.fileDataBase[(fileIDByte1,fileIDRest)] = (filename, totalChunks)
 
 		#Envia los chunks
-		for chunkID in range(totalChunks):             
+		for chunkID in range(totalChunks):
 			
 			fileSlice = os.read(fd,1024)
 			chunkPacketToSend.chunkPayload = fileSlice
@@ -134,8 +134,6 @@ class greenNode:
 			bytePackage , addr = self.SecureUDP.recivefrom()
 			# print("re",bytePackage)
 			self.inputQueue.put((bytePackage,addr))
-
-
 
 	def logicThread(self):
 		while True:
@@ -232,7 +230,7 @@ class greenNode:
 					completePack = obPackage(Type)
 					completePack.unserialize(bytePackage,Type)					
 					TimeStamp = time.time()
-					ListChunkIDs = [False] * self.fileDataBase[completePack.fileIDByte1,completePack.fileIDRest][3] #obtain chunkNumber from filedatabase
+					ListChunkIDs = [False] * self.fileDataBase[completePack.fileIDByte1,completePack.fileIDRest][1] #obtain chunkNumber from filedatabase
 					self.completeMap[(completePack.fileIDByte1,completePack.fileIDRest)] = (TimeStamp,addr[0],addr[1],ListChunkIDs)					
 					serializedObject = completePack.serialize(Type)
 					self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
@@ -311,7 +309,7 @@ class greenNode:
 						allpacksavailable = all(chunkID == True for chunkID in self.completeMap[request][3])
 						completeResponsePack.chunkID = allpacksavailable
 						bytecompleteResponsePack = completeResponsePack.serialize(5)
-						self.SecureUDP.sendto(bytecompleteResponsePack,self.locateMap[request][1],self.locateMap[request][2])
+						self.SecureUDP.sendto(bytecompleteResponsePack,self.completeMap[request][1],self.completeMap[request][2])
 						del self.completeMap[request]
 
 				#Checks TimeOuts for the Get request. TimeOut is 10s

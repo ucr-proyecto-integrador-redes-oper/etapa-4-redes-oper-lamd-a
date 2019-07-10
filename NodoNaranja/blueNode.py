@@ -177,6 +177,7 @@ class blueNode:
 			
 			elif Type == 4: #UNTESTED UNTESTED UNTESTED
 				print("(Complete) from", addr)
+				genericPack = obPackage(Type)
 				genericPack.unserialize(payload,Type)
 				self.completeMap[(genericPack.fileIDByte1,genericPack.fileIDRest)] = (addr[0],addr[1]) 
 				#Checks if I have a chunk of that file
