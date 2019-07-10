@@ -283,19 +283,19 @@ def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
 	byteCompletePack = completePack.serialize(4)
 	SecureUDP.sendto(byteCompletePack,greenIP,greenPort)
 
-	# bytePackage , addr = SecureUDP.recivefrom()
-	# responsePack = obPackage(4)
+	bytePackage , addr = SecureUDP.recivefrom()
+	responsePack = obPackage(5)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
 	clear.place(relx = 0.10, rely = 0.65)
 	
-	# responsePack.unserialize(bytePackage,3)
-	# if responsePack.fileIDByte1 == 0:
-	# 	label1 = Label(master=window,text="FILE NOT COMPLETE!!!!", font=("Helvetica", 14))
-	# 	label1.place(relx = 0.10, rely = 0.65)
-	# else:
-	# 	label1 = Label(master=window,text="FILE COMPLETED!!!!", font=("Helvetica", 14))
-	# 	label1.place(relx = 0.10, rely = 0.70)
+	responsePack.unserialize(bytePackage,3)
+	if responsePack.chunkID == 0:
+		label1 = Label(master=window,text="FILE NOT COMPLETE!!!!", font=("Helvetica", 14))
+		label1.place(relx = 0.10, rely = 0.65)
+	else:
+		label1 = Label(master=window,text="FILE COMPLETED!!!!", font=("Helvetica", 14))
+		label1.place(relx = 0.10, rely = 0.70)
 	window.grab_release()
 #-------------------------------Complete-----------------------------------------------
 
