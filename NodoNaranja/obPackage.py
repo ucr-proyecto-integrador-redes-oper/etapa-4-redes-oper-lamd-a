@@ -62,6 +62,9 @@ class obPackage:
         elif tipo == 20: #dummyGreen to Green put Chunk
             bytePacket = struct.pack('!b',self.packetCategory)
             bytePacket += self.fileName.encode(encoding='UTF-8',errors='replace')
+        elif tipo == 21:
+            bytePacket = struct.pack('!bBH',self.packetCategory,self.fileIDByte1,self.fileIDRest)
+            bytePacket += self.fileName.encode(encoding='UTF-8',errors='replace')
 
         return bytePacket
 
@@ -142,22 +145,30 @@ class obPackage:
             processedPacket = struct.unpack('!b',bytePacket[:struct.calcsize('!b')])
             self.packetCategory = processedPacket[0]
             self.fileName = bytePacket[struct.calcsize('!b'):].decode("utf-8")
+        elif tipo == 21:
+            processedPacket = struct.unpack('!bBH', bytePacket[:struct.calcsize('!bBH')])
+            self.packetCategory = processedPacket[0]
+            self.fileIDByte1 = processedPacket[1]
+            self.fileIDRest = processedPacket[2]
+            self.fileName = bytePacket[struct.calcsize('!bBH'):].decode("utf-8")
 
 #----------------------------------------------------------
 
 
 def main():
     filename = "diego.png"
-    obPackagex = obPackage(20)
+    obPackagex = obPackage(21)
+    obPackagex.fileIDByte1 = 1
+    obPackagex.fileIDRest = 3
     obPackagex.fileName = filename
     obPackagex.chunkID = 983
     obPackagex.print_data()
     
-    serializedObject = obPackagex.serialize(20)
+    serializedObject = obPackagex.serialize(21)
     print(serializedObject)
 
-    obPackagex2 = obPackage(20)
-    obPackagex2.unserialize(serializedObject,20)
+    obPackagex2 = obPackage(21)
+    obPackagex2.unserialize(serializedObject,21)
     obPackagex2.print_data()
 
 
