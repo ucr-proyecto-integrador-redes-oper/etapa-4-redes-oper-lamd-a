@@ -13,7 +13,9 @@ from tkinter import messagebox
 import PIL 
 import PIL.Image
 import PIL.ImageTk
-
+#import pygame
+#import wave
+import playsound
 
 
 rowIndex = 1
@@ -317,10 +319,10 @@ def locate(window):
 	entry4.grid(row=3,column=1)
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: sendLocate(slave,entry1,entry2,entry3,entry4))
-	button1.place(relx = 0.10, rely = 0.55)
+	button1.place(relx = 0.10, rely = 0.75)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
-	button1.place(relx = 0.40, rely = 0.55)
+	button1.place(relx = 0.40, rely = 0.75)
 
 def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 	window.grab_set()
@@ -444,6 +446,10 @@ def fileList():
 	for x in range(len(filesList)):
 		lbl2 = Label(master=fileListWindow,text=filesList[x])
 		lbl2.grid(row=x, column=0)
+
+def play():
+	playsound.playsound("/home/akka/Downloads/jugo.mp3")
+
 root = Tk()
 
 root.title("Green Node")
@@ -464,9 +470,9 @@ button = Button(text="SeeFiles", bd = 3, font = ("Helvetica", 16),command=fileLi
 #button.grid(row=0, column=0) # Lo pone en una pos
 button.place(relx = 0.01, rely =  0.05)
 
-button1 = Button(text="LoadFile", bd = 3, font = ("Helvetica", 16), command=lambda: putFile(root))
+button1 = Button(text="LoadFile",fg="green", bd = 3, width=10, font = ("Helvetica", 16), command=lambda: putFile(root))
 #button1.grid(row=1, column=0)
-button1.place(relx = 0.01, rely =  0.20)
+button1.place(relx = 0.33, rely =  0.70)
 
 button2 = Button(text="Exist", fg="green", bd = 3,  width=10, font = ("Helvetica", 16),command=lambda: exits(root))
 #button2.grid(row=5,column=0)
@@ -488,8 +494,8 @@ button6.place(relx = 0.33, rely =  0.55)
 #button6 = Button(text="NEPE2", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
 #button6.place(relx = 0.33, rely =  0.70)
 
-button7 = Button(text="Chunck", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root)) # Este es el raro
-button7.place(relx = 0.33, rely =  0.70)
+button7 = Button(text="Don't", fg="red", bd = 3, font = ("Helvetica", 20),command=lambda: play()) # Este es el raro
+button7.place(relx = 0.80, rely =  0.10)
 
 quitBottom = Button(text="QUIT", fg="red", bd = 3, font = ("Helvetica", 16), command=lambda: root.destroy())
 #quitBottom.grid(row = 7, column = 3)
