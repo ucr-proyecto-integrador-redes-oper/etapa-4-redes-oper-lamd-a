@@ -18,6 +18,7 @@ class greenNode:
     BluePort = 0
     existsMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT)
     locateMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT,ListBlueNodes)
+    getMap = {} # [key = (fileIDByte1,fileIDRest)] = (TimeStamp,IP,PORT,DictChunks,filename) DictChunks = [key = chunkID] = Chunk
     inputQueue = queue.Queue() # Tuple (pack,addr)
 
     def __init__(self,myGroupID,MyID,BlueIP,BluePort):
@@ -59,18 +60,17 @@ class greenNode:
                 print("Going to check if a file exist")
                 fileIDByte1 = input("Enter fileIDByte1: ")
                 fileIDRest = input("Enter fileIDRest: ")
+                filename = input("Enter filename: ")
                 #Creates a generic Exists package
                 
+                print("(Get) from ")
+                getPack = obPackage(6)
+                getPack.fileIDByte1 = int(fileIDByte1)
+                getPack.fileIDRest = int(fileIDRest)
                 TimeStamp = time.time()
-                ListBlueNodes = []
-                self.locateMap[(int(fileIDByte1),int(fileIDRest))] = (TimeStamp,self.BlueIP,self.BluePort,ListBlueNodes)
-                
-                existsPack = obPackage(8)
-                existsPack.fileIDByte1 = int(fileIDByte1)
-                existsPack.fileIDRest = int(fileIDRest)
-                serializedObject = existsPack.serialize(8)
-
-
+                ListBlueNodes = {}
+                self.getMap[(getPack.fileIDByte1,getPack.fileIDRest)] = (TimeStamp,self.BlueIP,self.BluePort,ListBlueNodes,filename)
+                serializedObject = getPack.serialize(6)
                 self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
                 
@@ -198,6 +198,33 @@ class greenNode:
                         if (time.time() - self.locateMap[(fileIDByte1,fileIDRest)][0]) <= 10:
                             #Add the blueNode to the listBlueNodes
                             self.locateMap[(fileIDByte1,fileIDRest)][3].append(str(locateResPack.nodeID))
+
+                elif Type == 6:
+                    print("(Get) from ",addr)
+                    getPack = obPackage(6)
+                    getPack.unserialize(bytePackage,6)
+                    TimeStamp = time.time()
+                    chunksList = []
+                    filename = self.fileDataBase[(getPack.fileIDByte1,getPack.fileIDRest)][0]
+                    print(filename)
+                    self.getMap[(getPack.fileIDByte1,getPack.fileIDRest)] = (TimeStamp,addr[0],addr[1],chunksList,filename)
+                    serializedObject = getPack.serialize(6)
+                    self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
+                elif Type == 7:
+                    print("(Get Res) from ",addr)
+                    getResPack = obPackage(7)
+                    getResPack.unserialize(bytePackage,7)
+                    fileIDByte1 = getResPack.fileIDByte1
+                    fileIDRest = getResPack.fileIDRest
+                    chunkID = getResPack.chunkID
+                    chunk = getResPack.chunkPayload
+                    # print(getResPack.chunkPayload)
+                    #If theres a request for that FileID
+                    if (fileIDByte1,fileIDRest) in self.getMap:
+                        #If the TimeOut is not over
+                        if (time.time() - self.getMap[(fileIDByte1,fileIDRest)][0]) <= 10:
+                            #Add the blueNode to the DictChunks
+                            self.getMap[(fileIDByte1,fileIDRest)][3][chunkID] = chunk
                 
             else:
                 #Checks TimeOuts for the exist request. TimeOut is 5s
@@ -218,6 +245,23 @@ class greenNode:
                         byteLocateListPack = locateListPack.serialize(20)
                         self.SecureUDP.sendto(byteLocateListPack,self.locateMap[request][1],self.locateMap[request][2])
                         del self.locateMap[request]
+
+                #Checks TimeOuts for the Get request. TimeOut is 10s
+                for request in list(self.getMap):
+                    if ( time.time() - self.getMap[request][0]) > 10:
+                        print("Writing the getMap for ",request)
+                        listChunks = self.getMap[request][3]
+                        listChunks = sorted(listChunks.items())
+                        filename = self.getMap[request][4]
+                        filename = "ArchivosReensamblado/" + filename
+                        fd = os.open(filename, os.O_RDWR|os.O_CREAT )
+                        for chunk in listChunks:
+                            os.write(fd,chunk[1])
+                        os.close(fd)
+                        # getResPack = obPackage(7)
+                        # byteGetResPack = getResPack.serialize(7)
+                        # self.SecureUDP.sendto(byteGetResPack,self.getMap[request][1],self.getMap[request][2])
+                        del self.getMap[request]
 
 
 

@@ -19,6 +19,7 @@ class blueNode:
     spanningTreeMsgQueue = queue.Queue() #(Type,nodeID,IP,PORT)
     existsMap = {} # [key = (fileIDByte1,fileIDRest)] = (IP,PORT)
     locateMap = {} # [key = (fileIDByte1,fileIDRest)] = (IP,PORT)
+    getMap = {} # [key = (fileIDByte1,fileIDRest)] = (IP,PORT)
     root = 1
     maxChunks = 40
 
@@ -122,11 +123,53 @@ class blueNode:
                 print("(LocateRes) from ",addr[0],str(addr[1]))
                 responseLocate = obPackage(9)
                 responseLocate.unserialize(payload,9)
-                responseLocate.print_data()
+                # responseLocate.print_data()
                 if (responseLocate.fileIDByte1,responseLocate.fileIDRest) in self.locateMap: #If theres a exist request for that file id
                     addrs = self.locateMap[(responseLocate.fileIDByte1,responseLocate.fileIDRest)]
                     responseLocate = responseLocate.serialize(9)
                     self.SecureUDP.sendto(responseLocate,addrs[0],addrs[1])
+                else:
+                    print("I dont have a exist request for that file")
+            elif Type == 6:
+                print("(Get) from ",addr[0],str(addr[1]))
+                genericPack = obPackage()
+                genericPack.unserialize(payload,6)
+                self.getMap[(genericPack.fileIDByte1,genericPack.fileIDRest)] = (addr[0],addr[1])
+                #Checks if I have a chunk of that file
+                if (genericPack.fileIDByte1,genericPack.fileIDRest) in self.blueSavedChunks:
+                    
+                    for chunk in self.blueSavedChunks[(genericPack.fileIDByte1,genericPack.fileIDRest)]:
+                        print("I have a chunk")
+                        responseGet = obPackage(7)
+                        responseGet.fileIDByte1 = genericPack.fileIDByte1
+                        responseGet.fileIDRest = genericPack.fileIDRest
+                        responseGet.chunkID = chunk[0]
+                        responseGet.chunkPayload = chunk[1]
+
+                        byteResponseGet= responseGet.serialize(7)
+                        self.SecureUDP.sendto(byteResponseGet,addr[0],addr[1])
+
+                #Asks the neighbors 
+                listNode = self.getSpanningTreeNodes((addr[0],addr[1]))
+                #If theres a path to take
+                if (len(listNode) != 0):
+                    for node in listNode:
+                        #Creates a Exists package
+                        print("Creando Get ",node)
+                        getPack = obPackage(6)
+                        getPack.fileIDByte1 = genericPack.fileIDByte1
+                        getPack.fileIDRest = genericPack.fileIDRest
+                        byteGetPack = getPack.serialize(6)
+                        self.SecureUDP.sendto(byteGetPack,node[0],node[1])
+
+            elif Type == 7:
+                print("(GetRes) from ",addr[0],str(addr[1]))
+                responseGet = obPackage(7)
+                responseGet.unserialize(payload,7)
+                if (responseGet.fileIDByte1,responseGet.fileIDRest) in self.getMap: #If theres a exist request for that file id
+                    addrs = self.getMap[(responseGet.fileIDByte1,responseGet.fileIDRest)]
+                    byteResponseGet = responseGet.serialize(7)
+                    self.SecureUDP.sendto(byteResponseGet,addrs[0],addrs[1])
                 else:
                     print("I dont have a exist request for that file")
 
@@ -148,17 +191,17 @@ class blueNode:
             Type = int.from_bytes(bytePackage[:1], byteorder='big')
             genericPack = obPackage()
             if Type == 0:
-                # print("(PutChunk) from ",package[1])
+                print("(PutChunk) from ",package[1])
                 chunkPack = obPackage()
                 chunkPack.unserialize(bytePackage,0)
 
                 actions = ["save","save&Clone","clone","drop"]
-                percentages = [0.40,0.30,0.26,0.04] # 40% save 30% save&Clone %26 clone 4% drop
+                percentages = [0.44,0.30,0.26,0] # 44% save 30% save&Clone %26 clone 0% drop
                 result = 0
                 if self.chunksStored < self.maxChunks:
                     result = self.putChunkRandomChoiceGenerator(percentages)
                 else:
-                    percentages = [0,0,0.96,0.04] # 0% save 0% save&Clone %96 clone 4% drop
+                    percentages = [0,0,1,0] # 0% save 0% save&Clone %100 clone 0% drop
                     result = self.putChunkRandomChoiceGenerator(percentages)
                 # print("Accion ",actions[result])
                 if actions[result] == "save":
@@ -166,7 +209,6 @@ class blueNode:
                     if (chunkPack.fileIDByte1,chunkPack.fileIDRest) in self.blueSavedChunks:
                         #If the key exists then just append the new chunkID and chunkPayload
                         self.blueSavedChunks[(chunkPack.fileIDByte1,chunkPack.fileIDRest)].append((chunkPack.chunkID,chunkPack.chunkPayload))
-                        
                     else:
                         #If not then creates a list witht the chunkID and chunkPayload and assign it to the key
                         tempList = [(chunkPack.chunkID,chunkPack.chunkPayload)]
@@ -322,7 +364,6 @@ class blueNode:
                     daddyPackage.nodeID = self.myID
                     bytesDaddyPackage = daddyPackage.serialize(13)
                     self.SecureUDP.sendto(bytesDaddyPackage, self.sTreeDadNode[1], self.sTreeDadNode[2])
-            
 
 
 
