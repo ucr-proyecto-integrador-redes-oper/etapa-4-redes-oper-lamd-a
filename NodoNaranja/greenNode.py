@@ -81,10 +81,10 @@ class greenNode:
 				filename = input("Enter filename: ")
 				chunkNumber = input("Enter the ammount of chunks: ")
 				#Creates a generic Complete package
-				completePack = obPackage(userInput)
+				completePack = obPackage(22)
 				completePack.fileIDByte1 = int(fileIDByte1)
 				completePack.fileIDRest = int(fileIDRest)
-				serializedObject = completePack.serialize(userInput)
+				serializedObject = completePack.serialize(22)
 				self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
 
