@@ -42,6 +42,9 @@ class blueNode:
 		serializedObject = obPackagex.serialize(14)
 		self.SecureUDP.sendto(serializedObject,orangeIP,orangePort)
 
+    def delete(self, key):
+        del self.blueSavedChunks[key]
+
 	def inputThread(self):
 		while True:
 			payload , addr = self.SecureUDP.recivefrom()
