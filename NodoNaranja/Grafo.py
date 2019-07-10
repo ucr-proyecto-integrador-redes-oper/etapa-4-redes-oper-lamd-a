@@ -1,5 +1,4 @@
 import math
-import numpy as np
 from screeninfo import get_monitors
 import pygame
 import time
