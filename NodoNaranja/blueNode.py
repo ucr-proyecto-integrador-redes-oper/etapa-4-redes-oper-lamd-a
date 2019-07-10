@@ -202,13 +202,13 @@ class blueNode:
 
 			elif Type == 5: #UNTESTED UNTESTED UNTESTED
 				print("(Complete R) from ",addr)
-				responseComplete = obPackage(5)
-				responseComplete.unserialize(payload,5)
+				responseComplete = obPackage(Type)
+				responseComplete.unserialize(payload,Type)
 
 				if (responseComplete.fileIDByte1,responseComplete.fileIDRest) in self.completeMap: #If theres a complete request for that file id
 					addr = self.completeMap[(responseComplete.fileIDByte1,responseComplete.fileIDRest)]
-					del self.completeMap[(responseComplete.fileIDByte1,responseComplete.fileIDRest)]
-					byteresponseComplete = responseComplete.serialize(5)
+					#del self.completeMap[(responseComplete.fileIDByte1,responseComplete.fileIDRest)]
+					byteresponseComplete = responseComplete.serialize(Type)
 					self.SecureUDP.sendto(byteresponseComplete,addr[0],addr[1])
 				else:
 					print("I dont have a complete request for that file")			
