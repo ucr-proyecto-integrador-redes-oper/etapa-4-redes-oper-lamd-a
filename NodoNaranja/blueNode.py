@@ -287,8 +287,9 @@ class blueNode:
 
 					self.chunksStored += 1
 				elif actions[result] == "clone":
-					ramdomNeighbor random.choice(self.neighborTuple)
-					self.SecureUDP.sendto(serializedPutChunkPack,ramdomNeighbor[0],ramdomNeighbor[1])
+					#1 Neighbor 
+					randomNeighbor = random.choice(list(self.neighborTuple))
+					self.SecureUDP.sendto(bytePackage,self.neighborTuple[randomNeighbor][0],self.neighborTuple[randomNeighbor][1])
 					# listNode = self.getSpanningTreeNodes((package[1][0],package[1][1]))
 					# print("Path ",listNode)
 
