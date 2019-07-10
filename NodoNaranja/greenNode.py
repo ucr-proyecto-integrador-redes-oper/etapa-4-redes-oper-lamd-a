@@ -181,6 +181,21 @@ class greenNode:
 					self.chunkSeparator(genericPack.fileName,self.fileIDByte1,self.fileIDRest)
 
 					self.fileIDRest += 1
+
+				elif Type == 21:
+					print("(Get) from ")
+					getPack = obPackage(21)
+					getPack.unserialize(bytePackage,21)
+					getPack.print_data()
+					TimeStamp = time.time()
+					ListBlueNodes = {}
+					print(getPack.fileName)
+					self.getMap[(getPack.fileIDByte1,getPack.fileIDRest)] = (TimeStamp,addr[0],addr[1],ListBlueNodes,getPack.fileName)
+
+					getPack.packetCategory = 6
+					serializedObject = getPack.serialize(6)
+					self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
+
 				elif Type == 2:
 					print("(Exist) from ",addr)
 					existsPack = obPackage(2)
@@ -290,16 +305,23 @@ class greenNode:
 					if ( time.time() - self.getMap[request][0]) > 10:
 						print("Writing the getMap for ",request)
 						listChunks = self.getMap[request][3]
-						listChunks = sorted(listChunks.items())
-						filename = self.getMap[request][4]
-						filename = "ArchivosReensamblado/" + filename
-						fd = os.open(filename, os.O_RDWR|os.O_CREAT )
-						for chunk in listChunks:
-							os.write(fd,chunk[1])
-						os.close(fd)
-						# getResPack = obPackage(7)
-						# byteGetResPack = getResPack.serialize(7)
-						# self.SecureUDP.sendto(byteGetResPack,self.getMap[request][1],self.getMap[request][2])
+						if len(listChunks) > 0:
+							listChunks = sorted(listChunks.items())
+							filename = self.getMap[request][4]
+							filename = "ArchivosReensamblado/" + filename
+							fd = os.open(filename, os.O_RDWR|os.O_CREAT )
+							for chunk in listChunks:
+								os.write(fd,chunk[1])
+							os.close(fd)
+							# getResPack = obPackage(7)
+							# byteGetResPack = getResPack.serialize(7)
+							# self.SecureUDP.sendto(byteGetResPack,self.getMap[request][1],self.getMap[request][2])
+							resp = obPackage(21)
+							resp.fileIDByte1 = request[0]
+							resp.fileIDRest = request[1]
+							resp.fileName = filename
+							byteResp = resp.serialize(21)
+							self.SecureUDP.sendto(byteResp,self.getMap[request][1],self.getMap[request][2])
 						del self.getMap[request]
 
 
