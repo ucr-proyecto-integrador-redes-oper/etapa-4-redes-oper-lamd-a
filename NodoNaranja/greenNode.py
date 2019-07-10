@@ -81,10 +81,10 @@ class greenNode:
 				fileIDRest = input("Enter fileIDRest: ")
 				filename = input("Enter filename: ")
 				#Creates a generic Complete package
-				completePack = obPackage(22)
+				completePack = obPackage(userInput)
 				completePack.fileIDByte1 = int(fileIDByte1)
 				completePack.fileIDRest = int(fileIDRest)
-				serializedObject = completePack.serialize(22)
+				serializedObject = completePack.serialize(userInput)
 				self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
 
 
