@@ -194,7 +194,7 @@ class blueNode:
 							self.SecureUDP.sendto(byteresponseComplete,addr[0],addr[1])
 				#Sending complete request to the rest of the spanning three
 				listNode = self.getSpanningTreeNodes((addr[0],addr[1]))
-				print("Path ",listNode)
+				# print("Path ",listNode)
 				#If theres a path to take
 				if len(listNode) != 0:
 					for node in listNode:
@@ -214,6 +214,25 @@ class blueNode:
 				else:
 					print("I dont have a complete request for that file")			
 			
+			elif Type == 10:
+				print("(Delete) from ",addr)
+				deletePack = obPackage(Type)
+				deletePack.unserialize(payload,Type)
+
+				#If I have that FileID delete all the chunks
+				if (deletePack.fileIDByte1,deletePack.fileIDRest) in self.blueSavedChunks:
+					del self.blueSavedChunks[(deletePack.fileIDByte1,deletePack.fileIDRest)]
+				
+				#Sending delete request to the rest of the spanning three
+				listNode = self.getSpanningTreeNodes((addr[0],addr[1]))
+				# print("Path ",listNode)
+				#If theres a path to take
+				if len(listNode) != 0:
+					for node in listNode:
+						byteDeletePack = deletePack.serialize(Type)
+						self.SecureUDP.sendto(byteDeletePack, node[0], node[1])
+
+
 			else:
 				self.packageQueue.put((payload,addr))
 
