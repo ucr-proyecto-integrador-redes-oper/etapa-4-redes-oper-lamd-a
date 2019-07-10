@@ -261,10 +261,10 @@ def complete(window):
 	entry4.grid(row=3,column=1)
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: sendComplete(slave,entry1,entry2,entry3,entry4))
-	button1.place(relx = 0.10, rely = 0.55)
+	button1.place(relx = 0.10, rely = 0.70)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
-	button1.place(relx = 0.40, rely = 0.55)
+	button1.place(relx = 0.40, rely = 0.70)
 
 def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
 	window.grab_set()
@@ -273,10 +273,10 @@ def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
 	completePack.fileIDRest = int(fileIDRest.get())
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.place(relx = 0.10, rely = 0.65)
+	clear.place(relx = 0.10, rely = 0.55)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.place(relx = 0.10, rely = 0.65)
+	label1.place(relx = 0.10, rely = 0.55)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
@@ -287,15 +287,15 @@ def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
 	responsePack = obPackage(5)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.place(relx = 0.10, rely = 0.65)
+	clear.place(relx = 0.10, rely = 0.55)
 	
-	responsePack.unserialize(bytePackage,3)
+	responsePack.unserialize(bytePackage,5)
 	if responsePack.chunkID == 0:
 		label1 = Label(master=window,text="FILE NOT COMPLETE!!!!", font=("Helvetica", 14))
-		label1.place(relx = 0.10, rely = 0.65)
+		label1.place(relx = 0.10, rely = 0.55)
 	else:
-		label1 = Label(master=window,text="FILE COMPLETED!!!!", font=("Helvetica", 14))
-		label1.place(relx = 0.10, rely = 0.70)
+		label1 = Label(master=window,text="FILE COMPLETE!!!!", font=("Helvetica", 14))
+		label1.place(relx = 0.10, rely = 0.55)
 	window.grab_release()
 #-------------------------------Complete-----------------------------------------------
 
