@@ -100,15 +100,15 @@ def putFile(fatherWindow):
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: putFileLogic(slave,entry1,entry2))
 	#button1.grid(row=3,column=0) button2.place(relx = 0.01, rely =  0.40)
-	button1.place(relx = 0.10, rely = 0.45)
+	button1.place(relx = 0.10, rely = 0.60)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,fatherWindow))
 	#button1.grid(row=3,column=1)
-	button1.place(relx = 0.35, rely = 0.45)
+	button1.place(relx = 0.35, rely = 0.60)
 
 	addFileButton = Button(slave,text="NewFile", bd = 3, width=7, font = ("Helvetica", 14), command=lambda: addNewFile(slave))
 	#addFileButton.grid(row=3,column=2)
-	addFileButton.place(relx = 0.60, rely = 0.45)
+	addFileButton.place(relx = 0.60, rely = 0.60)
 
 
 def goBack(myWindow,fatherWindow):
@@ -394,42 +394,57 @@ def get(window):
 	entry4 = Entry(slave)
 	entry4.grid(row=3,column=1)
 
-	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: sendGet(slave,entry1,entry2,entry3,entry4))
-	button1.place(relx = 0.10, rely = 0.55)
+	lbl5 = Label(master=slave,text="Filename: ", font=("Helvetica", 14))
+	lbl5.grid(row=4, column=0)
+	entry5 = Entry(slave)
+	entry5.grid(row=4,column=1)
+
+	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: sendGet(slave,entry1,entry2,entry3,entry4,entry5))
+	button1.place(relx = 0.10, rely = 0.75)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
-	button1.place(relx = 0.40, rely = 0.55)
+	button1.place(relx = 0.40, rely = 0.75)
 
-def sendGet(window,ip,port,fileIDByte1,fileIDRest):
+def sendGet(window,ip,port,fileIDByte1,fileIDRest,filename):
 	window.grab_set()
-	getPack = obPackage(6) #Tipe 6
-	getPack.fileIDByte1 = int(fileIDByte1.get())
-	getPack.fileIDRest = int(fileIDRest.get())
+
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=4,column=1)
+	clear.grid(row=5,column=1)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.grid(row=4,column=1)
+	label1.grid(row=5,column=1)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
-	byteGetPack = getPack.serialize(2)
+	getPack = obPackage(21)
+
+	getPack.fileIDByte1 = int(fileIDByte1.get())
+	getPack.fileIDRest = int(fileIDRest.get())
+	getPack.fileName = filename.get()
+
+	byteGetPack = getPack.serialize(21)
 	SecureUDP.sendto(byteGetPack,greenIP,greenPort)
 
 	bytePackage , addr = SecureUDP.recivefrom()
-	responsePack = obPackage(3)
+	responsePack = obPackage(21)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=4,column=1)
+	clear.grid(row=5,column=1)
 	
-	responsePack.unserialize(bytePackage,3)
+	responsePack.unserialize(bytePackage,21)
 	if responsePack.fileIDByte1 == 0:
-		label1 = Label(master=window,text="UNABLE TO GET FILE!!!!", font=("Helvetica", 14))
-		label1.grid(row=4,column=1)
+		label1 = Label(master=window,text="UNABLE TO RETRIEVE FILE!!!!", font=("Helvetica", 14))
+		label1.grid(row=5,column=1)
 	else:
-		label1 = Label(master=window,text="FILE GETTED!!!!", font=("Helvetica", 14))
-		label1.grid(row=4,column=1)
+		label1 = Label(master=window,text="FILE RETRIEVED!!!!", font=("Helvetica", 14))
+		label1.grid(row=5,column=1)
+
+		lbl1 = Label(master=window,text=responsePack.fileName)
+		lbl1.grid(row=6, column=1)
+
+		
+
 	window.grab_release()
 
 #-------------------------------GET-----------------------------------------------
