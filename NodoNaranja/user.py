@@ -123,10 +123,10 @@ def SendExist(window,ip,port,fileIDByte1,fileIDRest):
 	existsPack.fileIDRest = int(fileIDRest.get())
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=4,column=1)
+	clear.place(relx = 0.10, rely = 0.65)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.grid(row=4,column=1)
+	label1.place(relx = 0.10, rely = 0.65)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
@@ -137,15 +137,15 @@ def SendExist(window,ip,port,fileIDByte1,fileIDRest):
 	responsePack = obPackage(3)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=4,column=1)
+	clear.place(relx = 0.10, rely = 0.65)
 	
 	responsePack.unserialize(bytePackage,3)
 	if responsePack.fileIDByte1 == 0:
 		label1 = Label(master=window,text="FILE NOT found!!!!", font=("Helvetica", 14))
-		label1.grid(row=4,column=1)
+		label1.place(relx = 0.10, rely = 0.65)
 	else:
 		label1 = Label(master=window,text="FILE FOUND!!!!", font=("Helvetica", 14))
-		label1.grid(row=4,column=1)
+		label1.place(relx = 0.10, rely = 0.65)
 	window.grab_release()
 
 def exits(window):
@@ -196,7 +196,7 @@ def SendDelete(window,ip,port,fileIDByte1,fileIDRest):
 	SecureUDP.sendto(byteExistPack,greenIP,greenPort)
 
 	label1 = Label(master=window,text="FILE DELETED!!!!", font=("Helvetica", 14))
-	label1.grid(row=4,column=1)
+	label1.place(relx = 0.10, rely = 0.65)
 
 	window.deiconify()
 
@@ -273,10 +273,10 @@ def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
 	completePack.fileIDRest = int(fileIDRest.get())
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=4,column=1)
+	clear.place(relx = 0.10, rely = 0.65)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.grid(row=4,column=1)
+	label1.place(relx = 0.10, rely = 0.65)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
@@ -287,15 +287,15 @@ def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
 	responsePack = obPackage(3)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=4,column=1)
+	clear.place(relx = 0.10, rely = 0.65)
 	
 	responsePack.unserialize(bytePackage,3)
 	if responsePack.fileIDByte1 == 0:
 		label1 = Label(master=window,text="FILE NOT COMPLETE!!!!", font=("Helvetica", 14))
-		label1.grid(row=4,column=1)
+		label1.place(relx = 0.10, rely = 0.65)
 	else:
 		label1 = Label(master=window,text="FILE COMPLETED!!!!", font=("Helvetica", 14))
-		label1.grid(row=4,column=1)
+		label1.place(relx = 0.10, rely = 0.70)
 	window.grab_release()
 #-------------------------------Complete-----------------------------------------------
 
@@ -339,10 +339,10 @@ def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 	locatePack.fileIDRest = int(fileIDRest.get())
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=4,column=1)
+	clear.place(relx = 0.10, rely = 0.65)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.grid(row=4,column=1)
+	label1.place(relx = 0.10, rely = 0.65)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
@@ -353,16 +353,16 @@ def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 	responsePack = obPackage(20)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=4,column=1)
+	clear.place(relx = 0.10, rely = 0.65)
 	
 	responsePack.unserialize(bytePackage,20)
 	if len(responsePack.fileName) == 0:
 		label1 = Label(master=window,text="FILE CAN NOT BE LOCATE!!!!", font=("Helvetica", 14))
-		label1.grid(row=4,column=1)
+		label1.place(relx = 0.10, rely = 0.65)
 	else:
 		label1 = Label(master=window,text="FILE LOCATED!!!!", font=("Helvetica", 14))
 		print(responsePack.fileName)
-		label1.grid(row=4,column=1)
+		label1.place(relx = 0.10, rely = 0.70)
 	window.grab_release()
 
 #-------------------------------Locate-----------------------------------------------
@@ -410,10 +410,10 @@ def sendGet(window,ip,port,fileIDByte1,fileIDRest,filename):
 
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=5,column=1)
+	clear.place(relx = 0.10, rely = 0.65)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.grid(row=5,column=1)
+	label1.place(relx = 0.10, rely = 0.65)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
@@ -430,18 +430,18 @@ def sendGet(window,ip,port,fileIDByte1,fileIDRest,filename):
 	responsePack = obPackage(21)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.grid(row=5,column=1)
+	clear.place(relx = 0.10, rely = 0.65)
 	
 	responsePack.unserialize(bytePackage,21)
 	if responsePack.fileIDByte1 == 0:
 		label1 = Label(master=window,text="UNABLE TO RETRIEVE FILE!!!!", font=("Helvetica", 14))
-		label1.grid(row=5,column=1)
+		label1.place(relx = 0.10, rely = 0.65)
 	else:
 		label1 = Label(master=window,text="FILE RETRIEVED!!!!", font=("Helvetica", 14))
-		label1.grid(row=5,column=1)
+		label1.place(relx = 0.10, rely = 0.65)
 
 		lbl1 = Label(master=window,text=responsePack.fileName)
-		lbl1.grid(row=6, column=1)
+		lbl1.place(relx = 0.10, rely = 0.70)
 
 		
 
