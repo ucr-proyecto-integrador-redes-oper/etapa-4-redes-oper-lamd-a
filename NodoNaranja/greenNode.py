@@ -59,7 +59,6 @@ class greenNode:
 				# self.chunkSeparator(filename,self.fileIDByte1,self.fileIDRest)
 				# self.fileIDRest += 1
 			elif userInput == "2": #Check if file Exist
-				print("Going to check if a file exist")
 				fileIDByte1 = input("Enter fileIDByte1: ")
 				fileIDRest = input("Enter fileIDRest: ")
 				filename = input("Enter filename: ")
@@ -79,6 +78,8 @@ class greenNode:
 				print("Going to check if a file is complete")
 				fileIDByte1 = input("Enter fileIDByte1: ")
 				fileIDRest = input("Enter fileIDRest: ")
+				filename = input("Enter filename: ")
+				chunkNumber = input("Enter the ammount of chunks: ")
 				#Creates a generic Complete package
 				completePack = obPackage(userInput)
 				completePack.fileIDByte1 = int(fileIDByte1)
@@ -213,12 +214,28 @@ class greenNode:
 
 				elif Type == 4: #UNTESTED UNTESTED
 					print("(COMPLETE) from ",addr)
-					existsPack = obPackage(Type)
-					existsPack.unserialize(bytePackage,Type)
+					completePack = obPackage(Type)
+					completePack.unserialize(bytePackage,Type)
 					TimeStamp = time.time()
-					self.existsMap[(existsPack.fileIDByte1,existsPack.fileIDRest)] = (TimeStamp,addr[0],addr[1])
-					serializedObject = existsPack.serialize(Type)
+					self.completeRequestsMap[(completePack.fileIDByte1,completePack.fileIDRest)] = (TimeStamp,addr[0],addr[1])
+					serializedObject = completePack.serialize(Type)
 					self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
+
+				elif Type == 5: #UNTESTED UNTESTED
+					print("(COMPLETE RES) from ", addr)
+					completeResPack = obPackage(Type)
+					completeResPack.unserialize(bytePackage,Type)
+					fileIDByte1 = completeResPack.fileIDByte1
+					fileIDRest = completeResPack.fileIDRest
+					chunkID = completeResPack.chunkID
+					chunk = completeResPack.chunkPayload
+					print(completeResPack.chunkPayload)
+					#If theres a request for that FileID
+					if (fileIDByte1,fileIDRest) in self.completeChunkIDAccumulator:
+						#If the TimeOut is not over
+						if (time.time() - self.completeChunkIDAccumulator[(fileIDByte1,fileIDRest)][0]) <= 10:
+							#Add the blueNode to the DictChunks
+							self.completeChunkIDAccumulator[(fileIDByte1,fileIDRest)][3][chunkID] = chunk				
 
 				elif Type == 6:
 					print("(Get) from ",addr)
@@ -231,6 +248,7 @@ class greenNode:
 					self.getMap[(getPack.fileIDByte1,getPack.fileIDRest)] = (TimeStamp,addr[0],addr[1],chunksList,filename)
 					serializedObject = getPack.serialize(6)
 					self.SecureUDP.sendto(serializedObject,self.BlueIP,self.BluePort)
+
 				elif Type == 7:
 					print("(Get Res) from ",addr)
 					getResPack = obPackage(7)
