@@ -7,6 +7,57 @@ import random
 from pygame.locals import *
 pygame.init()
 
+class Admin_archivos:
+	def __init__(self):
+		self.file_name = "Grafo_Referencia.csv"
+		self.nodos_finales = [] #lista de listas
+
+	"""
+		Metodo que se encarga de ver el archivo y parser para crear un nodo
+	"""
+
+	def tomar_datos(self):
+		file = open(str(self.file_name), "r")
+		content = file.readlines()
+		nodo_str = ""
+		index = 0
+
+		for line in content:
+			if line[0:1].isdigit():
+				line = line[:-1]
+				# print(f"Linea ----> ({line})")
+				self.nodos_finales.append([])
+				nodo_str = ""
+				while len(line) > 0:
+					letra = line[0]
+					if letra >= '0' and letra <= '9':
+						nodo_str += letra
+					else:
+						# print(f"nodo_str = ({nodo_str})")
+						nodo_int = int(nodo_str)
+						self.nodos_finales[index].append(nodo_int)
+						nodo_str = ""
+					line = line[1:]
+				# print(f"nodo_str = ({nodo_str})")
+				nodo_int = int(nodo_str)
+				self.nodos_finales[index].append(nodo_int)
+				index += 1
+
+		file.close()
+
+	"""
+		Metodo que se encarga de imprimir lo que se saco del archivo como enteros
+	"""
+
+	def print_result(self):
+		print("Estado del grafo con nodos enteros")
+		for nodo_padre in self.nodos_finales:
+			print(nodo_padre)
+
+
+##########################################################
+##########################################################
+
 class Pantalla:
 	def __init__(self):
 		self.alto = 0
@@ -15,7 +66,7 @@ class Pantalla:
 		#Toma los valores del ultimo monitor visto
 		for m in get_monitors():
 			self.definir_valores(str(m))
-		print(f"alto_pantalla ({self.alto}) ancho_pantalla ({self.ancho})")
+		# print(f"alto_pantalla ({self.alto}) ancho_pantalla ({self.ancho})")
 
 	"""
 	Metodo que se encarga de parsear los valores en string de 
@@ -88,6 +139,7 @@ class Graficador:
 		self.game_display = pygame.display.set_mode((self.ancho_pygame, self.alto_pygame))
 		pygame.display.set_caption("GRUPO LAMDa")
 		self.nodo = pygame.image.load('nodo.jpg')
+		self.nodo_r = pygame.image.load('nodo_r.jpg')
 		self.pixelito = pygame.image.load('background.jpg')
 		self.limpiar_pantalla()
 
@@ -101,13 +153,35 @@ class Graficador:
 				self.game_display.blit(self.pixelito, (x, y))
 
 	"""
+		Metodo que se encarga de graficar de rojo los nodos que se le 
+		envian en la lista_nodos
+	"""
+
+	def graficar_nodos_rojos(self, lista_nodos):
+		for nodo in lista_nodos:
+			self.colocar_imagen(nodo.x, nodo.y, nodo.nombre, True)
+
+	"""
+		Metodo que se encarga de graficar de azul todos los nodos que se le 
+		envian en la lista_nodos
+	"""
+
+	def graficar_nodos_azules(self, lista_nodos):
+		for nodo in lista_nodos:
+			self.colocar_imagen(nodo.x, nodo.y, nodo.nombre)
+
+	"""
 		Metodo encargado de colocar una imagen con el nombre dentro de la misma
 		es decir que en el centro
 	"""	
 
-	def colocar_imagen(self, x, y, nombre):
+	def colocar_imagen(self, x, y, nombre, nodo_rojo = False):
 		temp_tuple = (y, x)
-		self.game_display.blit(self.nodo, temp_tuple)
+		
+		if nodo_rojo:
+			self.game_display.blit(self.nodo_r, temp_tuple)
+		else:
+			self.game_display.blit(self.nodo, temp_tuple)
 
 		#Colocando el nombre del nodo
 		smallText = pygame.font.Font("freesansbold.ttf", 20)
@@ -164,9 +238,12 @@ class Graph:
 		self.porc_ancho = 0.85
 		self.diff = 30
 		self.aristas = [] 
-		self.nodos = []
 		self.pantalla = Pantalla() #Para sacar las dimensiones de la pantalla actual
 		self.graficador = Graficador(self.pantalla)
+		self.lista_nodos_archivos = []
+		self.admin_archivo = Admin_archivos()
+		self.admin_archivo.tomar_datos()
+		self.nodos = []
 	
 	"""
 		Agrega nodos en localizaciones especificas
@@ -174,7 +251,7 @@ class Graph:
 	
 	def agregar_nodo_esp(self, x, y, nombre_nodo):
 		nuevo_nodo = Nodo(nombre_nodo, x, y)
-		print(f"{len(self.nodos)} - Nodo listo en ({x} - {y})")
+		# print(f"{len(self.nodos)} - Nodo listo en ({x} - {y})")
 		self.nodos.append(nuevo_nodo)
 		self.graficador.colocar_imagen(nuevo_nodo.x, nuevo_nodo.y, nombre_nodo)
 
@@ -261,51 +338,131 @@ class Graph:
 				pygame.display.update()
 				break
 
-###################################################################
-###################################################################
+	"""
+		Metodo encargado de colorear los nodos que se le mandan en la lista como rojos
+	"""
 
-def main ():
-	grafo = Graph()
+	def graficar_nodos_con_archivos(self, lista_nodos):
+		lista_nodos_temp = []
 
-	for iteracion in range(10):
-		for nodo in range(50):
-			grafo.agregar_nodo(str(nodo))
+		for num_nodo in lista_nodos:
+			for nodo in self.nodos:
+				if str(num_nodo) == nodo.nombre:
+					lista_nodos_temp.append(nodo)
+					break
 
-		# grafo.graficador.colocar_arista(0,0, 100, 100)
-		
-		#Creando aristas random
-		for arista in range(10):
-			n1 = random.randint(0, len(grafo.nodos)-1)
-			n2 = random.randint(0, len(grafo.nodos)-1)
+		self.graficador.graficar_nodos_azules(self.lista_nodos_archivos)
+		self.lista_nodos_archivos.clear()
+		self.lista_nodos_archivos = lista_nodos_temp
+		self.graficador.graficar_nodos_rojos(self.lista_nodos_archivos)
 
-			while n1 == n2:
-				n1 = random.randint(0, len(grafo.nodos)-1)
-				n2 = random.randint(0, len(grafo.nodos)-1)
+	"""
+		Metodo que se encarga de dejar todos los nodos rojos que hay como azules
+	"""
+
+	def convertir_nodos_a_azules(self):
+		self.graficador.graficar_nodos_azules(self.lista_nodos_archivos)
+		self.lista_nodos_archivos.clear()
+
+	"""
+		Metodo que se encarga de usar el arreglo de nodos para crear el grafo a partir del archivo
+	"""
+
+	def crear_grafo(self):
+		for lista_nodos in self.admin_archivo.nodos_finales:
+			padre = str(lista_nodos[0])
+			self.agregar_nodo(padre)
 			
-			#Ahora se hace la arista
-			nodo_a = grafo.nodos[n1]
-			nodo_b = grafo.nodos[n2]
+		for vecinos in self.admin_archivo.nodos_finales:
+			papa = -1
+			for index, vecino in enumerate(vecinos):
+				if index != 0:	
+					# print(f"    vecino: ({vecino})")
+					self.agregar_arista(self.nodos[papa - 1], self.nodos[vecino - 1])
+				else:
+					papa = vecino
+					# print(f"Papa = ({papa})")
 
-			print(f"Arista {arista} de {nodo_a.nombre} -> {nodo_b.nombre}")
-			grafo.agregar_arista(nodo_a, nodo_b)
+	"""
+		Metodo que me refresca la pantalla
+	"""
+
+	def refresh(self):
+		self.graficador.limpiar_pantalla()
+		self.nodos = []
+		self.crear_grafo()
+		self.graficador.graficar()
 
 
-		grafo.print_info_grafo()
-		grafo.graficador.graficar()
+
+###################################################################
+###################################################################
+
+# def main ():
+# 	grafo = Graph()
+# 	list_temp = []
+
+# 	for iteracion in range(10):
 		
-		grafo.graficador.limpiar_pantalla()
-		del grafo.nodos[:]
-		print(f"iteracion {iteracion}")
+# 		list_temp.clear()
+# 		for nodo in range(10):
+# 			nodo_rojo = random.randint(0, 50)
+# 			list_temp.append(nodo_rojo)
+
+# 		for nodo in range(50):
+# 			grafo.agregar_nodo(str(nodo))
+
+# 		# grafo.graficador.colocar_arista(0,0, 100, 100)
+		
+# 		#Creando aristas random
+# 		for arista in range(10):
+# 			n1 = random.randint(0, len(grafo.nodos)-1)
+# 			n2 = random.randint(0, len(grafo.nodos)-1)
+
+# 			while n1 == n2:
+# 				n1 = random.randint(0, len(grafo.nodos)-1)
+# 				n2 = random.randint(0, len(grafo.nodos)-1)
+			
+# 			#Ahora se hace la arista
+# 			nodo_a = grafo.nodos[n1]
+# 			nodo_b = grafo.nodos[n2]
+
+# 			# print(f"Arista {arista} de {nodo_a.nombre} -> {nodo_b.nombre}")
+# 			grafo.agregar_arista(nodo_a, nodo_b)
+
+
+# 		grafo.graficar_nodos_con_archivos(list_temp)
+# 		time.sleep(2)
+# 		grafo.convertir_nodos_a_azules()
+# 		# grafo.print_info_grafo()
+# 		grafo.graficador.graficar()
+		
+# 		grafo.graficador.limpiar_pantalla()
+# 		del grafo.nodos[:]
+# 		print(f"iteracion {iteracion}")
 
 	
 
-	# grafo.agregar_nodo_esp(0, 0, "0")
-	# grafo.agregar_nodo_esp(0, 100, "1")
-	# grafo.agregar_nodo_esp(100, 0, "2")
-	# grafo.agregar_nodo_esp(100, 100, "3")
-	# grafo.graficador.graficar()
+# 	# grafo.agregar_nodo_esp(0, 0, "0")
+# 	# grafo.agregar_nodo_esp(0, 100, "1")
+# 	# grafo.agregar_nodo_esp(100, 0, "2")
+# 	# grafo.agregar_nodo_esp(100, 100, "3")
+# 	# grafo.graficador.graficar()
 	
 	
+# def main2():
+# 	admin_archivo = Admin_archivos()
+# 	admin_archivo.tomar_datos()
+# 	admin_archivo.print_result()
+
+def main3():
+	grafo = Graph()
+	grafo.crear_grafo()
+	grafo.graficador.graficar()
+	while True:
+		grafo.refresh()
 
 if __name__ == "__main__":
-	main()
+	# main()
+	# main2()
+	main3()
