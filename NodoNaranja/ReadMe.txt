@@ -1,12 +1,3 @@
-To install pygame and see the graph you need to open a terminal and run:
-	sudo apt update
-	sudo apt install python3-pip
-	pip3 --version
-	python3 -m pip install -U pygame --user
-	python3 -m pygame.examples.aliens #If aliens game work you already have pygame installed
-
-	python3 Grafo.py
-
 To compile OrangeNode.py:
 	pyhton3 orangeNode.py MyPORT MyOrangeNodeID
 Example:
@@ -28,3 +19,20 @@ To compile greenNode.py:
 	pyhton3 greenNode.py myGroupID MyID BlueIP BluePort
 Example:
 	pyhton3 greenNode.py 1 0 0.0.0.0 9675
+
+
+To install pygame and see the graph you need to open a terminal and run:
+	sudo apt update
+	sudo apt install python3-pip
+	pip3 --version
+	python3 -m pip install -U pygame --user
+	python3 -m pygame.examples.aliens #If aliens game work you already have pygame installed
+
+python3 Grafo.py
+
+
+sudo apt-get install python3-tk 
+sudo apt-get install python-imaging-tk
+sudo apt-get install python3-pip
+pip3 install pillow
+pip3 install playsound
