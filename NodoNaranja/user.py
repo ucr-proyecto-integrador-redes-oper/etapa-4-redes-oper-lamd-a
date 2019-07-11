@@ -16,6 +16,7 @@ import PIL.ImageTk
 #import pygame
 #import wave
 import playsound
+from Grafo import Graph
 
 
 rowIndex = 1
@@ -68,7 +69,7 @@ def putFile(fatherWindow):
 	global filename
 	fatherWindow.withdraw()
 	slave = Tk()
-	slave.title("LoadFile")
+	slave.title("Put")
 	slave.geometry("700x200")
 
 	filename = filedialog.askopenfilename()
@@ -354,6 +355,15 @@ def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 	else:
 		label1 = Label(master=window,text="FILE LOCATED!!!!", font=("Helvetica", 14))
 		print(responsePack.fileName)
+		lista = responsePack.fileName.split(sep=';')
+		for num in range (len(lista)):
+			temp = lista[num]
+			lista[num] = int(temp)
+		
+		grafo = Graph()
+		grafo.crear_grafo()
+		grafo.mostrar_nodos_con_chunks(lista)
+
 		label1.place(relx = 0.10, rely = 0.50)
 	window.grab_release()
 
@@ -450,6 +460,12 @@ def fileList():
 def play():
 	playsound.playsound("/home/akka/Downloads/jugo.mp3")
 
+
+def showGraph():
+	grafo = Graph()
+	grafo.crear_grafo()
+
+
 root = Tk()
 
 root.title("Green Node")
@@ -470,11 +486,11 @@ button = Button(text="SeeFiles", bd = 3, font = ("Helvetica", 16),command=fileLi
 #button.grid(row=0, column=0) # Lo pone en una pos
 button.place(relx = 0.01, rely =  0.05)
 
-button1 = Button(text="LoadFile",fg="green", bd = 3, width=10, font = ("Helvetica", 16), command=lambda: putFile(root))
+button1 = Button(text="Exist",fg="green", bd = 3, width=10, font = ("Helvetica", 16), command=lambda: exits(root))
 #button1.grid(row=1, column=0)
 button1.place(relx = 0.33, rely =  0.70)
 
-button2 = Button(text="Exist", fg="green", bd = 3,  width=10, font = ("Helvetica", 16),command=lambda: exits(root))
+button2 = Button(text="Put", fg="green", bd = 3,  width=10, font = ("Helvetica", 16),command=lambda: putFile(root))
 #button2.grid(row=5,column=0)
 button2.place(relx = 0.01, rely =  0.40)
 
@@ -485,17 +501,17 @@ button3.place(relx = 0.01, rely =  0.70)
 button4 = Button(text="Complete", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: complete(root))
 button4.place(relx = 0.01, rely =  0.55)
 
-button5 = Button(text="Locate", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: locate(root))
+button5 = Button(text="Get", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: get(root))
 button5.place(relx = 0.33, rely =  0.40)
 
-button6 = Button(text="Get", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: get(root))
+button6 = Button(text="Locate", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: locate(root))
 button6.place(relx = 0.33, rely =  0.55)
 
 #button6 = Button(text="NEPE2", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
 #button6.place(relx = 0.33, rely =  0.70)
 
-button7 = Button(text="Don't", fg="red", bd = 3, font = ("Helvetica", 20),command=lambda: play()) # Este es el raro
-button7.place(relx = 0.80, rely =  0.10)
+button7 = Button(text="Show Graph", fg="red", bd = 3, font = ("Helvetica", 12),command=lambda: showGraph()) # Este es el raro
+button7.place(relx = 0.70, rely =  0.10)
 
 quitBottom = Button(text="QUIT", fg="red", bd = 3, font = ("Helvetica", 16), command=lambda: root.destroy())
 #quitBottom.grid(row = 7, column = 3)
