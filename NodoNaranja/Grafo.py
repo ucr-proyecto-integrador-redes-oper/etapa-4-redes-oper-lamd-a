@@ -9,7 +9,7 @@ pygame.init()
 
 class Admin_archivos:
 	def __init__(self):
-		self.file_name = "Grafo_Referencia.csv"
+		self.file_name = "../Grafo.csv"
 		self.nodos_finales = [] #lista de listas
 
 	"""
@@ -139,9 +139,9 @@ class Graficador:
 		self.mensaje = ""
 		self.game_display = pygame.display.set_mode((self.ancho_pygame, self.alto_pygame))
 		pygame.display.set_caption("GRUPO LAMDa")
-		self.nodo = pygame.image.load('nodo.jpg')
-		self.nodo_r = pygame.image.load('nodo_r.jpg')
-		self.pixelito = pygame.image.load('background.jpg')
+		self.nodo = pygame.image.load('images/nodo.jpg')
+		self.nodo_r = pygame.image.load('images/nodo_r.jpg')
+		self.pixelito = pygame.image.load('images/background.jpg')
 		self.limpiar_pantalla()
 
 	"""
@@ -392,7 +392,9 @@ class Graph:
 	def refresh(self):
 		self.graficador.limpiar_pantalla()
 		self.nodos = []
+		lista = [1,4,6]
 		self.crear_grafo()
+		self.mostrar_nodos_con_chunks(lista)
 		self.graficador.graficar()
 
 
@@ -467,13 +469,13 @@ def main3():
 
 	print(f"list_temp = ({list_temp})")
 	
+	lista = [1,4,6]
 	grafo = Graph()
 	grafo.crear_grafo()
+	grafo.mostrar_nodos_con_chunks(lista)
 	grafo.graficador.graficar()
 	while True:
 		grafo.refresh()
-		grafo.mostrar_nodos_con_chunks(list_temp)
-		grafo.graficador.graficar()
 		
 
 if __name__ == "__main__":

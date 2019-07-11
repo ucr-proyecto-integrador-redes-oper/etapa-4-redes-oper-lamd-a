@@ -202,13 +202,13 @@ class blueNode:
 
 			elif Type == 5: #UNTESTED UNTESTED UNTESTED
 				print("(Complete R) from ",addr)
-				responseComplete = obPackage(5)
-				responseComplete.unserialize(payload,5)
+				responseComplete = obPackage(Type)
+				responseComplete.unserialize(payload,Type)
 
 				if (responseComplete.fileIDByte1,responseComplete.fileIDRest) in self.completeMap: #If theres a complete request for that file id
 					addr = self.completeMap[(responseComplete.fileIDByte1,responseComplete.fileIDRest)]
-					del self.completeMap[(responseComplete.fileIDByte1,responseComplete.fileIDRest)]
-					byteresponseComplete = responseComplete.serialize(5)
+					#del self.completeMap[(responseComplete.fileIDByte1,responseComplete.fileIDRest)]
+					byteresponseComplete = responseComplete.serialize(Type)
 					self.SecureUDP.sendto(byteresponseComplete,addr[0],addr[1])
 				else:
 					print("I dont have a complete request for that file")			
@@ -287,8 +287,9 @@ class blueNode:
 
 					self.chunksStored += 1
 				elif actions[result] == "clone":
-					ramdomNeighbor random.choice(self.neighborTuple)
-					self.SecureUDP.sendto(serializedPutChunkPack,ramdomNeighbor[0],ramdomNeighbor[1])
+					#1 Neighbor 
+					randomNeighbor = random.choice(list(self.neighborTuple))
+					self.SecureUDP.sendto(bytePackage,self.neighborTuple[randomNeighbor][0],self.neighborTuple[randomNeighbor][1])
 					# listNode = self.getSpanningTreeNodes((package[1][0],package[1][1]))
 					# print("Path ",listNode)
 

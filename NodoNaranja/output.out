@@ -1,28 +1,9 @@
-I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 1  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 2  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 3  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 4  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 5  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 6  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 7  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 8  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 9  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 10  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 11  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 12  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
-I send a Orange & Orange packetCategory: 0  sn: 13  orangeSource: 1 orangeTarget: 0 communicationType: r requestedGraphPosition: 9 blueAddressIP: 10.1.138.170 blueAddressPort: 35720 priority: 182593540 
-	 Sended to 10.1.138.170:9010
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 2 blueAddressIP: 10.0.2.15 blueAddressPort: 58708 priority: 1589818413 
+	 Sended to 10.0.2.15:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 2 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 1589818413 
+	 Sended to 10.0.2.15:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: a requestedGraphPosition: 1 blueAddressIP: 10.0.2.15 blueAddressPort: 60185 priority: 2858818680 
+	 Sended to 10.0.2.15:9020
+I send a Orange & Orange packetCategory: 0  sn: 0  orangeSource: 0 orangeTarget: 1 communicationType: s requestedGraphPosition: 1 blueAddressIP: 0.0.0.0 blueAddressPort: 8888 priority: 2858818680 
+	 Sended to 10.0.2.15:9020
+:9010

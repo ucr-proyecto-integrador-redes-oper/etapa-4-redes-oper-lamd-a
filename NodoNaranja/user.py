@@ -13,7 +13,10 @@ from tkinter import messagebox
 import PIL 
 import PIL.Image
 import PIL.ImageTk
-
+#import pygame
+#import wave
+import playsound
+from Grafo import Graph
 
 
 rowIndex = 1
@@ -45,11 +48,10 @@ def putFileLogic(fatherWindow,entry1,entry2):
 	fileID = ( FileAdrrPack.fileIDByte1 , FileAdrrPack.fileIDRest)
 	filesList.append((filename,fileID))
 
-
 	lbl1 = Label(master=fatherWindow,text="File Successfully transferred your key: ", font=("Helvetica", 14))
-	lbl1.grid(row=3, column=1)
-	lbl1 = Label(master=fatherWindow,text=fileID)
-	lbl1.grid(row=4, column=1)
+	lbl1.place(relx = 0.10, rely = 0.50)
+	lbl1 = Label(master=fatherWindow,text=fileID, font=("Helvetica", 14))
+	lbl1.place(relx = 0.55, rely = 0.50)
 
 	print(filename,str(rowIndex))
 	fatherWindow.grab_release()
@@ -67,16 +69,8 @@ def putFile(fatherWindow):
 	global filename
 	fatherWindow.withdraw()
 	slave = Tk()
-	slave.title("LoadFile")
+	slave.title("Put")
 	slave.geometry("700x200")
-
-	"""
-	im1 = PIL.Image.open('images/back.jpg')
-	icon = PIL.ImageTk.PhotoImage(im1)
-	icon.image = icon 
-	label1 = Label(slave, image = icon)
-	label1.pack()
-	"""
 
 	filename = filedialog.askopenfilename()
 	
@@ -85,8 +79,6 @@ def putFile(fatherWindow):
 
 	lbl1 = Label(master=slave,text=filename, font=("Helvetica", 12))
 	lbl1.grid(row=0, column=1)
-
-	#Button(text="Delete", fg="green", bd = 3, width=7, font = ("Helvetica", 14),command=lambda: delete(root))
 
 	lbl1 = Label(master=slave,text="Insert IP: ", font=("Helvetica", 14))
 	lbl1.grid(row=1, column=0)
@@ -100,15 +92,15 @@ def putFile(fatherWindow):
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: putFileLogic(slave,entry1,entry2))
 	#button1.grid(row=3,column=0) button2.place(relx = 0.01, rely =  0.40)
-	button1.place(relx = 0.10, rely = 0.60)
+	button1.place(relx = 0.10, rely = 0.75)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,fatherWindow))
 	#button1.grid(row=3,column=1)
-	button1.place(relx = 0.35, rely = 0.60)
+	button1.place(relx = 0.35, rely = 0.75)
 
 	addFileButton = Button(slave,text="NewFile", bd = 3, width=7, font = ("Helvetica", 14), command=lambda: addNewFile(slave))
 	#addFileButton.grid(row=3,column=2)
-	addFileButton.place(relx = 0.60, rely = 0.60)
+	addFileButton.place(relx = 0.60, rely = 0.75)
 
 
 def goBack(myWindow,fatherWindow):
@@ -123,10 +115,10 @@ def SendExist(window,ip,port,fileIDByte1,fileIDRest):
 	existsPack.fileIDRest = int(fileIDRest.get())
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.place(relx = 0.10, rely = 0.65)
+	clear.place(relx = 0.10, rely = 0.55)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.place(relx = 0.10, rely = 0.65)
+	label1.place(relx = 0.10, rely = 0.55)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
@@ -137,15 +129,15 @@ def SendExist(window,ip,port,fileIDByte1,fileIDRest):
 	responsePack = obPackage(3)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.place(relx = 0.10, rely = 0.65)
+	clear.place(relx = 0.10, rely = 0.55)
 	
 	responsePack.unserialize(bytePackage,3)
 	if responsePack.fileIDByte1 == 0:
 		label1 = Label(master=window,text="FILE NOT found!!!!", font=("Helvetica", 14))
-		label1.place(relx = 0.10, rely = 0.65)
+		label1.place(relx = 0.10, rely = 0.55)
 	else:
 		label1 = Label(master=window,text="FILE FOUND!!!!", font=("Helvetica", 14))
-		label1.place(relx = 0.10, rely = 0.65)
+		label1.place(relx = 0.10, rely = 0.55)
 	window.grab_release()
 
 def exits(window):
@@ -153,6 +145,7 @@ def exits(window):
 	slave = Tk()
 	slave.title("Exist")
 	slave.geometry("500x200")
+
 	
 	lbl1 = Label(master=slave,text="Insert IP: ", font=("Helvetica", 14))
 	lbl1.grid(row=0, column=0)
@@ -176,11 +169,11 @@ def exits(window):
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: SendExist(slave,entry1,entry2,entry3,entry4))
 	#button1.grid(row=4,column=0)
-	button1.place(relx = 0.10, rely = 0.55)
+	button1.place(relx = 0.10, rely = 0.75)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
 	#button1.grid(row=5,column=0)
-	button1.place(relx = 0.40, rely = 0.55)
+	button1.place(relx = 0.40, rely = 0.75)
 #-------------------------------Exist-----------------------------------------------
 
 #-------------------------------Delete-----------------------------------------------
@@ -196,7 +189,7 @@ def SendDelete(window,ip,port,fileIDByte1,fileIDRest):
 	SecureUDP.sendto(byteDeletePack,greenIP,greenPort)
 
 	label1 = Label(master=window,text="FILE DELETED!!!!", font=("Helvetica", 14))
-	label1.place(relx = 0.10, rely = 0.65)
+	label1.place(relx = 0.10, rely = 0.55)
 
 	window.deiconify()
 
@@ -261,10 +254,10 @@ def complete(window):
 	entry4.grid(row=3,column=1)
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: sendComplete(slave,entry1,entry2,entry3,entry4))
-	button1.place(relx = 0.10, rely = 0.70)
+	button1.place(relx = 0.10, rely = 0.75)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
-	button1.place(relx = 0.40, rely = 0.70)
+	button1.place(relx = 0.40, rely = 0.75)
 
 def sendComplete(window,ip,port,fileIDByte1,fileIDRest):
 	window.grab_set()
@@ -327,10 +320,10 @@ def locate(window):
 	entry4.grid(row=3,column=1)
 
 	button1 = Button(slave,text="Done", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: sendLocate(slave,entry1,entry2,entry3,entry4))
-	button1.place(relx = 0.10, rely = 0.55)
+	button1.place(relx = 0.10, rely = 0.75)
 
 	button1 = Button(slave,text="Back", bd = 3, width=10, font = ("Helvetica", 14), command=lambda: goBack(slave,window))
-	button1.place(relx = 0.40, rely = 0.55)
+	button1.place(relx = 0.40, rely = 0.75)
 
 def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 	window.grab_set()
@@ -339,10 +332,10 @@ def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 	locatePack.fileIDRest = int(fileIDRest.get())
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.place(relx = 0.10, rely = 0.65)
+	clear.place(relx = 0.10, rely = 0.55)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.place(relx = 0.10, rely = 0.65)
+	label1.place(relx = 0.10, rely = 0.55)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
@@ -353,16 +346,25 @@ def sendLocate(window,ip,port,fileIDByte1,fileIDRest):
 	responsePack = obPackage(20)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.place(relx = 0.10, rely = 0.65)
+	clear.place(relx = 0.10, rely = 0.55)
 	
 	responsePack.unserialize(bytePackage,20)
 	if len(responsePack.fileName) == 0:
 		label1 = Label(master=window,text="FILE CAN NOT BE LOCATE!!!!", font=("Helvetica", 14))
-		label1.place(relx = 0.10, rely = 0.65)
+		label1.place(relx = 0.10, rely = 0.55)
 	else:
 		label1 = Label(master=window,text="FILE LOCATED!!!!", font=("Helvetica", 14))
 		print(responsePack.fileName)
-		label1.place(relx = 0.10, rely = 0.70)
+		lista = responsePack.fileName.split(sep=';')
+		for num in range (len(lista)):
+			temp = lista[num]
+			lista[num] = int(temp)
+		
+		grafo = Graph()
+		grafo.crear_grafo()
+		grafo.mostrar_nodos_con_chunks(lista)
+
+		label1.place(relx = 0.10, rely = 0.50)
 	window.grab_release()
 
 #-------------------------------Locate-----------------------------------------------
@@ -410,10 +412,10 @@ def sendGet(window,ip,port,fileIDByte1,fileIDRest,filename):
 
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.place(relx = 0.10, rely = 0.65)
+	clear.place(relx = 0.10, rely = 0.55)
 
 	label1 = Label(master=window,text="Looking for the file", font=("Helvetica", 14))
-	label1.place(relx = 0.10, rely = 0.65)
+	label1.place(relx = 0.10, rely = 0.55)
 
 	greenIP = ip.get()
 	greenPort = int(port.get())
@@ -430,20 +432,18 @@ def sendGet(window,ip,port,fileIDByte1,fileIDRest,filename):
 	responsePack = obPackage(21)
 
 	clear = Label(master=window,text="                                               ", font = ("Helvetica", 14))
-	clear.place(relx = 0.10, rely = 0.65)
+	clear.place(relx = 0.10, rely = 0.55)
 	
 	responsePack.unserialize(bytePackage,21)
 	if responsePack.fileIDByte1 == 0:
 		label1 = Label(master=window,text="UNABLE TO RETRIEVE FILE!!!!", font=("Helvetica", 14))
-		label1.place(relx = 0.10, rely = 0.65)
+		label1.place(relx = 0.10, rely = 0.55)
 	else:
 		label1 = Label(master=window,text="FILE RETRIEVED!!!!", font=("Helvetica", 14))
-		label1.place(relx = 0.10, rely = 0.65)
+		label1.place(relx = 0.10, rely = 0.55)
 
 		lbl1 = Label(master=window,text=responsePack.fileName)
-		lbl1.place(relx = 0.10, rely = 0.70)
-
-		
+		lbl1.place(relx = 0.10, rely = 0.55)
 
 	window.grab_release()
 
@@ -457,6 +457,13 @@ def fileList():
 		lbl2 = Label(master=fileListWindow,text=filesList[x])
 		lbl2.grid(row=x, column=0)
 
+def play():
+	playsound.playsound("/home/akka/Downloads/jugo.mp3")
+
+
+def showGraph():
+	grafo = Graph()
+	grafo.crear_grafo()
 
 
 root = Tk()
@@ -479,11 +486,11 @@ button = Button(text="SeeFiles", bd = 3, font = ("Helvetica", 16),command=fileLi
 #button.grid(row=0, column=0) # Lo pone en una pos
 button.place(relx = 0.01, rely =  0.05)
 
-button1 = Button(text="LoadFile", bd = 3, font = ("Helvetica", 16), command=lambda: putFile(root))
+button1 = Button(text="Exist",fg="green", bd = 3, width=10, font = ("Helvetica", 16), command=lambda: exits(root))
 #button1.grid(row=1, column=0)
-button1.place(relx = 0.01, rely =  0.20)
+button1.place(relx = 0.33, rely =  0.70)
 
-button2 = Button(text="Exist", fg="green", bd = 3,  width=10, font = ("Helvetica", 16),command=lambda: exits(root))
+button2 = Button(text="Put", fg="green", bd = 3,  width=10, font = ("Helvetica", 16),command=lambda: putFile(root))
 #button2.grid(row=5,column=0)
 button2.place(relx = 0.01, rely =  0.40)
 
@@ -494,17 +501,17 @@ button3.place(relx = 0.01, rely =  0.70)
 button4 = Button(text="Complete", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: complete(root))
 button4.place(relx = 0.01, rely =  0.55)
 
-button5 = Button(text="Locate", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: locate(root))
+button5 = Button(text="Get", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: get(root))
 button5.place(relx = 0.33, rely =  0.40)
 
-button6 = Button(text="Get", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: get(root))
+button6 = Button(text="Locate", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: locate(root))
 button6.place(relx = 0.33, rely =  0.55)
 
 #button6 = Button(text="NEPE2", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root))
 #button6.place(relx = 0.33, rely =  0.70)
 
-button7 = Button(text="Chunck", fg="green", bd = 3, width=10, font = ("Helvetica", 16),command=lambda: delete(root)) # Este es el raro
-button7.place(relx = 0.33, rely =  0.70)
+button7 = Button(text="Show Graph", fg="red", bd = 3, font = ("Helvetica", 12),command=lambda: showGraph()) # Este es el raro
+button7.place(relx = 0.70, rely =  0.10)
 
 quitBottom = Button(text="QUIT", fg="red", bd = 3, font = ("Helvetica", 16), command=lambda: root.destroy())
 #quitBottom.grid(row = 7, column = 3)
