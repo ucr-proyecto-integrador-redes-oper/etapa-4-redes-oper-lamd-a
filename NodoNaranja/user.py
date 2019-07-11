@@ -464,6 +464,8 @@ def play():
 def showGraph():
 	grafo = Graph()
 	grafo.crear_grafo()
+	grafo.graficador.graficar()
+	print("Salimos de show graph()")
 
 
 root = Tk()

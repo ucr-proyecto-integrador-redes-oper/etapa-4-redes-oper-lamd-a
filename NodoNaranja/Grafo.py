@@ -210,13 +210,11 @@ class Graficador:
 		stop = False
 		while not stop:
 			for event in pygame.event.get():
-				click = pygame.mouse.get_pressed()
 				if event.type == QUIT:
+						stop = True
 						pygame.quit()
-						quit()
-				elif click[0] == 1:
-					stop = True
-					break
+						# quit()
+		print("Fuera de while")
 
 	"""
 		Metodo que coloca una arista que va de (x1, y1) a (x2, y2)
