@@ -99,6 +99,7 @@ class Nodo:
 		self.nombre = nombre_nodo
 		self.vecinos = []
 		self.centro = (y+15, x+15)
+		self.color = "azul"
 
 	"""
 	Metodo que me dice si el par (x, y) esta dentro del area delimitada por
@@ -342,7 +343,7 @@ class Graph:
 		Metodo encargado de colorear los nodos que se le mandan en la lista como rojos
 	"""
 
-	def graficar_nodos_con_archivos(self, lista_nodos):
+	def mostrar_nodos_con_chunks(self, lista_nodos):
 		lista_nodos_temp = []
 
 		for num_nodo in lista_nodos:
@@ -351,10 +352,11 @@ class Graph:
 					lista_nodos_temp.append(nodo)
 					break
 
-		self.graficador.graficar_nodos_azules(self.lista_nodos_archivos)
-		self.lista_nodos_archivos.clear()
-		self.lista_nodos_archivos = lista_nodos_temp
-		self.graficador.graficar_nodos_rojos(self.lista_nodos_archivos)
+		# print("Nodos con paquetes")
+		# for nodito in lista_nodos_temp:
+		# 	print(f"nodo -> {nodito.nombre}")
+
+		self.graficador.graficar_nodos_rojos(lista_nodos_temp)
 
 	"""
 		Metodo que se encarga de dejar todos los nodos rojos que hay como azules
@@ -456,11 +458,23 @@ class Graph:
 # 	admin_archivo.print_result()
 
 def main3():
+
+	list_temp = []
+
+	for nodo in range(10):
+		nodo_rojo = random.randint(1, 15)
+		list_temp.append(nodo_rojo)
+
+	print(f"list_temp = ({list_temp})")
+	
 	grafo = Graph()
 	grafo.crear_grafo()
 	grafo.graficador.graficar()
 	while True:
 		grafo.refresh()
+		grafo.mostrar_nodos_con_chunks(list_temp)
+		grafo.graficador.graficar()
+		
 
 if __name__ == "__main__":
 	# main()
